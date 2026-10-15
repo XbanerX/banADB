@@ -7,6 +7,8 @@ import com.baner.banadb.data.model.*
 import com.flyfishxu.kadb.Kadb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.Path.Companion.toPath
+import okio.FileSystem
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
@@ -24,6 +26,32 @@ object AdbManager {
 
     fun getConnectedHost(): String = connectedHost
     fun getConnectedPort(): Int = connectedPort
+
+    fun init(context: android.content.Context) {
+        try {
+            val certFile = File(context.filesDir, "kadb_key")
+            val path = certFile.absolutePath.toPath()
+            val fileSystem = okio.FileSystem.SYSTEM
+            val storeClass = Class.forName("com.flyfishxu.kadb.cert.OkioFilePrivateKeyStore")
+            val store = storeClass.getConstructor(okio.Path::class.java, okio.FileSystem::class.java).newInstance(path, fileSystem)
+            val kadbCertClass = Class.forName("com.flyfishxu.kadb.cert.KadbCert")
+            val kadbCert = kadbCertClass.getField("INSTANCE").get(null)
+            val policyClass = Class.forName("com.flyfishxu.kadb.cert.KadbCertPolicy")
+            val policy = policyClass.getConstructor().newInstance()
+            val configureMethod = kadbCertClass.getMethod(
+                "configure",
+                Class.forName("com.flyfishxu.kadb.cert.KadbPrivateKeyStore"),
+                policyClass,
+                List::class.java
+            )
+            configureMethod.invoke(kadbCert, store, policy, emptyList<ByteArray>())
+            val ensureReadyMethod = kadbCertClass.getMethod("ensureReady")
+            ensureReadyMethod.invoke(kadbCert)
+            Log.d(TAG, "KadbCert initialized with persistent store at ${certFile.absolutePath}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing KadbCert with file store", e)
+        }
+    }
 
     suspend fun pair(ip: String, port: Int, code: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {

@@ -46,6 +46,7 @@ fun PairingDialog(
     var pairingPortInput by remember { mutableStateOf("") }
     var connectionPortInput by remember { mutableStateOf("") }
     var pairingCodeInput by remember { mutableStateOf("") }
+    var validationError by remember { mutableStateOf<String?>(null) }
 
     // Direct connect fields
     var directIpInput by remember { mutableStateOf("192.168.") }
@@ -53,6 +54,16 @@ fun PairingDialog(
 
     LaunchedEffect(Unit) {
         viewModel.startDiscovery()
+    }
+
+    // Auto-fill connection port from mDNS when connect service is discovered for target IP
+    LaunchedEffect(discoveredDevices, ipInput) {
+        if (connectionPortInput.isBlank() && ipInput.isNotBlank()) {
+            val connectDev = discoveredDevices.find { it.ip == ipInput.trim() && it.isPaired }
+            if (connectDev != null) {
+                connectionPortInput = connectDev.port.toString()
+            }
+        }
     }
 
     // Dismiss dialog automatically when connected
@@ -187,6 +198,20 @@ fun PairingDialog(
                     else -> {}
                 }
 
+                validationError?.let { msg ->
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = StatusPairing.copy(alpha = 0.2f),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                    ) {
+                        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = StatusPairing, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(msg, color = StatusPairing, fontSize = 12.sp)
+                        }
+                    }
+                }
+
                 // Tab Content
                 when (selectedTab) {
                     0 -> { // Android 11+ Pairing
@@ -235,7 +260,7 @@ fun PairingDialog(
                                         value = pairingPortInput,
                                         onValueChange = { pairingPortInput = it },
                                         label = { Text("Pairing Port") },
-                                        placeholder = { Text("e.g. 37821") },
+                                        placeholder = { Text("e.g. 33133") },
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         singleLine = true,
                                         modifier = Modifier.weight(1f),
@@ -248,8 +273,8 @@ fun PairingDialog(
                                     OutlinedTextField(
                                         value = connectionPortInput,
                                         onValueChange = { connectionPortInput = it },
-                                        label = { Text("Main Port (opt)") },
-                                        placeholder = { Text("e.g. 41235") },
+                                        label = { Text("Main Port (IP & Port)") },
+                                        placeholder = { Text("e.g. 34241") },
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         singleLine = true,
                                         modifier = Modifier.weight(1f),
@@ -286,11 +311,20 @@ fun PairingDialog(
 
                         Button(
                             onClick = {
+                                validationError = null
                                 val pPort = pairingPortInput.toIntOrNull() ?: 0
-                                val cPort = connectionPortInput.toIntOrNull() ?: pPort
-                                if (ipInput.isNotBlank() && pPort > 0 && pairingCodeInput.length == 6) {
-                                    viewModel.doPairing(ipInput.trim(), pPort, pairingCodeInput.trim(), cPort) {}
+                                val detectedPort = discoveredDevices.find { it.ip == ipInput.trim() && it.isPaired }?.port
+                                val cPort = connectionPortInput.toIntOrNull() ?: detectedPort ?: 0
+
+                                if (ipInput.isBlank() || pPort <= 0 || pairingCodeInput.length != 6) {
+                                    validationError = "Ingresa la IP, el Puerto de emparejamiento y el código de 6 dígitos."
+                                    return@Button
                                 }
+                                if (cPort == 0) {
+                                    validationError = "Ingresa el Puerto de Conexión principal (el que aparece en 'Dirección IP y puerto' en tu teléfono, ej. 34241). El puerto de emparejamiento ($pPort) y el de conexión son distintos."
+                                    return@Button
+                                }
+                                viewModel.doPairing(ipInput.trim(), pPort, pairingCodeInput.trim(), cPort) {}
                             },
                             enabled = connectionState !is ConnectionState.Pairing && connectionState !is ConnectionState.Connecting,
                             modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -390,12 +424,14 @@ fun PairingDialog(
                                         colors = CardDefaults.cardColors(containerColor = SurfaceCard),
                                         modifier = Modifier.fillMaxWidth().clickable {
                                             if (dev.isPaired) {
-                                                directIpInput = dev.ip
-                                                directPortInput = dev.port.toString()
-                                                selectedTab = 1
+                                                viewModel.doConnect(dev.ip, dev.port)
                                             } else {
                                                 ipInput = dev.ip
                                                 pairingPortInput = dev.port.toString()
+                                                val connectDev = discoveredDevices.find { it.ip == dev.ip && it.isPaired }
+                                                if (connectDev != null) {
+                                                    connectionPortInput = connectDev.port.toString()
+                                                }
                                                 selectedTab = 0
                                             }
                                         }
@@ -431,7 +467,18 @@ fun PairingDialog(
                                                     )
                                                 }
                                             }
-                                            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextMuted)
+                                            if (dev.isPaired) {
+                                                Button(
+                                                    onClick = { viewModel.doConnect(dev.ip, dev.port) },
+                                                    shape = RoundedCornerShape(8.dp),
+                                                    colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
+                                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                                ) {
+                                                    Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                }
+                                            } else {
+                                                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextMuted)
+                                            }
                                         }
                                     }
                                 }

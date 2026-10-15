@@ -9,6 +9,7 @@ class BanaAdbApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        com.baner.banadb.adb.AdbManager.init(this)
         createNotificationChannel()
     }
 
