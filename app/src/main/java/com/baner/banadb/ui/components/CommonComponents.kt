@@ -92,7 +92,7 @@ fun BanaTopBar(
         },
         navigationIcon = navigationIcon ?: {},
         actions = {
-            if (connectionState is ConnectionState.Connected) {
+            if (connectionState is ConnectionState.Connected && navigationIcon == null) {
                 IconButton(onClick = onDisconnect) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -189,62 +189,206 @@ fun VirtualTrackpad(
     remoteHeight: Int,
     onTap: (Float, Float) -> Unit,
     onSwipe: (Float, Float, Float, Float, Int) -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    var gestureInfo by remember { mutableStateOf("Touch or drag to control remote screen") }
+    var gestureInfo by remember { mutableStateOf("Touch or drag to navigate") }
+    var invertDirection by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(280.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceCard)
-            .border(1.dp, CyberCyan.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-            .pointerInput(remoteWidth, remoteHeight) {
-                detectTapGestures { offset ->
-                    val rx = (offset.x / size.width) * remoteWidth
-                    val ry = (offset.y / size.height) * remoteHeight
-                    gestureInfo = "Tap at (${rx.toInt()}, ${ry.toInt()})"
-                    onTap(rx, ry)
-                }
-            }
-            .pointerInput(remoteWidth, remoteHeight) {
-                var startX = 0f
-                var startY = 0f
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        startX = (offset.x / size.width) * remoteWidth
-                        startY = (offset.y / size.height) * remoteHeight
-                    },
-                    onDragEnd = {
-                        gestureInfo = "Drag gesture completed"
-                    },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        val currentX = (change.position.x / size.width) * remoteWidth
-                        val currentY = (change.position.y / size.height) * remoteHeight
-                        onSwipe(startX, startY, currentX, currentY, 150)
-                        startX = currentX
-                        startY = currentY
-                    }
-                )
-            },
-        contentAlignment = Alignment.Center
+    val safeWidth = if (remoteWidth > 0) remoteWidth.toFloat() else 1080f
+    val safeHeight = if (remoteHeight > 0) remoteHeight.toFloat() else 2400f
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Default.TouchApp,
-                contentDescription = "Trackpad",
-                tint = CyberCyan.copy(alpha = 0.6f),
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = gestureInfo,
-                color = TextSecondary,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
+        // Trackpad header with Invert Scroll Switch
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.TouchApp,
+                    contentDescription = null,
+                    tint = BananaGold,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = gestureInfo,
+                    color = TextSecondary,
+                    fontSize = 12.sp
+                )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = if (invertDirection) "Invert: ON" else "Invert: OFF",
+                    color = if (invertDirection) BananaGold else TextMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Switch(
+                    checked = invertDirection,
+                    onCheckedChange = { invertDirection = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = BackgroundDark,
+                        checkedTrackColor = BananaGold,
+                        uncheckedThumbColor = TextMuted,
+                        uncheckedTrackColor = SurfaceCardHover
+                    ),
+                    modifier = Modifier.height(28.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Tactile Trackpad Surface
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(SurfaceCard)
+                .border(1.dp, BananaGold.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                .pointerInput(safeWidth, safeHeight) {
+                    detectTapGestures { offset ->
+                        val rx = (offset.x / size.width) * safeWidth
+                        val ry = (offset.y / size.height) * safeHeight
+                        gestureInfo = "Tap at (${rx.toInt()}, ${ry.toInt()})"
+                        onTap(rx, ry)
+                    }
+                }
+                .pointerInput(safeWidth, safeHeight, invertDirection) {
+                    var startX = 0f
+                    var startY = 0f
+                    var currentX = 0f
+                    var currentY = 0f
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            startX = (offset.x / size.width) * safeWidth
+                            startY = (offset.y / size.height) * safeHeight
+                            currentX = startX
+                            currentY = startY
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            currentX = (change.position.x / size.width) * safeWidth
+                            currentY = (change.position.y / size.height) * safeHeight
+                        },
+                        onDragEnd = {
+                            val dx = currentX - startX
+                            val dy = currentY - startY
+                            val distance = kotlin.math.hypot(dx, dy)
+                            if (distance > 25f) {
+                                val (sx, sy, ex, ey) = if (invertDirection) {
+                                    arrayOf(currentX, currentY, startX, startY)
+                                } else {
+                                    arrayOf(startX, startY, currentX, currentY)
+                                }
+                                gestureInfo = "Swipe (${(ex - sx).toInt()}, ${(ey - sy).toInt()})"
+                                onSwipe(sx, sy, ex, ey, 220)
+                            }
+                        }
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.TouchApp,
+                    contentDescription = "Trackpad",
+                    tint = BananaGold.copy(alpha = 0.4f),
+                    modifier = Modifier.size(52.dp)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Trackpad Touch Surface",
+                    color = TextMuted,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Tap to Click • Drag to Swipe",
+                    color = TextSecondary.copy(alpha = 0.7f),
+                    fontSize = 11.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Mouse buttons & Quick Scroll Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Left Click
+            Button(
+                onClick = { onTap(safeWidth / 2f, safeHeight / 2f) },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SurfaceCard)
+            ) {
+                Icon(Icons.Default.TouchApp, contentDescription = null, tint = BananaGold, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Tap", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            }
+
+            // Scroll Up
+            IconButton(
+                onClick = {
+                    val midX = safeWidth / 2f
+                    val midY = safeHeight / 2f
+                    onSwipe(midX, midY - 300f, midX, midY + 300f, 250)
+                },
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SurfaceCard)
+            ) {
+                Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll Up", tint = BananaGold)
+            }
+
+            // Scroll Down
+            IconButton(
+                onClick = {
+                    val midX = safeWidth / 2f
+                    val midY = safeHeight / 2f
+                    onSwipe(midX, midY + 300f, midX, midY - 300f, 250)
+                },
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SurfaceCard)
+            ) {
+                Icon(Icons.Default.ArrowDownward, contentDescription = "Scroll Down", tint = BananaGold)
+            }
+
+            // Right Click / Back
+            Button(
+                onClick = { onBack?.invoke() ?: onSwipe(50f, safeHeight / 2f, 500f, safeHeight / 2f, 200) },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SurfaceCard)
+            ) {
+                Icon(Icons.Default.Undo, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Back", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }

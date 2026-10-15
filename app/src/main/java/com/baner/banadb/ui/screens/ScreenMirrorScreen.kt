@@ -42,6 +42,10 @@ fun ScreenMirrorScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     var autoRefresh by remember { mutableStateOf(false) }
+    var invertGestures by remember { mutableStateOf(false) }
+
+    val safeWidth = if (dashboardData.screenWidth > 0) dashboardData.screenWidth else 1080
+    val safeHeight = if (dashboardData.screenHeight > 0) dashboardData.screenHeight else 2400
 
     LaunchedEffect(Unit) {
         viewModel.captureScreenshot()
@@ -71,6 +75,13 @@ fun ScreenMirrorScreen(
                 },
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { invertGestures = !invertGestures }) {
+                            Icon(
+                                imageVector = Icons.Default.SwapVert,
+                                contentDescription = "Invert Gestures",
+                                tint = if (invertGestures) BananaGold else TextMuted
+                            )
+                        }
                         Text(
                             text = if (autoRefresh) "Live" else "Manual",
                             color = if (autoRefresh) NeonEmerald else TextMuted,
@@ -108,29 +119,42 @@ fun ScreenMirrorScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color.Black)
                     .border(1.dp, BananaGold.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-                    .pointerInput(dashboardData.screenWidth, dashboardData.screenHeight) {
+                    .pointerInput(safeWidth, safeHeight) {
                         detectTapGestures { offset ->
-                            val rx = (offset.x / size.width) * dashboardData.screenWidth
-                            val ry = (offset.y / size.height) * dashboardData.screenHeight
+                            val rx = (offset.x / size.width) * safeWidth
+                            val ry = (offset.y / size.height) * safeHeight
                             viewModel.sendTap(rx, ry)
                         }
                     }
-                    .pointerInput(dashboardData.screenWidth, dashboardData.screenHeight) {
+                    .pointerInput(safeWidth, safeHeight, invertGestures) {
                         var startX = 0f
                         var startY = 0f
+                        var currentX = 0f
+                        var currentY = 0f
                         detectDragGestures(
                             onDragStart = { offset ->
-                                startX = (offset.x / size.width) * dashboardData.screenWidth
-                                startY = (offset.y / size.height) * dashboardData.screenHeight
+                                startX = (offset.x / size.width) * safeWidth
+                                startY = (offset.y / size.height) * safeHeight
+                                currentX = startX
+                                currentY = startY
                             },
-                            onDragEnd = {},
                             onDrag = { change, _ ->
                                 change.consume()
-                                val endX = (change.position.x / size.width) * dashboardData.screenWidth
-                                val endY = (change.position.y / size.height) * dashboardData.screenHeight
-                                viewModel.sendSwipe(startX, startY, endX, endY, 200)
-                                startX = endX
-                                startY = endY
+                                currentX = (change.position.x / size.width) * safeWidth
+                                currentY = (change.position.y / size.height) * safeHeight
+                            },
+                            onDragEnd = {
+                                val dx = currentX - startX
+                                val dy = currentY - startY
+                                val dist = kotlin.math.hypot(dx, dy)
+                                if (dist > 25f) {
+                                    val (sx, sy, ex, ey) = if (invertGestures) {
+                                        arrayOf(currentX, currentY, startX, startY)
+                                    } else {
+                                        arrayOf(startX, startY, currentX, currentY)
+                                    }
+                                    viewModel.sendSwipe(sx, sy, ex, ey, 220)
+                                }
                             }
                         )
                     },

@@ -283,8 +283,11 @@ fun FileManagerScreen(
 }
 
 private fun formatFileSize(bytes: Long): String {
-    if (bytes < 1024) return "$bytes B"
-    val exp = (Math.log(bytes.toDouble()) / Math.log(1024.0)).toInt()
-    val pre = "KMGTPE"[exp - 1]
-    return String.format("%.1f %sB", bytes / Math.pow(1024.0, exp.toDouble()), pre)
+    if (bytes <= 0L) return "0 B"
+    if (bytes < 1024L) return "$bytes B"
+    val units = arrayOf("KB", "MB", "GB", "TB", "PB")
+    val digitGroups = (Math.log10(bytes.toDouble()) / Math.log10(1024.0)).toInt()
+    val safeGroup = (digitGroups - 1).coerceIn(0, units.size - 1)
+    val value = bytes / Math.pow(1024.0, (safeGroup + 1).toDouble())
+    return String.format(java.util.Locale.US, "%.1f %s", value, units[safeGroup])
 }

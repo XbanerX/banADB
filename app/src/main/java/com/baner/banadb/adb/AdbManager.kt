@@ -179,39 +179,51 @@ object AdbManager {
         val files = mutableListOf<RemoteFile>()
         
         output.lines().forEach { rawLine ->
-            val line = rawLine.trim()
-            if (line.isEmpty() || line.startsWith("total ") || line.startsWith("ls:")) return@forEach
-            val parts = line.split("\\s+".toRegex())
-            if (parts.size >= 8) {
-                val perms = parts[0]
-                if (!perms.startsWith("d") && !perms.startsWith("-") && !perms.startsWith("l")) return@forEach
-                val isDir = perms.startsWith("d")
-                val size = parts[4].toLongOrNull() ?: 0L
+            try {
+                val line = rawLine.trim()
+                if (line.isEmpty() || line.startsWith("total ") || line.startsWith("ls:")) return@forEach
+                val parts = line.split("\\s+".toRegex())
+                if (parts.size >= 8) {
+                    val perms = parts[0]
+                    if (!perms.startsWith("d") && !perms.startsWith("-") && !perms.startsWith("l")) return@forEach
+                    val isDir = perms.startsWith("d")
+                    val size = parts[4].toLongOrNull() ?: 0L
 
-                // Detect date format: Android toybox (YYYY-MM-DD HH:MM) vs GNU coreutils (MMM DD HH:MM)
-                val nameStartIndex = if (parts[5].contains("-") || parts[6].contains(":")) {
-                    7
-                } else {
-                    8
-                }
+                    // Detect date format: Android toybox (YYYY-MM-DD HH:MM) vs GNU coreutils (MMM DD HH:MM)
+                    val nameStartIndex = if (parts[5].contains("-") || parts[6].contains(":")) {
+                        7
+                    } else {
+                        8
+                    }
 
-                if (parts.size > nameStartIndex) {
-                    val name = parts.subList(nameStartIndex, parts.size).joinToString(" ").trim()
-                    if (name.isNotEmpty() && name != "." && name != "..") {
-                        val fullPath = if (cleanPath == "/") "/$name" else "$cleanPath/$name"
-                        val modified = if (nameStartIndex == 7) "${parts[5]} ${parts[6]}" else "${parts[5]} ${parts[6]} ${parts[7]}"
-                        files.add(
-                            RemoteFile(
-                                name = name,
-                                path = fullPath,
-                                size = size,
-                                isDirectory = isDir,
-                                permissions = perms,
-                                modified = modified
+                    if (parts.size > nameStartIndex) {
+                        var rawName = parts.subList(nameStartIndex, parts.size).joinToString(" ").trim()
+                        if (rawName.contains(" -> ")) {
+                            rawName = rawName.substringBefore(" -> ").trim()
+                        }
+                        val name = rawName
+                        if (name.isNotEmpty() && name != "." && name != "..") {
+                            val fullPath = if (cleanPath == "/") "/$name" else "$cleanPath/$name"
+                            val modified = if (nameStartIndex == 7) {
+                                "${parts.getOrElse(5) { "" }} ${parts.getOrElse(6) { "" }}".trim()
+                            } else {
+                                "${parts.getOrElse(5) { "" }} ${parts.getOrElse(6) { "" }} ${parts.getOrElse(7) { "" }}".trim()
+                            }
+                            files.add(
+                                RemoteFile(
+                                    name = name,
+                                    path = fullPath,
+                                    size = size,
+                                    isDirectory = isDir,
+                                    permissions = perms,
+                                    modified = modified
+                                )
                             )
-                        )
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error parsing ls line: $rawLine", e)
             }
         }
         files.distinctBy { it.path }
@@ -296,6 +308,57 @@ object AdbManager {
     suspend fun uninstallApp(packageName: String): Boolean = withContext(Dispatchers.IO) {
         val out = executeShell("pm uninstall \"$packageName\"")
         out.contains("Success", ignoreCase = true)
+    }
+
+    suspend fun extractApk(packageName: String, label: String, destDir: File): Result<File> = withContext(Dispatchers.IO) {
+        try {
+            val pathOutput = executeShell("pm path $packageName").trim()
+            val remotePath = pathOutput.lineSequence()
+                .firstOrNull { it.startsWith("package:") }
+                ?.substringAfter("package:")
+                ?.trim()
+                ?: return@withContext Result.failure(Exception("Path not found for $packageName"))
+
+            val safeRemote = "/sdcard/Download/${packageName}_extract.apk"
+            executeShell("cp \"$remotePath\" \"$safeRemote\"")
+
+            if (!destDir.exists()) destDir.mkdirs()
+            val cleanLabel = label.replace(Regex("[^a-zA-Z0-9_.-]"), "_")
+            val localFile = File(destDir, "${cleanLabel}_${packageName}.apk")
+
+            val pulled = pullFile(safeRemote, localFile)
+            executeShell("rm -f \"$safeRemote\"")
+
+            if (pulled && localFile.exists() && localFile.length() > 0) {
+                Result.success(localFile)
+            } else {
+                Result.failure(Exception("Could not download APK file"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "extractApk error", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun installApk(srcFile: File): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val remoteTemp = "/data/local/tmp/app_install.apk"
+            val pushed = pushFile(srcFile, remoteTemp)
+            if (!pushed) {
+                return@withContext Result.failure(Exception("Failed to push APK to remote device"))
+            }
+            val output = executeShell("pm install -r \"$remoteTemp\"").trim()
+            executeShell("rm -f \"$remoteTemp\"")
+
+            if (output.contains("Success", ignoreCase = true)) {
+                Result.success("Installation successful")
+            } else {
+                Result.failure(Exception(output.ifEmpty { "Installation failed" }))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "installApk error", e)
+            Result.failure(e)
+        }
     }
 
     suspend fun fetchDashboard(): DeviceDashboardData = withContext(Dispatchers.IO) {

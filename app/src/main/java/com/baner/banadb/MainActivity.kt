@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.screens.*
 import com.baner.banadb.ui.theme.BackgroundDark
 import com.baner.banadb.ui.theme.BanaAdbTheme
@@ -24,9 +25,25 @@ class MainActivity : ComponentActivity() {
                 val viewModel: AdbViewModel = viewModel()
                 var currentRoute by remember { mutableStateOf("home") }
                 var showPairingDialog by remember { mutableStateOf(false) }
+                val connectionState by viewModel.connectionState.collectAsState()
+
+                // Auto-transition to Remote Control screen when connected
+                LaunchedEffect(connectionState) {
+                    if (connectionState is ConnectionState.Connected && currentRoute == "home") {
+                        currentRoute = "control"
+                    } else if (connectionState !is ConnectionState.Connected && currentRoute != "home") {
+                        currentRoute = "home"
+                    }
+                }
+
+                val parentRoute = if (connectionState is ConnectionState.Connected) "control" else "home"
 
                 BackHandler(enabled = currentRoute != "home") {
-                    currentRoute = "home"
+                    if (currentRoute == "control") {
+                        currentRoute = "home"
+                    } else {
+                        currentRoute = parentRoute
+                    }
                 }
 
                 Surface(
@@ -44,50 +61,51 @@ class MainActivity : ComponentActivity() {
                         "control" -> {
                             RemoteControlScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = "home" },
+                                onNavigateToSection = { route -> currentRoute = route }
                             )
                         }
                         "terminal" -> {
                             TerminalScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = parentRoute }
                             )
                         }
                         "apps" -> {
                             AppManagerScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = parentRoute }
                             )
                         }
                         "files" -> {
                             FileManagerScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = parentRoute }
                             )
                         }
                         "dashboard" -> {
                             DashboardScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = parentRoute }
                             )
                         }
                         "processes" -> {
                             ProcessManagerScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = parentRoute }
                             )
                         }
                         "scripts" -> {
                             ScriptRunnerScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" },
+                                onBack = { currentRoute = parentRoute },
                                 onNavigateToTerminal = { currentRoute = "terminal" }
                             )
                         }
                         "mirror" -> {
                             ScreenMirrorScreen(
                                 viewModel = viewModel,
-                                onBack = { currentRoute = "home" }
+                                onBack = { currentRoute = parentRoute }
                             )
                         }
                     }

@@ -1,7 +1,10 @@
 package com.baner.banadb.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Environment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.baner.banadb.adb.AdbManager
@@ -23,6 +26,16 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+
+    private val _operationStatus = MutableStateFlow<String?>(null)
+    val operationStatus: StateFlow<String?> = _operationStatus.asStateFlow()
+
+    private val _isOperationLoading = MutableStateFlow(false)
+    val isOperationLoading: StateFlow<Boolean> = _isOperationLoading.asStateFlow()
+
+    fun clearOperationStatus() {
+        _operationStatus.value = null
+    }
 
     val discoveredDevices = discoveryManager.discoveredDevices
 
@@ -241,6 +254,55 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             if (AdbManager.uninstallApp(pkg)) {
                 refreshApps()
+            }
+        }
+    }
+
+    fun installApkFromUri(uri: Uri, context: Context) {
+        viewModelScope.launch {
+            _isOperationLoading.value = true
+            _operationStatus.value = "Transferring APK to remote device..."
+            try {
+                val tempFile = File(context.cacheDir, "install_${System.currentTimeMillis()}.apk")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                _operationStatus.value = "Executing remote install..."
+                val result = AdbManager.installApk(tempFile)
+                tempFile.delete()
+                result.onSuccess {
+                    _operationStatus.value = "APK installed successfully!"
+                    refreshApps()
+                }.onFailure { err ->
+                    _operationStatus.value = "Install failed: ${err.message}"
+                }
+            } catch (e: Exception) {
+                _operationStatus.value = "Failed: ${e.message}"
+            } finally {
+                _isOperationLoading.value = false
+            }
+        }
+    }
+
+    fun extractApk(pkg: String, label: String, context: Context) {
+        viewModelScope.launch {
+            _isOperationLoading.value = true
+            _operationStatus.value = "Extracting $label APK..."
+            try {
+                val destDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                    ?: File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "BanaADB")
+                val result = AdbManager.extractApk(pkg, label, destDir)
+                result.onSuccess { file ->
+                    _operationStatus.value = "APK extracted to Downloads: ${file.name}"
+                }.onFailure { err ->
+                    _operationStatus.value = "Extract failed: ${err.message}"
+                }
+            } catch (e: Exception) {
+                _operationStatus.value = "Failed: ${e.message}"
+            } finally {
+                _isOperationLoading.value = false
             }
         }
     }

@@ -1,5 +1,8 @@
 package com.baner.banadb.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,14 +36,23 @@ fun AppManagerScreen(
     viewModel: AdbViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val connectionState by viewModel.connectionState.collectAsState()
     val apps by viewModel.installedApps.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isOperationLoading by viewModel.isOperationLoading.collectAsState()
+    val operationStatus by viewModel.operationStatus.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     var showSystemApps by remember { mutableStateOf(false) }
     var selectedAppForActions by remember { mutableStateOf<RemoteAppInfo?>(null) }
     var showUninstallConfirm by remember { mutableStateOf<RemoteAppInfo?>(null) }
+
+    val apkPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.installApkFromUri(it, context) }
+    }
 
     LaunchedEffect(showSystemApps) {
         viewModel.refreshApps(includeSystem = showSystemApps)
@@ -72,6 +85,15 @@ fun AppManagerScreen(
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = BananaGold)
                     }
                 }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { apkPickerLauncher.launch("*/*") },
+                containerColor = BananaGold,
+                contentColor = BackgroundDark,
+                icon = { Icon(Icons.Default.UploadFile, contentDescription = null) },
+                text = { Text("Install APK", fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -275,6 +297,15 @@ fun AppManagerScreen(
                         selectedAppForActions = null
                     }
                 )
+                ListItem(
+                    headlineContent = { Text("Extract APK to Downloads", color = TextPrimary) },
+                    supportingContent = { Text("Pulls APK file to local device Downloads folder", color = TextMuted, fontSize = 11.sp) },
+                    leadingContent = { Icon(Icons.Default.Download, contentDescription = null, tint = BananaGold) },
+                    modifier = Modifier.clickable {
+                        viewModel.extractApk(app.packageName, app.label, context)
+                        selectedAppForActions = null
+                    }
+                )
                 if (!app.isSystem) {
                     ListItem(
                         headlineContent = { Text("Uninstall Application", color = StatusError) },
@@ -311,6 +342,44 @@ fun AppManagerScreen(
             dismissButton = {
                 TextButton(onClick = { showUninstallConfirm = null }) {
                     Text("Cancel", color = TextSecondary)
+                }
+            },
+            containerColor = SurfaceDark
+        )
+    }
+
+    // Operation Loading Dialog
+    if (isOperationLoading) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Remote Operation", color = BananaGold, fontWeight = FontWeight.Bold) },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
+                    CircularProgressIndicator(color = BananaGold, modifier = Modifier.size(28.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(operationStatus ?: "Executing on device...", color = TextPrimary, fontSize = 14.sp)
+                }
+            },
+            confirmButton = {},
+            containerColor = SurfaceDark
+        )
+    }
+
+    // Operation Status Message Dialog
+    if (!isOperationLoading && operationStatus != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearOperationStatus() },
+            title = { Text("BanaADB Status", color = BananaGold, fontWeight = FontWeight.Bold) },
+            text = { Text(operationStatus ?: "", color = TextPrimary, fontSize = 14.sp) },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.clearOperationStatus() },
+                    colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
+                ) {
+                    Text("OK", color = BackgroundDark, fontWeight = FontWeight.Bold)
                 }
             },
             containerColor = SurfaceDark
