@@ -313,9 +313,17 @@ private fun DetailItem(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = TextSecondary, fontSize = 13.sp)
-        Text(value, color = TextPrimary, fontWeight = FontWeight.Medium, fontSize = 13.sp)
+        Text(label, color = TextSecondary, fontSize = 13.sp, modifier = Modifier.padding(end = 12.dp))
+        Text(
+            value,
+            color = TextPrimary,
+            fontWeight = FontWeight.Medium,
+            fontSize = 13.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            modifier = Modifier.weight(1f, fill = false)
+        )
     }
 }

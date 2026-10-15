@@ -354,7 +354,15 @@ object AdbManager {
                 h = sizeMatch.groupValues[2].toIntOrNull() ?: 2400
             }
 
-            val uptime = executeShell("uptime").trim()
+            val rawUptime = executeShell("uptime").trim()
+            val uptime = if (rawUptime.contains("up ")) {
+                rawUptime.substringAfter("up ")
+                    .substringBefore(",  ")
+                    .substringBefore(", 0 user")
+                    .substringBefore(", 1 user")
+                    .substringBefore(", 2 user")
+                    .trim()
+            } else rawUptime
 
             DeviceDashboardData(
                 model = "$manufacturer $model".trim().ifEmpty { "Connected Device" },
