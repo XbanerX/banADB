@@ -170,35 +170,52 @@ object AdbManager {
     }
 
     suspend fun listRemoteFiles(path: String): List<RemoteFile> = withContext(Dispatchers.IO) {
-        val cleanPath = if (path.isEmpty()) "/sdcard" else path
+        val cleanPath = when {
+            path.isBlank() -> "/sdcard"
+            path.length > 1 && path.endsWith("/") -> path.dropLast(1)
+            else -> path
+        }
         val output = executeShell("ls -laL \"$cleanPath\"")
         val files = mutableListOf<RemoteFile>()
         
-        output.lines().forEach { line ->
-            val parts = line.trim().split("\\s+".toRegex())
+        output.lines().forEach { rawLine ->
+            val line = rawLine.trim()
+            if (line.isEmpty() || line.startsWith("total ") || line.startsWith("ls:")) return@forEach
+            val parts = line.split("\\s+".toRegex())
             if (parts.size >= 8) {
                 val perms = parts[0]
-                if (perms.startsWith("total") || perms.isEmpty()) return@forEach
+                if (!perms.startsWith("d") && !perms.startsWith("-") && !perms.startsWith("l")) return@forEach
                 val isDir = perms.startsWith("d")
                 val size = parts[4].toLongOrNull() ?: 0L
-                val modified = "${parts[5]} ${parts[6]} ${parts[7]}"
-                val name = parts.subList(8, parts.size).joinToString(" ")
-                if (name != "." && name != "..") {
-                    val fullPath = if (cleanPath.endsWith("/")) "$cleanPath$name" else "$cleanPath/$name"
-                    files.add(
-                        RemoteFile(
-                            name = name,
-                            path = fullPath,
-                            size = size,
-                            isDirectory = isDir,
-                            permissions = perms,
-                            modified = modified
+
+                // Detect date format: Android toybox (YYYY-MM-DD HH:MM) vs GNU coreutils (MMM DD HH:MM)
+                val nameStartIndex = if (parts[5].contains("-") || parts[6].contains(":")) {
+                    7
+                } else {
+                    8
+                }
+
+                if (parts.size > nameStartIndex) {
+                    val name = parts.subList(nameStartIndex, parts.size).joinToString(" ").trim()
+                    if (name.isNotEmpty() && name != "." && name != "..") {
+                        val fullPath = if (cleanPath == "/") "/$name" else "$cleanPath/$name"
+                        val modified = if (nameStartIndex == 7) "${parts[5]} ${parts[6]}" else "${parts[5]} ${parts[6]} ${parts[7]}"
+                        files.add(
+                            RemoteFile(
+                                name = name,
+                                path = fullPath,
+                                size = size,
+                                isDirectory = isDir,
+                                permissions = perms,
+                                modified = modified
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
-        files.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
+        files.distinctBy { it.path }
+            .sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
     }
 
     suspend fun createRemoteDir(remotePath: String): Boolean = withContext(Dispatchers.IO) {

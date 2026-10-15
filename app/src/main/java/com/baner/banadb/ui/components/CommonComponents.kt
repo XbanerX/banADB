@@ -49,26 +49,43 @@ fun BanaTopBar(
                     color = BananaGold,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                // Status pill
-                val (statusColor, statusText) = when (connectionState) {
-                    is ConnectionState.Connected -> StatusConnected to "Connected"
-                    is ConnectionState.Connecting -> StatusPairing to "Connecting"
-                    is ConnectionState.Pairing -> StatusPairing to "Pairing"
-                    is ConnectionState.Error -> StatusError to "Error"
-                    ConnectionState.Disconnected -> StatusDisconnected to "Offline"
-                }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(statusColor.copy(alpha = 0.2f))
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = statusText,
-                        color = statusColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
+                if (navigationIcon == null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    // Status pill
+                    val (statusColor, statusText) = when (connectionState) {
+                        is ConnectionState.Connected -> StatusConnected to "Connected"
+                        is ConnectionState.Connecting -> StatusPairing to "Connecting"
+                        is ConnectionState.Pairing -> StatusPairing to "Pairing"
+                        is ConnectionState.Error -> StatusError to "Error"
+                        ConnectionState.Disconnected -> StatusDisconnected to "Offline"
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(statusColor.copy(alpha = 0.2f))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = statusText,
+                            color = statusColor,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                } else {
+                    val statusColor = when (connectionState) {
+                        is ConnectionState.Connected -> StatusConnected
+                        is ConnectionState.Connecting -> StatusPairing
+                        is ConnectionState.Pairing -> StatusPairing
+                        is ConnectionState.Error -> StatusError
+                        ConnectionState.Disconnected -> StatusDisconnected
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(statusColor)
                     )
                 }
             }
