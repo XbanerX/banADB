@@ -91,7 +91,9 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
             
             val pairResult = AdbManager.pair(ip, pairingPort, pairingCode)
             if (pairResult.isSuccess) {
-                appendConsole("Pairing succeeded! Connecting to port $connectionPort...")
+                appendConsole("Pairing succeeded! Waiting for target daemon to register key...")
+                kotlinx.coroutines.delay(800)
+                appendConsole("Connecting to port $connectionPort...")
                 val connPort = if (connectionPort > 0) connectionPort else 5555
                 doConnect(ip, connPort)
                 onComplete(true)

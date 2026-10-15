@@ -29,9 +29,10 @@ object AdbManager {
 
     fun init(context: android.content.Context) {
         try {
-            val certFile = File(context.filesDir, "kadb_key")
-            val path = certFile.absolutePath.toPath()
-            val fileSystem = okio.FileSystem.SYSTEM
+            val keyFile = File(context.filesDir, "kadb_key")
+            val certFile = File(context.filesDir, "kadb_cert")
+            val path = keyFile.absolutePath.toPath()
+            val fileSystem = FileSystem.SYSTEM
             val storeClass = Class.forName("com.flyfishxu.kadb.cert.OkioFilePrivateKeyStore")
             val store = storeClass.getConstructor(okio.Path::class.java, okio.FileSystem::class.java).newInstance(path, fileSystem)
             val kadbCertClass = Class.forName("com.flyfishxu.kadb.cert.KadbCert")
@@ -45,11 +46,26 @@ object AdbManager {
                 List::class.java
             )
             configureMethod.invoke(kadbCert, store, policy, emptyList<ByteArray>())
-            val ensureReadyMethod = kadbCertClass.getMethod("ensureReady")
-            ensureReadyMethod.invoke(kadbCert)
-            Log.d(TAG, "KadbCert initialized with persistent store at ${certFile.absolutePath}")
+
+            if (keyFile.exists() && certFile.exists() && keyFile.length() > 0 && certFile.length() > 0) {
+                val keyBytes = keyFile.readBytes()
+                val certBytes = certFile.readBytes()
+                val importMethod = kadbCertClass.getMethod("importIdentity", ByteArray::class.java, ByteArray::class.java)
+                importMethod.invoke(kadbCert, keyBytes, certBytes)
+                Log.d(TAG, "Imported persistent key and certificate successfully")
+            } else {
+                val ensureReadyMethod = kadbCertClass.getMethod("ensureReady")
+                val snapshot = ensureReadyMethod.invoke(kadbCert)
+                if (snapshot != null) {
+                    val keyBytes = snapshot.javaClass.getMethod("getPrivateKeyPem").invoke(snapshot) as ByteArray
+                    val certBytes = snapshot.javaClass.getMethod("getCertificatePem").invoke(snapshot) as ByteArray
+                    keyFile.writeBytes(keyBytes)
+                    certFile.writeBytes(certBytes)
+                    Log.d(TAG, "Generated and saved persistent key and certificate")
+                }
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing KadbCert with file store", e)
+            Log.e(TAG, "Error initializing KadbCert with persistent store", e)
         }
     }
 
@@ -58,18 +74,8 @@ object AdbManager {
             Log.d(TAG, "Starting pairing with $ip:$port using code $code")
             val certUtilsClass = Class.forName("com.flyfishxu.kadb.cert.CertUtils")
             val certUtils = certUtilsClass.getField("INSTANCE").get(null)
-
-            var keyPair: Any? = null
-            try {
-                keyPair = certUtilsClass.getMethod("loadKeyPair").invoke(certUtils)
-            } catch (_: Throwable) {}
-
-            if (keyPair == null) {
-                val policyClass = Class.forName("com.flyfishxu.kadb.cert.KadbCertPolicy")
-                val policy = policyClass.getConstructor().newInstance()
-                val identity = certUtilsClass.getMethod("generateNewIdentity", policyClass).invoke(certUtils, policy)
-                keyPair = identity?.javaClass?.getMethod("getKeyPair")?.invoke(identity)
-            }
+            val keyPair = certUtilsClass.getMethod("loadKeyPair").invoke(certUtils)
+                ?: throw java.lang.IllegalStateException("No key pair available in KadbCert")
 
             val pairClass = Class.forName("com.flyfishxu.kadb.pair.PairingConnectionCtx")
             val adbKeyPairClass = Class.forName("com.flyfishxu.kadb.cert.AdbKeyPair")
@@ -100,9 +106,15 @@ object AdbManager {
         try {
             disconnect()
             Log.d(TAG, "Connecting to $ip:$port...")
-            val kadb = Kadb(host = ip, port = port)
+            val kadb = Kadb(host = ip, port = port, connectTimeout = 10000, socketTimeout = 15000)
+            
+            // In Kadb, connection() is lazy and triggered by operations.
+            // Executing a quick probe command triggers the TLS/ADB handshake and verifies authentication.
+            val testOutput = kadb.shell("echo ok").output.trim()
+            Log.d(TAG, "Connection handshake successful: $testOutput")
+
             if (!kadb.connectionCheck()) {
-                throw java.io.IOException("Failed to connect to $ip:$port")
+                throw java.io.IOException("Connection failed: transport channel is not open.")
             }
             activeKadb = kadb
             connectedHost = ip
@@ -270,77 +282,85 @@ object AdbManager {
     }
 
     suspend fun fetchDashboard(): DeviceDashboardData = withContext(Dispatchers.IO) {
-        val model = executeShell("getprop ro.product.model").trim().ifEmpty { "Android Device" }
-        val manufacturer = executeShell("getprop ro.product.manufacturer").trim()
-        val androidVersion = executeShell("getprop ro.build.version.release").trim()
-        val sdkVersion = executeShell("getprop ro.build.version.sdk").trim()
-        
-        // Battery info
-        val batteryDump = executeShell("dumpsys battery")
-        var level = -1
-        var status = "Unknown"
-        var health = "Good"
-        var temp = 0f
-        var voltage = 0
+        try {
+            val model = executeShell("getprop ro.product.model").trim().ifEmpty { "Android Device" }
+            val manufacturer = executeShell("getprop ro.product.manufacturer").trim()
+            val androidVersion = executeShell("getprop ro.build.version.release").trim()
+            val sdkVersion = executeShell("getprop ro.build.version.sdk").trim()
+            
+            // Battery info
+            val batteryDump = executeShell("dumpsys battery")
+            var level = -1
+            var status = "Unknown"
+            var health = "Good"
+            var temp = 0f
+            var voltage = 0
 
-        batteryDump.lines().forEach { l ->
-            val trim = l.trim()
-            when {
-                trim.startsWith("level:") -> level = trim.substringAfter(":").trim().toIntOrNull() ?: level
-                trim.startsWith("status:") -> {
-                    status = when (trim.substringAfter(":").trim()) {
-                        "2" -> "Charging"
-                        "3" -> "Discharging"
-                        "4" -> "Not Charging"
-                        "5" -> "Full"
-                        else -> "Plugged"
+            batteryDump.lines().forEach { l ->
+                val trim = l.trim()
+                when {
+                    trim.startsWith("level:") -> level = trim.substringAfter(":").trim().toIntOrNull() ?: level
+                    trim.startsWith("status:") -> {
+                        status = when (trim.substringAfter(":").trim()) {
+                            "2" -> "Charging"
+                            "3" -> "Discharging"
+                            "4" -> "Not Charging"
+                            "5" -> "Full"
+                            else -> "Plugged"
+                        }
                     }
-                }
-                trim.startsWith("health:") -> {
-                    health = when (trim.substringAfter(":").trim()) {
-                        "2" -> "Good"
-                        "3" -> "Overheat"
-                        "4" -> "Dead"
-                        "5" -> "Over Voltage"
-                        else -> "Normal"
+                    trim.startsWith("health:") -> {
+                        health = when (trim.substringAfter(":").trim()) {
+                            "2" -> "Good"
+                            "3" -> "Overheat"
+                            "4" -> "Dead"
+                            "5" -> "Over Voltage"
+                            else -> "Normal"
+                        }
                     }
-                }
-                trim.startsWith("temperature:") -> {
-                    temp = (trim.substringAfter(":").trim().toFloatOrNull() ?: 0f) / 10f
-                }
-                trim.startsWith("voltage:") -> {
-                    voltage = trim.substringAfter(":").trim().toIntOrNull() ?: 0
+                    trim.startsWith("temperature:") -> {
+                        temp = (trim.substringAfter(":").trim().toFloatOrNull() ?: 0f) / 10f
+                    }
+                    trim.startsWith("voltage:") -> {
+                        voltage = trim.substringAfter(":").trim().toIntOrNull() ?: 0
+                    }
                 }
             }
+
+            // Screen resolution
+            val wmSize = executeShell("wm size").trim()
+            var w = 1080
+            var h = 2400
+            val sizeMatch = Regex("(\\d+)x(\\d+)").find(wmSize)
+            if (sizeMatch != null) {
+                w = sizeMatch.groupValues[1].toIntOrNull() ?: 1080
+                h = sizeMatch.groupValues[2].toIntOrNull() ?: 2400
+            }
+
+            val uptime = executeShell("uptime").trim()
+
+            DeviceDashboardData(
+                model = "$manufacturer $model".trim().ifEmpty { "Connected Device" },
+                manufacturer = manufacturer,
+                androidVersion = androidVersion,
+                sdkVersion = sdkVersion,
+                batteryLevel = level,
+                batteryStatus = status,
+                batteryHealth = health,
+                batteryTemp = temp,
+                batteryVoltage = voltage,
+                screenWidth = w,
+                screenHeight = h,
+                ipAddress = connectedHost,
+                uptime = uptime
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching dashboard data", e)
+            DeviceDashboardData(
+                model = "Connected Device",
+                ipAddress = connectedHost
+            )
         }
-
-        // Screen resolution
-        val wmSize = executeShell("wm size").trim()
-        var w = 1080
-        var h = 2400
-        val sizeMatch = Regex("(\\d+)x(\\d+)").find(wmSize)
-        if (sizeMatch != null) {
-            w = sizeMatch.groupValues[1].toIntOrNull() ?: 1080
-            h = sizeMatch.groupValues[2].toIntOrNull() ?: 2400
-        }
-
-        val uptime = executeShell("uptime").trim()
-
-        DeviceDashboardData(
-            model = "$manufacturer $model".trim(),
-            manufacturer = manufacturer,
-            androidVersion = androidVersion,
-            sdkVersion = sdkVersion,
-            batteryLevel = level,
-            batteryStatus = status,
-            batteryHealth = health,
-            batteryTemp = temp,
-            batteryVoltage = voltage,
-            screenWidth = w,
-            screenHeight = h,
-            ipAddress = connectedHost,
-            uptime = uptime
-        )
     }
 
     suspend fun fetchProcesses(): List<RunningProcess> = withContext(Dispatchers.IO) {
