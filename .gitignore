@@ -12,3 +12,6 @@ app/build/
 *.hprof
 .kotlin
 __pycache__/
+*.jks
+*.keystore
+releases/

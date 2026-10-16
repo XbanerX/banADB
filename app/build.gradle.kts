@@ -20,9 +20,31 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val keyFile = file("banadb-release.jks")
+            if (keyFile.exists()) {
+                storeFile = keyFile
+                storePassword = "banadb2026"
+                keyAlias = "banadb"
+                keyPassword = "banadb2026"
+            }
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
