@@ -10,11 +10,11 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BananaGold,
+    primary = CyberCyan,
     onPrimary = BackgroundDark,
-    primaryContainer = BananaGoldDark,
-    onPrimaryContainer = BananaGoldLight,
-    secondary = CyberCyan,
+    primaryContainer = CyberCyanDark,
+    onPrimaryContainer = CyberCyanLight,
+    secondary = CyberCyanLight,
     onSecondary = BackgroundDark,
     secondaryContainer = SurfaceCard,
     onSecondaryContainer = CyberCyanLight,

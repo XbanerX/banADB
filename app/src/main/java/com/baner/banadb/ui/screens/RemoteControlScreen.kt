@@ -1,8 +1,12 @@
 package com.baner.banadb.ui.screens
 
+import android.graphics.Bitmap
 import android.view.KeyEvent
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,11 +27,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.components.DirectionalPad
@@ -41,6 +52,8 @@ fun RemoteControlScreen(
     onBack: () -> Unit,
     onNavigateToSection: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val localClipboardManager = LocalClipboardManager.current
     val connectionState by viewModel.connectionState.collectAsState()
     val dashboardData by viewModel.dashboardData.collectAsState()
 
@@ -54,6 +67,15 @@ fun RemoteControlScreen(
     var showQuickSetDialog by remember { mutableStateOf(false) }
     var showBatteryDialog by remember { mutableStateOf(false) }
     var showPowerDialog by remember { mutableStateOf(false) }
+    var showScreenshotPreviewDialog by remember { mutableStateOf(false) }
+    var capturedPreviewBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var showDisconnectConfirmDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+
+    // Intercept back swipe/press on remote control
+    BackHandler {
+        showDisconnectConfirmDialog = true
+    }
 
     Scaffold(
         topBar = {
@@ -65,11 +87,18 @@ fun RemoteControlScreen(
                     onBack()
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { showDisconnectConfirmDialog = true }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showAboutDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "About banADB",
+                            tint = TextSecondary
+                        )
+                    }
                     if (connectionState is ConnectionState.Connected) {
                         Button(
                             onClick = {
@@ -157,9 +186,19 @@ fun RemoteControlScreen(
                             contentColor = if (liveSelected) BackgroundDark else TextSecondary
                         )
                     ) {
-                        Icon(Icons.Default.VideogameAsset, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.VideogameAsset,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (liveSelected) BackgroundDark else TextSecondary
+                        )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Live Control", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(
+                            "Live Control",
+                            color = if (liveSelected) BackgroundDark else TextSecondary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
                     }
 
                     val termSelected = activeTopTab == 1
@@ -175,9 +214,19 @@ fun RemoteControlScreen(
                             contentColor = if (termSelected) BackgroundDark else TextSecondary
                         )
                     ) {
-                        Icon(Icons.Default.Terminal, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Terminal,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (termSelected) BackgroundDark else TextSecondary
+                        )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Terminal", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(
+                            "Terminal",
+                            color = if (termSelected) BackgroundDark else TextSecondary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
                     }
                 }
             }
@@ -283,7 +332,7 @@ fun RemoteControlScreen(
                                 ) { onNavigateToSection("mirror") }
                             }
 
-                            // Row 2: Quick Set, Tasks, Status, Notify
+                            // Row 2: Quick Set, Tasks, Gallery, Status
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -303,25 +352,32 @@ fun RemoteControlScreen(
                                 ) { onNavigateToSection("processes") }
 
                                 FeatureToolItem(
+                                    icon = Icons.Default.PhotoLibrary,
+                                    label = "Gallery",
+                                    tint = CyberCyan,
+                                    modifier = Modifier.weight(1f)
+                                ) { onNavigateToSection("gallery") }
+
+                                FeatureToolItem(
                                     icon = Icons.Default.Speed,
                                     label = "Status",
                                     tint = NeonEmerald,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("dashboard") }
+                            }
 
+                            // Row 3: Notify, Scripts, Battery, Screenshot
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 FeatureToolItem(
                                     icon = Icons.Default.Notifications,
                                     label = "Notify",
                                     tint = CyberCyan,
                                     modifier = Modifier.weight(1f)
-                                ) { viewModel.executeCommand("cmd statusbar expand-notifications") }
-                            }
+                                ) { onNavigateToSection("notifications") }
 
-                            // Row 3: Scripts, Battery, Screenshot, Terminal
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
                                 FeatureToolItem(
                                     icon = Icons.Default.Code,
                                     label = "Scripts",
@@ -342,16 +398,12 @@ fun RemoteControlScreen(
                                     tint = BananaGold,
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    viewModel.captureScreenshot()
-                                    onNavigateToSection("mirror")
+                                    Toast.makeText(context, "Capturing screenshot...", Toast.LENGTH_SHORT).show()
+                                    viewModel.captureScreenshot { bmp ->
+                                        capturedPreviewBitmap = bmp
+                                        showScreenshotPreviewDialog = true
+                                    }
                                 }
-
-                                FeatureToolItem(
-                                    icon = Icons.Default.Terminal,
-                                    label = "Terminal",
-                                    tint = CyberCyan,
-                                    modifier = Modifier.weight(1f)
-                                ) { onNavigateToSection("terminal") }
                             }
                         }
                     }
@@ -509,13 +561,18 @@ fun RemoteControlScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 ControlButton(icon = Icons.Default.Search, desc = "Search") {
-                                    viewModel.sendKeyevent(KeyEvent.KEYCODE_SEARCH)
+                                    viewModel.triggerRemoteSearch()
+                                    Toast.makeText(context, "Search triggered", Toast.LENGTH_SHORT).show()
                                 }
                                 ControlButton(icon = Icons.Default.Notifications, desc = "Notify", tint = CyberCyan) {
                                     viewModel.executeCommand("cmd statusbar expand-notifications")
                                 }
                                 ControlButton(icon = Icons.Default.CameraAlt, desc = "Screenshot", tint = BananaGold) {
-                                    viewModel.captureScreenshot()
+                                    Toast.makeText(context, "Capturing screenshot...", Toast.LENGTH_SHORT).show()
+                                    viewModel.captureScreenshot { bmp ->
+                                        capturedPreviewBitmap = bmp
+                                        showScreenshotPreviewDialog = true
+                                    }
                                 }
                                 ControlButton(icon = Icons.Default.PowerSettingsNew, desc = "Power", tint = StatusError) {
                                     showPowerDialog = true
@@ -570,26 +627,26 @@ fun RemoteControlScreen(
 
                                 // Row 1
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    KeyButton("Enter", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ENTER) }
-                                    KeyButton("Delete", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_DEL) }
-                                    KeyButton("Tab", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_TAB) }
-                                    KeyButton("Space", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_SPACE) }
+                                    KeyButton("Enter", icon = Icons.Default.KeyboardReturn, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ENTER) }
+                                    KeyButton("Del", icon = Icons.Default.Backspace, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_DEL) }
+                                    KeyButton("Tab", icon = Icons.Default.KeyboardTab, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_TAB) }
+                                    KeyButton("Space", icon = Icons.Default.SpaceBar, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_SPACE) }
                                 }
                                 // Row 2
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    KeyButton("Esc", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ESCAPE) }
-                                    KeyButton("Copy", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_COPY) }
-                                    KeyButton("Paste", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PASTE) }
-                                    KeyButton("Select All", Modifier.weight(1f)) {
+                                    KeyButton("Esc", icon = Icons.Default.Cancel, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ESCAPE) }
+                                    KeyButton("Copy", icon = Icons.Default.ContentCopy, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_COPY) }
+                                    KeyButton("Paste", icon = Icons.Default.ContentPaste, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PASTE) }
+                                    KeyButton("All", icon = Icons.Default.SelectAll, modifier = Modifier.weight(1f)) {
                                         viewModel.executeCommand("input keyevent --meta 113 29") // Ctrl+A
                                     }
                                 }
                                 // Row 3
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    KeyButton("Home", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_HOME) }
-                                    KeyButton("End", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_END) }
-                                    KeyButton("PgUp", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_UP) }
-                                    KeyButton("PgDn", Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_DOWN) }
+                                    KeyButton("Home", icon = Icons.Default.VerticalAlignTop, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_HOME) }
+                                    KeyButton("End", icon = Icons.Default.VerticalAlignBottom, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_END) }
+                                    KeyButton("PgUp", icon = Icons.Default.KeyboardArrowUp, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_UP) }
+                                    KeyButton("PgDn", icon = Icons.Default.KeyboardArrowDown, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_DOWN) }
                                 }
                             }
                         }
@@ -677,59 +734,196 @@ fun RemoteControlScreen(
         }
     }
 
-    // Dialog: Remote Clipboard Manager
+    if (showAboutDialog) {
+        AboutDialog(onDismiss = { showAboutDialog = false })
+    }
+
+    // Dialog: Remote & Local Clipboard Manager
     if (showClipboardDialog) {
         var remoteClip by remember { mutableStateOf("") }
         var inputClip by remember { mutableStateOf("") }
+        var isFetching by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
+            isFetching = true
             viewModel.syncClipboardFromRemote { text ->
                 remoteClip = text
+                isFetching = false
             }
         }
 
         AlertDialog(
             onDismissRequest = { showClipboardDialog = false },
-            title = { Text("Remote Clipboard", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.ContentPaste, contentDescription = null, tint = BananaGold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Clipboard Manager", color = BananaGold, fontWeight = FontWeight.Bold)
+                }
+            },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Device Clipboard Content:", color = TextSecondary, fontSize = 12.sp)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Remote clipboard display card
                     Card(
-                        shape = RoundedCornerShape(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = BackgroundDark),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = remoteClip.ifEmpty { "(Clipboard is empty)" },
-                            color = TextPrimary,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(10.dp)
-                        )
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Remote Device Clipboard:", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                if (isFetching) {
+                                    CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = BananaGold)
+                                } else {
+                                    Row {
+                                        IconButton(
+                                            onClick = {
+                                                isFetching = true
+                                                viewModel.syncClipboardFromRemote { text ->
+                                                    remoteClip = text
+                                                    isFetching = false
+                                                    Toast.makeText(context, "Remote clipboard updated", Toast.LENGTH_SHORT).show()
+                                                }
+                                            },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = BananaGold, modifier = Modifier.size(16.dp))
+                                        }
+                                        if (remoteClip.isNotEmpty()) {
+                                            IconButton(
+                                                onClick = {
+                                                    localClipboardManager.setText(AnnotatedString(remoteClip))
+                                                    Toast.makeText(context, "Copied to phone clipboard", Toast.LENGTH_SHORT).show()
+                                                },
+                                                modifier = Modifier.size(24.dp)
+                                            ) {
+                                                Icon(Icons.Default.ContentCopy, contentDescription = "Copy to Phone", tint = CyberCyan, modifier = Modifier.size(16.dp))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = remoteClip.ifEmpty { "(Remote clipboard is empty or protected)" },
+                                color = if (remoteClip.isEmpty()) TextMuted else TextPrimary,
+                                fontSize = 12.sp,
+                                maxLines = 4
+                            )
+                        }
                     }
 
+                    // Phone Clipboard Quick Action
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                val phoneText = localClipboardManager.getText()?.text ?: ""
+                                if (phoneText.isNotEmpty()) {
+                                    inputClip = phoneText
+                                    Toast.makeText(context, "Pasted from phone clipboard", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Phone clipboard is empty", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = BananaGold),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+                        ) {
+                            Icon(Icons.Default.ContentPasteGo, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Paste Phone", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        OutlinedButton(
+                            onClick = { inputClip = "" },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+                        ) {
+                            Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Clear", fontSize = 11.sp)
+                        }
+                    }
+
+                    // Input Text Field
                     OutlinedTextField(
                         value = inputClip,
                         onValueChange = { inputClip = it },
-                        label = { Text("Send new text to remote clipboard") },
+                        label = { Text("Text to send", fontSize = 12.sp) },
+                        placeholder = { Text("Type or paste long text here...", fontSize = 11.sp) },
                         modifier = Modifier.fillMaxWidth(),
+                        maxLines = 5,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = BananaGold,
-                            focusedLabelColor = BananaGold
+                            focusedLabelColor = BananaGold,
+                            unfocusedBorderColor = SurfaceCardHover
                         )
+                    )
+
+                    // Explanation note
+                    Text(
+                        text = "Tip: 'Inject Direct' types directly into active remote input field. 'Set Remote' sets the target clipboard buffer.",
+                        color = TextMuted,
+                        fontSize = 10.sp
                     )
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        if (inputClip.isNotBlank()) {
-                            viewModel.syncClipboardToRemote(inputClip)
-                        }
-                        showClipboardDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Send", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    // Direct Inject button (input text)
+                    Button(
+                        onClick = {
+                            if (inputClip.isNotBlank()) {
+                                viewModel.sendText(inputClip)
+                                Toast.makeText(context, "Text injected into target focus", Toast.LENGTH_SHORT).show()
+                                showClipboardDialog = false
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonEmerald),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp)
+                    ) {
+                        Icon(Icons.Default.KeyboardAlt, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Inject Direct", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    }
+
+                    // Set target clipboard
+                    Button(
+                        onClick = {
+                            if (inputClip.isNotBlank()) {
+                                viewModel.syncClipboardToRemote(inputClip, injectInput = false) { success ->
+                                    Toast.makeText(context, if (success) "Target clipboard set" else "Target clipboard failed", Toast.LENGTH_SHORT).show()
+                                }
+                                showClipboardDialog = false
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp)
+                    ) {
+                        Icon(Icons.Default.ContentPaste, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Set Remote", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    }
                 }
             },
             dismissButton = {
@@ -737,7 +931,8 @@ fun RemoteControlScreen(
                     Text("Close", color = TextSecondary)
                 }
             },
-            containerColor = SurfaceDark
+            containerColor = SurfaceDark,
+            shape = RoundedCornerShape(16.dp)
         )
     }
 
@@ -870,6 +1065,147 @@ fun RemoteControlScreen(
             containerColor = SurfaceDark
         )
     }
+
+    // Dialog: Screenshot Preview & Save to Gallery
+    if (showScreenshotPreviewDialog && capturedPreviewBitmap != null) {
+        Dialog(
+            onDismissRequest = { showScreenshotPreviewDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .fillMaxHeight(0.85f),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Screenshot Captured",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = BananaGold
+                        )
+                        IconButton(onClick = { showScreenshotPreviewDialog = false }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(BackgroundDark),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            bitmap = capturedPreviewBitmap!!.asImageBitmap(),
+                            contentDescription = "Preview",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                Toast.makeText(context, "Retaking...", Toast.LENGTH_SHORT).show()
+                                viewModel.captureScreenshot { bmp ->
+                                    capturedPreviewBitmap = bmp
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = BananaGold)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Retake", fontSize = 13.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                capturedPreviewBitmap?.let { bmp ->
+                                    viewModel.saveScreenshotToGallery(context, bmp) { path ->
+                                        Toast.makeText(context, "Saved to Gallery: $path", Toast.LENGTH_LONG).show()
+                                        showScreenshotPreviewDialog = false
+                                    }
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
+                        ) {
+                            Icon(Icons.Default.SaveAlt, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Save", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Dialog: Disconnect Confirmation
+    if (showDisconnectConfirmDialog) {
+        val connName = (connectionState as? ConnectionState.Connected)?.deviceName ?: "Remote Device"
+        AlertDialog(
+            onDismissRequest = { showDisconnectConfirmDialog = false },
+            icon = { Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = StatusError, modifier = Modifier.size(32.dp)) },
+            title = {
+                Text(
+                    text = "Disconnect from device?",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to disconnect from $connName and return to the home screen?",
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDisconnectConfirmDialog = false
+                        viewModel.disconnect()
+                        onBack()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = StatusError),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Disconnect", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDisconnectConfirmDialog = false }) {
+                    Text("Cancel", color = TextSecondary)
+                }
+            },
+            containerColor = SurfaceDark,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 }
 
 @Composable
@@ -929,6 +1265,7 @@ private fun ControlButton(
 @Composable
 private fun KeyButton(
     label: String,
+    icon: ImageVector? = null,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -939,6 +1276,10 @@ private fun KeyButton(
         colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
     ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = label, tint = BananaGold, modifier = Modifier.size(13.dp))
+            Spacer(modifier = Modifier.width(3.dp))
+        }
         Text(label, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }

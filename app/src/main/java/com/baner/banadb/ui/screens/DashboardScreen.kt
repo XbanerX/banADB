@@ -1,5 +1,6 @@
 package com.baner.banadb.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +33,8 @@ fun DashboardScreen(
     viewModel: AdbViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val localClipboardManager = LocalClipboardManager.current
     val connectionState by viewModel.connectionState.collectAsState()
     val data by viewModel.dashboardData.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -162,18 +167,40 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.ContentPaste, contentDescription = null, tint = NeonEmerald)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Remote Clipboard", style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.ContentPaste, contentDescription = null, tint = NeonEmerald)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Remote Clipboard", style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                        }
+
+                        TextButton(
+                            onClick = {
+                                val phoneText = localClipboardManager.getText()?.text ?: ""
+                                if (phoneText.isNotEmpty()) {
+                                    clipboardInput = phoneText
+                                    Toast.makeText(context, "Pasted phone clipboard", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Phone clipboard empty", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.ContentPasteGo, contentDescription = null, tint = BananaGold, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Paste Phone", color = BananaGold, fontSize = 11.sp)
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = clipboardInput,
                         onValueChange = { clipboardInput = it },
-                        placeholder = { Text("Paste or type text to sync...") },
+                        placeholder = { Text("Paste or type text to sync...", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -192,28 +219,58 @@ fun DashboardScreen(
                             onClick = {
                                 viewModel.syncClipboardFromRemote { text ->
                                     clipboardInput = text
+                                    Toast.makeText(context, "Remote clipboard fetched", Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).height(58.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
                         ) {
-                            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp), tint = NeonEmerald)
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Get Remote", color = NeonEmerald, fontSize = 12.sp)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                                Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp), tint = NeonEmerald)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("Get Remote", color = NeonEmerald, fontSize = 11.sp, maxLines = 1)
+                            }
                         }
 
                         Button(
                             onClick = {
                                 if (clipboardInput.isNotEmpty()) {
-                                    viewModel.syncClipboardToRemote(clipboardInput)
+                                    viewModel.syncClipboardToRemote(clipboardInput) { success ->
+                                        Toast.makeText(context, if (success) "Sent to clipboard" else "Failed", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = NeonEmerald),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).height(58.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
                         ) {
-                            Icon(Icons.Default.Upload, contentDescription = null, modifier = Modifier.size(16.dp), tint = BackgroundDark)
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Send Remote", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                                Icon(Icons.Default.Upload, contentDescription = null, modifier = Modifier.size(18.dp), tint = BackgroundDark)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("Send Clip", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+                            }
+                        }
+
+                        Button(
+                            onClick = {
+                                if (clipboardInput.isNotEmpty()) {
+                                    viewModel.sendText(clipboardInput)
+                                    Toast.makeText(context, "Injected into target focus", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
+                            modifier = Modifier.weight(1f).height(58.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                                Icon(Icons.Default.KeyboardAlt, contentDescription = null, modifier = Modifier.size(18.dp), tint = BackgroundDark)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("Inject", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+                            }
                         }
                     }
                 }
@@ -240,29 +297,32 @@ fun DashboardScreen(
                     ) {
                         OutlinedButton(
                             onClick = { showRebootConfirm = "" },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).height(44.dp),
                             shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Reboot", fontSize = 12.sp)
+                            Text("Reboot", fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
                         }
 
                         OutlinedButton(
                             onClick = { showRebootConfirm = "recovery" },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).height(44.dp),
                             shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Recovery", fontSize = 12.sp)
+                            Text("Recovery", fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
                         }
 
                         OutlinedButton(
                             onClick = { showRebootConfirm = "bootloader" },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).height(44.dp),
                             shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Bootloader", fontSize = 12.sp)
+                            Text("Bootloader", fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }

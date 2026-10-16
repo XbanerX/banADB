@@ -3,8 +3,12 @@ package com.baner.banadb.ui.viewmodel
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
+import android.util.LruCache
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.baner.banadb.adb.AdbManager
@@ -13,11 +17,16 @@ import com.baner.banadb.data.model.*
 import com.baner.banadb.data.repository.DevicePreferences
 import com.baner.banadb.service.AdbConnectionService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
+import java.io.FileOutputStream
 
 class AdbViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -66,6 +75,15 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     private val _notifications = MutableStateFlow<List<NotificationItem>>(emptyList())
     val notifications: StateFlow<List<NotificationItem>> = _notifications.asStateFlow()
 
+    private val _isNotificationSyncEnabled = MutableStateFlow(false)
+    val isNotificationSyncEnabled: StateFlow<Boolean> = _isNotificationSyncEnabled.asStateFlow()
+
+    private val _galleryMedia = MutableStateFlow<List<RemoteMediaItem>>(emptyList())
+    val galleryMedia: StateFlow<List<RemoteMediaItem>> = _galleryMedia.asStateFlow()
+
+    private val _isGalleryLoading = MutableStateFlow(false)
+    val isGalleryLoading: StateFlow<Boolean> = _isGalleryLoading.asStateFlow()
+
     private val _scripts = MutableStateFlow<List<ScriptItem>>(emptyList())
     val scripts: StateFlow<List<ScriptItem>> = _scripts.asStateFlow()
 
@@ -78,7 +96,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     init {
         loadSavedDevices()
         loadScripts()
-        appendConsole("BanaADB Terminal initialized.\nType a command or choose a suggestion below.\n")
+        appendConsole("banADB Terminal initialized.\nType a command or choose a suggestion below.\n")
     }
 
     fun loadSavedDevices() {
@@ -117,6 +135,21 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
                 onComplete(false)
             }
         }
+    }
+
+    fun pairAndConnect(
+        ip: String,
+        pairingPort: Int,
+        pairingCode: String,
+        connectionPort: Int? = null,
+        onResult: (Boolean) -> Unit = {}
+    ) {
+        val port = if (connectionPort != null && connectionPort > 0) connectionPort else 5555
+        doPairing(ip, pairingPort, pairingCode, port, onResult)
+    }
+
+    fun connect(ip: String, port: Int) {
+        doConnect(ip, port)
     }
 
     fun doConnect(ip: String, port: Int) {
@@ -180,7 +213,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearConsole() {
-        _consoleOutput.value = "# BanaADB Terminal Cleared.\n"
+        _consoleOutput.value = "# banADB Terminal Cleared.\n"
     }
 
     // Dashboard
@@ -292,7 +325,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
             _operationStatus.value = "Extracting $label APK..."
             try {
                 val destDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                    ?: File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "BanaADB")
+                    ?: File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "banADB")
                 val result = AdbManager.extractApk(pkg, label, destDir)
                 result.onSuccess { file ->
                     _operationStatus.value = "APK extracted to Downloads: ${file.name}"
@@ -325,11 +358,245 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Notifications
+    private var notificationSyncJob: kotlinx.coroutines.Job? = null
+
     fun refreshNotifications() {
         viewModelScope.launch {
             _isRefreshing.value = true
-            _notifications.value = AdbManager.fetchNotifications()
-            _isRefreshing.value = false
+            try {
+                _notifications.value = AdbManager.fetchNotifications()
+            } catch (e: Exception) {
+                Log.e("AdbViewModel", "refreshNotifications error", e)
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
+
+    fun toggleNotificationSync(enabled: Boolean) {
+        _isNotificationSyncEnabled.value = enabled
+        notificationSyncJob?.cancel()
+        if (enabled) {
+            notificationSyncJob = viewModelScope.launch {
+                while (isActive && _isNotificationSyncEnabled.value) {
+                    if (AdbManager.isConnected) {
+                        try {
+                            _notifications.value = AdbManager.fetchNotifications()
+                        } catch (e: Exception) {
+                            Log.e("AdbViewModel", "Notification sync loop error", e)
+                        }
+                    }
+                    kotlinx.coroutines.delay(5000)
+                }
+            }
+        }
+    }
+
+    fun dismissNotification(item: NotificationItem) {
+        viewModelScope.launch {
+            val ok = AdbManager.dismissNotification(item.key)
+            if (ok) {
+                _notifications.value = _notifications.value.filter { it.id != item.id && it.key != item.key }
+            }
+        }
+    }
+
+    // Remote Gallery
+    fun refreshGallery() {
+        viewModelScope.launch {
+            _isGalleryLoading.value = true
+            try {
+                _galleryMedia.value = AdbManager.fetchRemoteGalleryMedia()
+            } catch (e: Exception) {
+                Log.e("AdbViewModel", "refreshGallery error", e)
+            } finally {
+                _isGalleryLoading.value = false
+            }
+        }
+    }
+
+    fun deleteRemoteMedia(item: RemoteMediaItem, onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val success = AdbManager.deleteRemoteMedia(item.path)
+            if (success) {
+                _galleryMedia.value = _galleryMedia.value.filter { it.path != item.path }
+            }
+            onComplete(success)
+        }
+    }
+
+    fun downloadMediaToLocal(
+        context: Context,
+        item: RemoteMediaItem,
+        onProgress: (String) -> Unit,
+        onComplete: (Boolean, String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                onProgress("Downloading ${item.name}...")
+                val subDir = if (item.isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
+                val publicDir = File(Environment.getExternalStoragePublicDirectory(subDir), "banADB")
+                if (!publicDir.exists()) publicDir.mkdirs()
+                val targetFile = File(publicDir, item.name)
+
+                val success = AdbManager.pullFile(item.path, targetFile)
+                if (success && targetFile.exists() && targetFile.length() > 0) {
+                    android.media.MediaScannerConnection.scanFile(
+                        context,
+                        arrayOf(targetFile.absolutePath),
+                        arrayOf(if (item.isVideo) "video/*" else "image/*"),
+                        null
+                    )
+                    onComplete(true, targetFile.absolutePath)
+                } else {
+                    onComplete(false, "Download failed or file empty")
+                }
+            } catch (e: Exception) {
+                Log.e("AdbViewModel", "downloadMediaToLocal error", e)
+                onComplete(false, e.localizedMessage ?: "Download failed")
+            }
+        }
+    }
+
+    private val thumbnailMemoryCache = LruCache<String, Bitmap>(100)
+    private val thumbMutex = Mutex()
+
+    fun getCachedThumbnail(path: String, size: Long): Bitmap? {
+        val cacheKey = "${path}_$size"
+        return thumbnailMemoryCache.get(cacheKey)
+    }
+
+    suspend fun loadThumbnail(context: Context, item: RemoteMediaItem): Bitmap? = withContext(Dispatchers.IO) {
+        val cacheKey = "${item.path}_${item.size}"
+        thumbnailMemoryCache.get(cacheKey)?.let { return@withContext it }
+
+        val thumbsDir = File(context.cacheDir, "gallery_thumbs")
+        if (!thumbsDir.exists()) thumbsDir.mkdirs()
+        val thumbFile = File(thumbsDir, "thumb_${item.path.hashCode()}_${item.size}.jpg")
+
+        if (thumbFile.exists() && thumbFile.length() > 0) {
+            try {
+                val bmp = BitmapFactory.decodeFile(thumbFile.absolutePath)
+                if (bmp != null) {
+                    thumbnailMemoryCache.put(cacheKey, bmp)
+                    return@withContext bmp
+                }
+            } catch (e: Exception) {
+                thumbFile.delete()
+            }
+        }
+
+        // Fetch from remote device sequentially using Mutex
+        thumbMutex.withLock {
+            // Re-check after acquiring lock in case another coroutine fetched it
+            thumbnailMemoryCache.get(cacheKey)?.let { return@withLock it }
+            if (thumbFile.exists() && thumbFile.length() > 0) {
+                val bmp = BitmapFactory.decodeFile(thumbFile.absolutePath)
+                if (bmp != null) {
+                    thumbnailMemoryCache.put(cacheKey, bmp)
+                    return@withLock bmp
+                }
+            }
+
+            if (!AdbManager.isConnected) return@withLock null
+
+            val tempDir = File(context.cacheDir, "gallery_tmp")
+            if (!tempDir.exists()) tempDir.mkdirs()
+            val tempFile = File(tempDir, "tmp_${item.path.hashCode()}_${System.currentTimeMillis()}")
+
+            try {
+                val success = AdbManager.pullFile(item.path, tempFile)
+                if (!success || !tempFile.exists() || tempFile.length() == 0L) {
+                    return@withLock null
+                }
+
+                var extractedBitmap: Bitmap? = null
+
+                if (item.isVideo) {
+                    try {
+                        val retriever = MediaMetadataRetriever()
+                        retriever.setDataSource(tempFile.absolutePath)
+                        extractedBitmap = retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                            ?: retriever.frameAtTime
+                        retriever.release()
+                    } catch (e: Exception) {
+                        Log.w("AdbViewModel", "Video frame extraction failed for ${item.path}", e)
+                    }
+                } else {
+                    try {
+                        val boundsOpts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                        BitmapFactory.decodeFile(tempFile.absolutePath, boundsOpts)
+                        val sampleSize = calculateInSampleSize(boundsOpts, 360, 360)
+                        val decodeOpts = BitmapFactory.Options().apply {
+                            inSampleSize = sampleSize
+                            inPreferredConfig = Bitmap.Config.RGB_565
+                        }
+                        extractedBitmap = BitmapFactory.decodeFile(tempFile.absolutePath, decodeOpts)
+                    } catch (e: Exception) {
+                        Log.w("AdbViewModel", "Image decoding failed for ${item.path}", e)
+                    }
+                }
+
+                // Delete raw temp file to save storage
+                tempFile.delete()
+
+                if (extractedBitmap != null) {
+                    try {
+                        FileOutputStream(thumbFile).use { out ->
+                            extractedBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+                        }
+                    } catch (e: Exception) {
+                        Log.w("AdbViewModel", "Failed to cache thumb on disk", e)
+                    }
+                    thumbnailMemoryCache.put(cacheKey, extractedBitmap)
+                    extractedBitmap
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("AdbViewModel", "loadThumbnail error for ${item.path}", e)
+                null
+            } finally {
+                if (tempFile.exists()) tempFile.delete()
+            }
+        }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize.coerceAtLeast(1)
+    }
+
+    fun loadPreviewFile(
+        context: Context,
+        item: RemoteMediaItem,
+        onLoaded: (File?) -> Unit
+    ) {
+        viewModelScope.launch {
+            val cacheDir = File(context.cacheDir, "gallery_preview")
+            if (!cacheDir.exists()) cacheDir.mkdirs()
+            val localCache = File(cacheDir, "${item.name.hashCode()}_${item.name}")
+            if (localCache.exists() && localCache.length() == item.size) {
+                onLoaded(localCache)
+                return@launch
+            }
+            val ok = thumbMutex.withLock {
+                AdbManager.pullFile(item.path, localCache)
+            }
+            if (ok && localCache.exists() && localCache.length() > 0) {
+                onLoaded(localCache)
+            } else {
+                onLoaded(null)
+            }
         }
     }
 
@@ -359,9 +626,11 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Clipboard & Toggles
-    fun syncClipboardToRemote(text: String) {
+    fun syncClipboardToRemote(text: String, injectInput: Boolean = false, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
-            AdbManager.setClipboard(text)
+            val clipSuccess = AdbManager.setClipboard(text)
+            val injectSuccess = if (injectInput) AdbManager.sendText(text) else true
+            onResult?.invoke(clipSuccess || injectSuccess)
             refreshDashboard()
         }
     }
@@ -370,6 +639,12 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val text = AdbManager.getClipboard()
             onResult(text)
+        }
+    }
+
+    fun triggerRemoteSearch() {
+        viewModelScope.launch {
+            AdbManager.triggerSearch()
         }
     }
 
@@ -408,12 +683,59 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Screen Mirroring / Screenshot
-    fun captureScreenshot() {
+    fun captureScreenshot(onCaptured: ((Bitmap?) -> Unit)? = null) {
         viewModelScope.launch {
             _isRefreshing.value = true
             val bmp = AdbManager.captureScreenshot()
             _screenshotBitmap.value = bmp
             _isRefreshing.value = false
+            onCaptured?.invoke(bmp)
+        }
+    }
+
+    fun saveScreenshotToGallery(context: Context, bitmap: Bitmap, onSaved: (Uri?) -> Unit) {
+        viewModelScope.launch {
+            val uri = AdbManager.saveScreenshotToGallery(context, bitmap)
+            onSaved(uri)
+        }
+    }
+
+    // File Manager Downloads & Preview Cache
+    fun pullFileToCache(file: RemoteFile, context: Context, onResult: (File?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isOperationLoading.value = true
+            try {
+                val previewDir = File(context.cacheDir, "previews")
+                if (!previewDir.exists()) previewDir.mkdirs()
+                val localFile = File(previewDir, file.name)
+                if (localFile.exists()) localFile.delete()
+                val success = AdbManager.pullFile(file.path, localFile)
+                if (success && localFile.exists()) {
+                    onResult(localFile)
+                } else {
+                    onResult(null)
+                }
+            } catch (e: Exception) {
+                onResult(null)
+            } finally {
+                _isOperationLoading.value = false
+            }
+        }
+    }
+
+    fun saveFileToDownloads(file: RemoteFile, context: Context, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isOperationLoading.value = true
+            try {
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val targetFile = File(downloadsDir, file.name)
+                val success = AdbManager.pullFile(file.path, targetFile)
+                onResult(success)
+            } catch (e: Exception) {
+                onResult(false)
+            } finally {
+                _isOperationLoading.value = false
+            }
         }
     }
 

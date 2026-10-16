@@ -24,10 +24,13 @@ object AdbManager {
     val isConnected: Boolean
         get() = activeKadb?.connectionCheck() == true
 
+    private var appContext: android.content.Context? = null
+
     fun getConnectedHost(): String = connectedHost
     fun getConnectedPort(): Int = connectedPort
 
     fun init(context: android.content.Context) {
+        appContext = context.applicationContext
         try {
             val keyFile = File(context.filesDir, "kadb_key")
             val certFile = File(context.filesDir, "kadb_cert")
@@ -86,7 +89,7 @@ object AdbManager {
                 adbKeyPairClass,
                 String::class.java
             )
-            val pairingCtx = constructor.newInstance(ip, port, code.toByteArray(Charsets.UTF_8), keyPair, "BanaADB") as java.io.Closeable
+            val pairingCtx = constructor.newInstance(ip, port, code.toByteArray(Charsets.UTF_8), keyPair, "banADB") as java.io.Closeable
             try {
                 pairClass.getMethod("start").invoke(pairingCtx)
             } finally {
@@ -477,26 +480,122 @@ object AdbManager {
     suspend fun fetchNotifications(): List<NotificationItem> = withContext(Dispatchers.IO) {
         val out = executeShell("dumpsys notification --noredact")
         val items = mutableListOf<NotificationItem>()
-        var currentPkg = ""
-        var currentTitle = ""
-        var currentText = ""
+        val records = out.split("NotificationRecord(")
+        val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+
+        for (record in records.drop(1)) {
+            val pkg = Regex("pkg=([^\\s]+)").find(record)?.groupValues?.get(1) ?: ""
+            if (pkg.isEmpty()) continue
+
+            val rawKey = Regex("key=([^\\s\\n:]+)").find(record)?.groupValues?.get(1) ?: ""
+            val whenMatch = Regex("when=(\\d+)").find(record)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+
+            var title = Regex("android\\.title=String \\((.*?)\\)").find(record)?.groupValues?.get(1) ?: ""
+            var text = Regex("android\\.text=String \\((.*?)\\)").find(record)?.groupValues?.get(1) ?: ""
+            if (text.isEmpty()) {
+                text = Regex("android\\.bigText=String \\((.*?)\\)").find(record)?.groupValues?.get(1) ?: ""
+            }
+            val ticker = Regex("tickerText=(.*?)\\n").find(record)?.groupValues?.get(1)?.trim()
+            if (ticker != null && ticker != "null" && ticker.isNotEmpty()) {
+                if (text.isEmpty()) text = ticker
+                if (title.isEmpty()) title = ticker
+            }
+            val subText = Regex("android\\.subText=String \\((.*?)\\)").find(record)?.groupValues?.get(1) ?: ""
+
+            if (title.isNotEmpty() || text.isNotEmpty()) {
+                val category = categorizePkg(pkg)
+                val postTime = if (whenMatch > 0L) timeFormat.format(java.util.Date(whenMatch)) else ""
+                items.add(
+                    NotificationItem(
+                        id = rawKey.ifEmpty { "${pkg}_${whenMatch}" },
+                        key = rawKey,
+                        pkg = pkg,
+                        title = title,
+                        text = text,
+                        subText = subText,
+                        postTime = postTime,
+                        category = category,
+                        timestampMs = whenMatch
+                    )
+                )
+            }
+        }
+        items.distinctBy { "${it.pkg}_${it.title}_${it.text}" }.sortedByDescending { it.timestampMs }
+    }
+
+    private fun categorizePkg(pkg: String): String {
+        val p = pkg.lowercase()
+        return when {
+            p.contains("sms") || p.contains("mms") || p.contains("message") ||
+            p.contains("whatsapp") || p.contains("telegram") || p.contains("signal") ||
+            p.contains("messenger") || p.contains("viber") || p.contains("slack") ||
+            p.contains("line") || p.contains("chat") -> "Messages"
+
+            p.contains("facebook") || p.contains("instagram") || p.contains("twitter") ||
+            p.contains("x.com") || p.contains("tiktok") || p.contains("reddit") ||
+            p.contains("discord") || p.contains("threads") || p.contains("snapchat") ||
+            p.contains("pinterest") || p.contains("linkedin") -> "Social"
+
+            p.contains("mail") || p.contains("gmail") || p.contains("outlook") ||
+            p.contains("yahoo") || p.contains("spark") || p.contains("thunderbird") -> "Email"
+
+            else -> "System"
+        }
+    }
+
+    suspend fun dismissNotification(key: String): Boolean = withContext(Dispatchers.IO) {
+        if (key.isNotEmpty()) {
+            executeShell("cmd notification cancel \"$key\" 2>/dev/null || cmd notification snooze --for 86400000 \"$key\" 2>/dev/null")
+            true
+        } else false
+    }
+
+    suspend fun fetchRemoteGalleryMedia(): List<RemoteMediaItem> = withContext(Dispatchers.IO) {
+        val cmd = "find /sdcard/DCIM /sdcard/Pictures /sdcard/Movies /sdcard/Download -maxdepth 4 -type f \\( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' -o -name '*.webp' -o -name '*.mp4' -o -name '*.mkv' -o -name '*.mov' \\) 2>/dev/null | grep -v '/\\.' | while read -r f; do stat -c '%s|%Y|%n' \"\$f\"; done"
+        val out = executeShell(cmd)
+        val list = mutableListOf<RemoteMediaItem>()
 
         out.lines().forEach { line ->
             val trim = line.trim()
-            if (trim.startsWith("pkg=")) {
-                currentPkg = trim.substringAfter("pkg=").substringBefore(" ")
-            } else if (trim.startsWith("android.title=")) {
-                currentTitle = trim.substringAfter("android.title=").removeSurrounding("String (", ")")
-            } else if (trim.startsWith("android.text=")) {
-                currentText = trim.substringAfter("android.text=").removeSurrounding("String (", ")")
-                if (currentPkg.isNotEmpty() && (currentTitle.isNotEmpty() || currentText.isNotEmpty())) {
-                    items.add(NotificationItem(pkg = currentPkg, title = currentTitle, text = currentText))
-                    currentTitle = ""
-                    currentText = ""
+            if (trim.contains('|')) {
+                val parts = trim.split('|', limit = 3)
+                if (parts.size == 3) {
+                    val size = parts[0].toLongOrNull() ?: 0L
+                    val epochSec = parts[1].toLongOrNull() ?: 0L
+                    val path = parts[2].trim()
+                    if (path.isNotEmpty() && size > 0) {
+                        val name = path.substringAfterLast('/')
+                        val isVideo = path.endsWith(".mp4", ignoreCase = true) ||
+                                      path.endsWith(".mkv", ignoreCase = true) ||
+                                      path.endsWith(".mov", ignoreCase = true)
+                        val category = when {
+                            path.contains("/DCIM", ignoreCase = true) || path.contains("Camera", ignoreCase = true) -> "Camera"
+                            path.contains("Screenshot", ignoreCase = true) -> "Screenshots"
+                            isVideo || path.contains("/Movies", ignoreCase = true) -> "Videos"
+                            path.contains("/Download", ignoreCase = true) -> "Downloads"
+                            else -> "Pictures"
+                        }
+                        list.add(
+                            RemoteMediaItem(
+                                path = path,
+                                name = name,
+                                size = size,
+                                timestamp = epochSec * 1000L,
+                                isVideo = isVideo,
+                                category = category
+                            )
+                        )
+                    }
                 }
             }
         }
-        items
+        list.sortedByDescending { it.timestamp }
+    }
+
+    suspend fun deleteRemoteMedia(path: String): Boolean = withContext(Dispatchers.IO) {
+        executeShell("rm -f \"$path\"")
+        executeShell("content delete --uri content://media/external/file --where \"_data='$path'\" 2>/dev/null")
+        true
     }
 
     // Remote Navigation and Control
@@ -516,19 +615,92 @@ object AdbManager {
     }
 
     suspend fun sendText(text: String): Boolean = withContext(Dispatchers.IO) {
-        val sanitized = text.replace(" ", "%s").replace("'", "\\'")
-        executeShell("input text '$sanitized'")
+        try {
+            val sanitized = text.replace(" ", "%s")
+                .replace("'", "\\'")
+                .replace("\"", "\\\"")
+                .replace("&", "\\&")
+                .replace("<", "\\<")
+                .replace(">", "\\>")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace(";", "\\;")
+            executeShell("input text '$sanitized'")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "sendText error", e)
+            false
+        }
+    }
+
+    suspend fun triggerSearch(): Boolean = withContext(Dispatchers.IO) {
+        executeShell("am start -a android.intent.action.WEB_SEARCH 2>/dev/null || input keyevent 84 || am start -a android.intent.action.ASSIST")
         true
+    }
+
+    private suspend fun ensureClipBinaryDeployed(): Boolean = withContext(Dispatchers.IO) {
+        val kadb = activeKadb ?: return@withContext false
+        try {
+            val check = executeShell("ls -l /data/local/tmp/banaclip.jar 2>/dev/null")
+            if (check.contains("banaclip.jar") && !check.contains("No such file")) {
+                return@withContext true
+            }
+
+            val ctx = appContext ?: return@withContext false
+            val localTmp = File(ctx.cacheDir, "banaclip.jar")
+            ctx.assets.open("banaclip.jar").use { input ->
+                localTmp.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            if (localTmp.exists()) {
+                val pushed = pushFile(localTmp, "/data/local/tmp/banaclip.jar")
+                executeShell("chmod 644 /data/local/tmp/banaclip.jar")
+                return@withContext pushed
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed deploying banaclip.jar", e)
+        }
+        false
     }
 
     suspend fun getClipboard(): String = withContext(Dispatchers.IO) {
-        executeShell("cmd clipboard get").trim()
+        try {
+            ensureClipBinaryDeployed()
+            val out = executeShell("CLASSPATH=/data/local/tmp/banaclip.jar app_process /data/local/tmp com.baner.clip.ClipRunner get")
+            if (out.isNotEmpty() && !out.contains("Error", ignoreCase = true) && !out.contains("Exception", ignoreCase = true)) {
+                return@withContext out
+            }
+
+            // Fallback for systems that support cmd clipboard
+            val legacyOut = executeShell("cmd clipboard get 2>/dev/null").trim()
+            if (legacyOut.isNotEmpty() && !legacyOut.contains("No shell command", ignoreCase = true) && !legacyOut.contains("error", ignoreCase = true)) {
+                return@withContext legacyOut
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "getClipboard failed", e)
+        }
+        ""
     }
 
     suspend fun setClipboard(text: String): Boolean = withContext(Dispatchers.IO) {
-        val sanitized = text.replace("'", "\\'")
-        executeShell("cmd clipboard set '$sanitized'")
-        true
+        try {
+            ensureClipBinaryDeployed()
+            val b64 = android.util.Base64.encodeToString(text.toByteArray(Charsets.UTF_8), android.util.Base64.NO_WRAP)
+            val res = executeShell("CLASSPATH=/data/local/tmp/banaclip.jar app_process /data/local/tmp com.baner.clip.ClipRunner setb64 '$b64'").trim()
+            if (res.contains("OK")) {
+                return@withContext true
+            }
+
+            // Fallback for older legacy devices
+            val escaped = text.replace("\\", "\\\\").replace("\"", "\\\"").replace("`", "\\`").replace("$", "\\$")
+            val cmd = "cmd clipboard set text \"$escaped\" 2>/dev/null || service call clipboard 2 s16 \"$escaped\""
+            executeShell(cmd)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "setClipboard error", e)
+            false
+        }
     }
 
     suspend fun toggleWifi(enable: Boolean): Boolean = withContext(Dispatchers.IO) {
@@ -564,6 +736,36 @@ object AdbManager {
             } else null
         } catch (e: Exception) {
             Log.e(TAG, "Screenshot capture failed", e)
+            null
+        }
+    }
+
+    suspend fun saveScreenshotToGallery(context: android.content.Context, bitmap: Bitmap): android.net.Uri? = withContext(Dispatchers.IO) {
+        try {
+            val filename = "banADB_${System.currentTimeMillis()}.png"
+            val contentValues = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, filename)
+                put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png")
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/banADB")
+                    put(android.provider.MediaStore.Images.Media.IS_PENDING, 1)
+                }
+            }
+            val resolver = context.contentResolver
+            val uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            if (uri != null) {
+                resolver.openOutputStream(uri)?.use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    contentValues.clear()
+                    contentValues.put(android.provider.MediaStore.Images.Media.IS_PENDING, 0)
+                    resolver.update(uri, contentValues, null, null)
+                }
+                uri
+            } else null
+        } catch (e: Exception) {
+            Log.e(TAG, "saveScreenshotToGallery failed", e)
             null
         }
     }

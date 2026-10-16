@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.baner.banadb.data.model.ConnectionState
@@ -37,13 +39,23 @@ fun HomeScreen(
     val context = LocalContext.current
     val connectionState by viewModel.connectionState.collectAsState()
     val savedDevices by viewModel.savedDevices.collectAsState()
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "BanaADB",
+                title = "banADB",
                 connectionState = connectionState,
-                onDisconnect = { viewModel.disconnect() }
+                onDisconnect = { viewModel.disconnect() },
+                actions = {
+                    IconButton(onClick = { showAboutDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "About banADB",
+                            tint = TextSecondary
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -51,8 +63,8 @@ fun HomeScreen(
                 onClick = onOpenPairing,
                 containerColor = BananaGold,
                 contentColor = BackgroundDark,
-                icon = { Icon(Icons.Default.Add, "Pair") },
-                text = { Text("Pair New Device", fontWeight = FontWeight.Bold) }
+                icon = { Icon(Icons.Default.Add, "Pair", tint = BackgroundDark) },
+                text = { Text("Pair New Device", color = BackgroundDark, fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -77,7 +89,11 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f, fill = false)
+                                    .padding(end = 8.dp)
+                            ) {
                                 Text("Connection Status", color = TextSecondary, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 when (val state = connectionState) {
@@ -257,7 +273,16 @@ fun HomeScreen(
                     )
                 }
             }
+
+            // Bottom clearance for floating action button
+            item {
+                Spacer(modifier = Modifier.height(96.dp))
+            }
         }
+    }
+
+    if (showAboutDialog) {
+        AboutDialog(onDismiss = { showAboutDialog = false })
     }
 }
 
@@ -305,34 +330,58 @@ private fun SavedDeviceCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(SurfaceDark),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.PhoneAndroid, contentDescription = null, tint = BananaGold)
+                    Icon(Icons.Default.PhoneAndroid, contentDescription = null, tint = BananaGold, modifier = Modifier.size(22.dp))
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(device.name, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                    Text("${device.ip}:${device.port}", color = TextSecondary, fontSize = 13.sp)
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f, fill = false)) {
+                    Text(
+                        device.name,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        "${device.ip}:${device.port}",
+                        color = TextSecondary,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Button(
                     onClick = onConnect,
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false)
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = StatusError.copy(alpha = 0.8f))
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = StatusError.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
                 }
             }
         }

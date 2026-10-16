@@ -17,7 +17,7 @@ class BanaAdbApplication : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "BanaADB Connection Service",
+                "banADB Connection Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Keeps wireless ADB connection active"

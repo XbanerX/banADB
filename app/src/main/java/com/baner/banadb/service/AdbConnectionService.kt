@@ -53,7 +53,7 @@ class AdbConnectionService : Service() {
         )
 
         return NotificationCompat.Builder(this, BanaAdbApplication.CHANNEL_ID)
-            .setContentTitle("BanaADB Connected: $deviceName")
+            .setContentTitle("banADB Connected: $deviceName")
             .setContentText("Active session with $ip")
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentIntent(pendingIntent)

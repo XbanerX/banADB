@@ -92,8 +92,8 @@ fun AppManagerScreen(
                 onClick = { apkPickerLauncher.launch("*/*") },
                 containerColor = BananaGold,
                 contentColor = BackgroundDark,
-                icon = { Icon(Icons.Default.UploadFile, contentDescription = null) },
-                text = { Text("Install APK", fontWeight = FontWeight.Bold) }
+                icon = { Icon(Icons.Default.UploadFile, contentDescription = null, tint = BackgroundDark) },
+                text = { Text("Install APK", color = BackgroundDark, fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -372,7 +372,7 @@ fun AppManagerScreen(
     if (!isOperationLoading && operationStatus != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearOperationStatus() },
-            title = { Text("BanaADB Status", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = { Text("banADB Status", color = BananaGold, fontWeight = FontWeight.Bold) },
             text = { Text(operationStatus ?: "", color = TextPrimary, fontSize = 14.sp) },
             confirmButton = {
                 Button(

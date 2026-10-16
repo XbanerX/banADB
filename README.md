@@ -1,6 +1,6 @@
-# BanaADB - Wireless ADB Remote Control
+# banADB - Wireless & Autonomous ADB Cockpit
 
-Una aplicación nativa moderna para Android construida con **Kotlin**, **Jetpack Compose** y el protocolo puro en Kotlin **KADB** (`com.flyfishxu:kadb`). Diseñada con un tema visual personalizado **Cyber Amber / Banana Gold** y fondo **Deep Slate**.
+Una aplicación nativa moderna para Android construida con **Kotlin**, **Jetpack Compose** y el protocolo puro en Kotlin **KADB** (`com.flyfishxu:kadb`). Diseñada con un tema visual de alto rendimiento **Cyber Cyan** y fondo **Deep Slate**.
 
 ## 📱 Características Principales
 
@@ -71,5 +71,15 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleDebug
 
 ### Instalar en un teléfono conectado por USB o Wi-Fi:
 ```bash
-adb install -r /home/baner/Projects/banadb/app/build/outputs/apk/debug/app-debug.apk
+adb install -r banadb.apk
 ```
+
+---
+
+## 📄 Licencia y Créditos
+
+- **Versión:** 1.0.0 (Build 1)
+- **Autor:** baner
+- **Contacto:** [bandroid@banerxus.com](mailto:bandroid@banerxus.com)
+- **Licencia:** [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE)
+

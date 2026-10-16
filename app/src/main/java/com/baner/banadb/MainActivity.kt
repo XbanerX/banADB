@@ -6,14 +6,22 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.screens.*
-import com.baner.banadb.ui.theme.BackgroundDark
-import com.baner.banadb.ui.theme.BanaAdbTheme
+import com.baner.banadb.ui.theme.*
 import com.baner.banadb.ui.viewmodel.AdbViewModel
 
 class MainActivity : ComponentActivity() {
@@ -23,33 +31,40 @@ class MainActivity : ComponentActivity() {
         setContent {
             BanaAdbTheme {
                 val viewModel: AdbViewModel = viewModel()
+                var showSplash by remember { mutableStateOf(true) }
                 var currentRoute by remember { mutableStateOf("home") }
                 var showPairingDialog by remember { mutableStateOf(false) }
+                var showExitAppDialog by remember { mutableStateOf(false) }
                 val connectionState by viewModel.connectionState.collectAsState()
 
-                // Auto-transition to Remote Control screen when connected
-                LaunchedEffect(connectionState) {
-                    if (connectionState is ConnectionState.Connected && currentRoute == "home") {
-                        currentRoute = "control"
-                    } else if (connectionState !is ConnectionState.Connected && currentRoute != "home") {
-                        currentRoute = "home"
+                if (showSplash) {
+                    SplashScreen(onTimeout = { showSplash = false })
+                } else {
+                    // Auto-transition to Remote Control screen when connected
+                    LaunchedEffect(connectionState) {
+                        if (connectionState is ConnectionState.Connected && currentRoute == "home") {
+                            currentRoute = "control"
+                        } else if (connectionState !is ConnectionState.Connected && currentRoute != "home") {
+                            currentRoute = "home"
+                        }
                     }
-                }
 
-                val parentRoute = if (connectionState is ConnectionState.Connected) "control" else "home"
+                    val parentRoute = if (connectionState is ConnectionState.Connected) "control" else "home"
 
-                BackHandler(enabled = currentRoute != "home") {
-                    if (currentRoute == "control") {
-                        currentRoute = "home"
-                    } else {
+                    // Exit App confirmation on Home screen
+                    BackHandler(enabled = currentRoute == "home") {
+                        showExitAppDialog = true
+                    }
+
+                    // Sub-screen navigation back to parentRoute (RemoteControl handles its own back)
+                    BackHandler(enabled = currentRoute != "home" && currentRoute != "control") {
                         currentRoute = parentRoute
                     }
-                }
 
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = BackgroundDark
-                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = BackgroundDark
+                    ) {
                     when (currentRoute) {
                         "home" -> {
                             HomeScreen(
@@ -108,6 +123,18 @@ class MainActivity : ComponentActivity() {
                                 onBack = { currentRoute = parentRoute }
                             )
                         }
+                        "gallery" -> {
+                            GalleryScreen(
+                                viewModel = viewModel,
+                                onBack = { currentRoute = parentRoute }
+                            )
+                        }
+                        "notifications" -> {
+                            NotificationMirrorScreen(
+                                viewModel = viewModel,
+                                onBack = { currentRoute = parentRoute }
+                            )
+                        }
                     }
 
                     if (showPairingDialog) {
@@ -116,8 +143,38 @@ class MainActivity : ComponentActivity() {
                             onDismiss = { showPairingDialog = false }
                         )
                     }
+
+                    if (showExitAppDialog) {
+                        val activity = LocalContext.current as? ComponentActivity
+                        AlertDialog(
+                            onDismissRequest = { showExitAppDialog = false },
+                            icon = { Icon(Icons.Default.ExitToApp, contentDescription = null, tint = BananaGold, modifier = Modifier.size(32.dp)) },
+                            title = { Text("Exit banADB?", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+                            text = { Text("Are you sure you want to close banADB?", color = TextSecondary, fontSize = 14.sp) },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showExitAppDialog = false
+                                        activity?.finish()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = StatusError),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("Exit", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showExitAppDialog = false }) {
+                                    Text("Cancel", color = TextSecondary)
+                                }
+                            },
+                            containerColor = SurfaceDark,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                    }
                 }
             }
         }
     }
+}
 }

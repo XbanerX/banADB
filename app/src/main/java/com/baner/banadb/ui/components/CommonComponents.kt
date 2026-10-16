@@ -6,9 +6,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,18 +18,28 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
+import kotlinx.coroutines.delay
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.theme.*
 
@@ -43,12 +55,37 @@ fun BanaTopBar(
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = BananaGold,
-                    fontWeight = FontWeight.Bold
-                )
+                if (title.equals("banADB", ignoreCase = true) || title.equals("BanaADB", ignoreCase = true)) {
+                    if (navigationIcon == null) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_banadb_logo),
+                            contentDescription = "banADB Logo",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(RoundedCornerShape(7.dp))
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle(color = TextPrimary, fontWeight = FontWeight.Bold)) {
+                                append("ban")
+                            }
+                            withStyle(SpanStyle(color = CyberCyan, fontWeight = FontWeight.ExtraBold)) {
+                                append("ADB")
+                            }
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = 20.sp
+                    )
+                } else {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 if (navigationIcon == null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     // Status pill
@@ -396,28 +433,48 @@ fun VirtualTrackpad(
 @Composable
 fun PinInputBoxes(
     pinLength: Int = 6,
+    onPinChange: ((String) -> Unit)? = null,
     onPinComplete: (String) -> Unit
 ) {
     var pin by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(contentAlignment = Alignment.Center) {
+    LaunchedEffect(Unit) {
+        delay(150)
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.clickable { focusRequester.requestFocus() }
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
+                },
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             for (i in 0 until pinLength) {
                 val char = pin.getOrNull(i)?.toString() ?: ""
                 val isSelected = pin.length == i
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(SurfaceCard)
+                        .weight(1f)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(SurfaceDark)
                         .border(
                             width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) BananaGold else TextMuted.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(8.dp)
+                            color = if (isSelected) CyberCyan else SurfaceCardHover,
+                            shape = RoundedCornerShape(10.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -431,30 +488,41 @@ fun PinInputBoxes(
             }
         }
 
-        // Hidden input
+        // Hidden input spanning entire row for touch and IME handling
         TextField(
             value = pin,
             onValueChange = {
                 if (it.length <= pinLength && it.all { c -> c.isDigit() }) {
                     pin = it
+                    onPinChange?.invoke(it)
                     if (it.length == pinLength) {
                         onPinComplete(it)
                     }
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (pin.length == pinLength) {
+                        onPinComplete(pin)
+                    }
+                }
+            ),
             modifier = Modifier
-                .size(1.dp)
+                .fillMaxWidth()
+                .height(52.dp)
+                .alpha(0.01f)
                 .focusRequester(focusRequester),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                cursorColor = Color.Transparent
+                cursorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             )
         )
-    }
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
     }
 }

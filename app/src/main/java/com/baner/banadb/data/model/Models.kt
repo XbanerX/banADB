@@ -14,7 +14,9 @@ data class DiscoveryDevice(
     val name: String,
     val serviceType: String,
     val isPaired: Boolean = false
-)
+) {
+    val isPairing: Boolean get() = serviceType.contains("pairing", ignoreCase = true)
+}
 
 data class SavedDevice(
     val id: String,
@@ -69,11 +71,24 @@ data class RunningProcess(
 )
 
 data class NotificationItem(
+    val id: String = "",
+    val key: String = "",
     val pkg: String,
     val title: String,
     val text: String,
     val subText: String = "",
-    val postTime: String = ""
+    val postTime: String = "",
+    val category: String = "System",
+    val timestampMs: Long = 0L
+)
+
+data class RemoteMediaItem(
+    val path: String,
+    val name: String,
+    val size: Long,
+    val timestamp: Long,
+    val isVideo: Boolean,
+    val category: String = "Pictures"
 )
 
 data class ScriptItem(

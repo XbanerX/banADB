@@ -2,13 +2,16 @@ package com.baner.banadb.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Brand Colors - BanaADB Cyber Amber & Deep Slate
-val BananaGold = Color(0xFFF5B800)
-val BananaGoldLight = Color(0xFFFCD34D)
-val BananaGoldDark = Color(0xFFB45309)
+// Brand Colors - BanaADB Cyber Cyan Accent & Deep Slate
+val CyberCyan = Color(0xFF00E5FF)
+val CyberCyanLight = Color(0xFF80F3FF)
+val CyberCyanDark = Color(0xFF0098B3)
 
-val CyberCyan = Color(0xFF06B6D4)
-val CyberCyanLight = Color(0xFF67E8F9)
+// Universal accent aliases (maps BananaGold to Cyber Cyan throughout the app)
+val BananaGold = CyberCyan
+val BananaGoldLight = CyberCyanLight
+val BananaGoldDark = CyberCyanDark
+
 val NeonEmerald = Color(0xFF10B981)
 
 val BackgroundDark = Color(0xFF090D16)
@@ -28,5 +31,5 @@ val TextMuted = Color(0xFF64748B)
 
 val StatusConnected = Color(0xFF10B981)
 val StatusDisconnected = Color(0xFF64748B)
-val StatusPairing = Color(0xFFF59E0B)
+val StatusPairing = CyberCyan
 val StatusError = Color(0xFFEF4444)

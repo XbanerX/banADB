@@ -63,8 +63,8 @@ fun ScriptRunnerScreen(
                 onClick = { showAddScriptDialog = true },
                 containerColor = BananaGold,
                 contentColor = BackgroundDark,
-                icon = { Icon(Icons.Default.Add, "Add Script") },
-                text = { Text("New Script", fontWeight = FontWeight.Bold) }
+                icon = { Icon(Icons.Default.Add, "Add Script", tint = BackgroundDark) },
+                text = { Text("New Script", color = BackgroundDark, fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -102,12 +102,12 @@ fun ScriptRunnerScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Surface(
                                         shape = RoundedCornerShape(6.dp),
-                                        color = if (script.isPreset) CyberCyan.copy(alpha = 0.2f) else BananaGold.copy(alpha = 0.2f),
+                                        color = if (script.isPreset) CyberCyan.copy(alpha = 0.2f) else NeonEmerald.copy(alpha = 0.2f),
                                         modifier = Modifier.padding(end = 8.dp)
                                     ) {
                                         Text(
                                             text = script.category.uppercase(),
-                                            color = if (script.isPreset) CyberCyan else BananaGold,
+                                            color = if (script.isPreset) CyberCyan else NeonEmerald,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
