@@ -1,5 +1,9 @@
 package com.baner.banadb.ui.screens
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -74,7 +78,45 @@ fun PairingDialog(
     var directPortInput by remember { mutableStateOf("5555") }
 
     // Localhost fields
-    var localPortInput by remember { mutableStateOf("5555") }
+    val isLocalPairingRunning by viewModel.localPairingState.isRunning.collectAsState()
+    val discoveredPairingPort by viewModel.localPairingState.discoveredPairingPort.collectAsState()
+    val discoveredConnectPort by viewModel.localPairingState.discoveredConnectPort.collectAsState()
+    val localStatusMsg by viewModel.localPairingState.statusMessage.collectAsState()
+    val isLocalPairingInProgress by viewModel.localPairingState.isPairingInProgress.collectAsState()
+    val localPairingError by viewModel.localPairingState.lastError.collectAsState()
+    val isLocalScanning by viewModel.isLocalScanning.collectAsState()
+
+    var localPairingPortInput by remember { mutableStateOf("") }
+    var localPairingCodeInput by remember { mutableStateOf("") }
+    var localConnectionPortInput by remember { mutableStateOf("") }
+    var localDirectPortInput by remember { mutableStateOf("5555") }
+    var selectedLocalIp by remember { mutableStateOf(viewModel.getPreferredLocalIp()) }
+    var showManualLocalPairing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(discoveredPairingPort) {
+        if (discoveredPairingPort != null && localPairingPortInput.isBlank()) {
+            localPairingPortInput = discoveredPairingPort.toString()
+        }
+    }
+
+    LaunchedEffect(discoveredConnectPort) {
+        if (discoveredConnectPort != null) {
+            if (localConnectionPortInput.isBlank()) {
+                localConnectionPortInput = discoveredConnectPort.toString()
+            }
+            if (localDirectPortInput == "5555") {
+                localDirectPortInput = discoveredConnectPort.toString()
+            }
+        }
+    }
+
+    LaunchedEffect(discoveredDevices) {
+        val localIps = viewModel.getLocalIpv4Addresses() + "127.0.0.1"
+        val localService = discoveredDevices.firstOrNull { !it.isPairing && (localIps.contains(it.ip) || it.ip.startsWith("127.")) }
+        if (localService != null && localDirectPortInput == "5555") {
+            localDirectPortInput = localService.port.toString()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.startDiscovery()
@@ -767,78 +809,117 @@ fun PairingDialog(
                     }
                 }
 
-                2 -> { // Local (Host) (Matching Screenshot 5)
+                2 -> { // Local (Host) - Matching User Screenshots & Automatic Notification Flow
+                    val isConnected = connectionState is ConnectionState.Connected
+                    val connectedDevName = if (connectionState is ConnectionState.Connected) (connectionState as ConnectionState.Connected).deviceName else ""
+                    val connectedHost = if (connectionState is ConnectionState.Connected) (connectionState as ConnectionState.Connected).ip else ""
+                    val connectedPort = if (connectionState is ConnectionState.Connected) (connectionState as ConnectionState.Connected).port else 0
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        // Card 1: Local ADB Status Card
-                        val isLocalConnected = (connectionState is ConnectionState.Connected) &&
-                                (viewModel.savedDevices.value.any { it.ip == "127.0.0.1" || it.ip == "localhost" })
+                        // Card 1: Local ADB Status Card (Matching Screenshot 1)
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = SurfaceCard),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.Info, contentDescription = null, tint = if (isLocalConnected) StatusConnected else TextMuted)
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(SurfaceCardHover),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = if (isConnected) StatusConnected else TextMuted,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
                                 Spacer(modifier = Modifier.width(14.dp))
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Local ADB: " + if (isLocalConnected) "Connected" else "Disconnected",
+                                        text = if (isConnected) "Connected: $connectedDevName" else "Local ADB: Disconnected",
                                         color = TextPrimary,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp
+                                        fontSize = 15.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
+                                    Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = if (isLocalConnected) "Local host debugging active" else "Disconnected",
-                                        color = TextMuted,
-                                        fontSize = 12.sp
+                                        text = if (isConnected) "$connectedHost:$connectedPort" else "Disconnected",
+                                        color = if (isConnected) CyberCyan else TextSecondary,
+                                        fontSize = 13.sp
                                     )
+                                }
+                                if (isConnected) {
+                                    OutlinedButton(
+                                        onClick = { viewModel.disconnect() },
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                    ) {
+                                        Text("Disconnect", fontSize = 12.sp)
+                                    }
                                 }
                             }
                         }
 
-                        // Card 2: Direct Connect to Localhost Card
+                        // Card 2: Direct Connect to Localhost (Matching Screenshot 1)
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(1.dp, BananaGold.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Usb, contentDescription = null, tint = BananaGold, modifier = Modifier.size(22.dp))
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text("Direct Connect to Localhost", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                    Icon(
+                                        imageVector = Icons.Default.Usb,
+                                        contentDescription = null,
+                                        tint = CyberCyan,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Direct Connect to Localhost",
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
                                 }
 
                                 Text(
-                                    text = "Developer Options -> Wireless Debugging shows: 'IP address & Port: 192.168.x.x:PORT'. Enter that PORT below:",
+                                    text = "Developer Options -> Wireless Debugging shows:\n'IP address & Port: 192.168.x.x:PORT'. Enter that PORT below:",
                                     color = TextSecondary,
                                     fontSize = 12.sp,
-                                    lineHeight = 17.sp
+                                    lineHeight = 16.sp
                                 )
 
                                 OutlinedTextField(
-                                    value = localPortInput,
-                                    onValueChange = { localPortInput = it },
+                                    value = localDirectPortInput,
+                                    onValueChange = { localDirectPortInput = it },
                                     label = { Text("Connection Port (e.g. 38491)") },
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = BananaGold,
-                                        focusedLabelColor = BananaGold
+                                        focusedBorderColor = CyberCyan,
+                                        focusedLabelColor = CyberCyan
                                     )
                                 )
 
@@ -848,105 +929,484 @@ fun PairingDialog(
                                 ) {
                                     Button(
                                         onClick = {
-                                            val p = localPortInput.trim().toIntOrNull() ?: 5555
-                                            viewModel.connect("127.0.0.1", p)
+                                            val p = localDirectPortInput.trim().toIntOrNull() ?: 5555
+                                            viewModel.connect(selectedLocalIp, p)
                                         },
-                                        modifier = Modifier.weight(1f).height(46.dp),
-                                        shape = RoundedCornerShape(10.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(46.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = CyberCyan)
                                     ) {
                                         Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold)
                                     }
 
                                     OutlinedButton(
                                         onClick = {
-                                            // Scan common adb ports on localhost (5555, 37000-45000)
-                                            Toast.makeText(context, "Scanning local ADB services...", Toast.LENGTH_SHORT).show()
-                                            viewModel.startDiscovery()
+                                            viewModel.scanAndConnectLocal { detectedPort ->
+                                                localDirectPortInput = detectedPort.toString()
+                                            }
                                         },
-                                        modifier = Modifier.weight(1f).height(46.dp),
-                                        shape = RoundedCornerShape(10.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = BananaGold)
+                                        enabled = !isLocalScanning,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(46.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = CyberCyan),
+                                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                                            brush = androidx.compose.ui.graphics.SolidColor(CyberCyan.copy(alpha = 0.5f))
+                                        )
                                     ) {
-                                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Auto-Scan", fontSize = 13.sp)
+                                        if (isLocalScanning) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(16.dp),
+                                                color = CyberCyan,
+                                                strokeWidth = 2.dp
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text("Scanning...", color = CyberCyan, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                        } else {
+                                            Icon(Icons.Default.Refresh, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(16.dp))
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text("Auto-Scan", color = CyberCyan, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        // Section 3: Discovered Local ADB Services
-                        Text("Discovered Local ADB Services:", color = TextSecondary, fontWeight = FontWeight.Medium, fontSize = 13.sp)
-                        val localServices = discoveredDevices.filter { it.ip == "127.0.0.1" || it.ip.startsWith("192.168.") }
-                        if (localServices.isNotEmpty()) {
-                            localServices.take(2).forEach { dev ->
+                        // Section 3: Discovered Local ADB Services (Matching Screenshot 1 & 2)
+                        val localServices = discoveredDevices.filter { !it.isPairing }
+                        Text(
+                            text = "Discovered Local ADB Services:",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+                        )
+
+                        if (localServices.isEmpty()) {
+                            Text(
+                                text = "No local services detected yet. Tap 'Auto-Scan' or turn ON Wireless Debugging.",
+                                color = TextMuted,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                            )
+                        } else {
+                            localServices.forEach { service ->
                                 Card(
                                     shape = RoundedCornerShape(14.dp),
                                     colors = CardDefaults.cardColors(containerColor = SurfaceCard),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(14.dp).fillMaxWidth(),
+                                        modifier = Modifier
+                                            .padding(horizontal = 14.dp, vertical = 12.dp)
+                                            .fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Row(
+                                            verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .padding(end = 12.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .padding(end = 8.dp)
                                         ) {
-                                            Icon(Icons.Default.PhoneAndroid, contentDescription = null, tint = CyberCyan)
+                                            Icon(
+                                                Icons.Default.PhoneAndroid,
+                                                contentDescription = null,
+                                                tint = CyberCyan,
+                                                modifier = Modifier.size(24.dp)
+                                            )
                                             Spacer(modifier = Modifier.width(12.dp))
-                                            Column(modifier = Modifier.weight(1f, fill = false)) {
-                                                Text("${dev.ip}:${dev.port}", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                                Text(dev.name.ifEmpty { "adb-service" }, color = CyberCyan, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            Column {
+                                                Text(
+                                                    text = "${service.ip}:${service.port}",
+                                                    color = TextPrimary,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 14.sp
+                                                )
+                                                Text(
+                                                    text = service.name,
+                                                    color = CyberCyan,
+                                                    fontSize = 12.sp,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
                                             }
                                         }
 
                                         Button(
-                                            onClick = { viewModel.connect(dev.ip, dev.port) },
+                                            onClick = {
+                                                viewModel.connect(service.ip, service.port)
+                                            },
                                             shape = RoundedCornerShape(10.dp),
-                                            colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
-                                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                                            colors = ButtonDefaults.buttonColors(containerColor = CyberCyan),
+                                            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 6.dp)
                                         ) {
-                                            Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                                            Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // Section 4: Pair Local Device (Automatic via Notification)
+                        // Card 4: Pair Local Device (Automatic via Notification) (Matching Screenshot 2)
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isLocalPairingRunning) CyberCyan else Color.Transparent,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text("Pair Local Device (Automatic via Notification)", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("1. Tap 'Start Service' below to enable background pairing listener", color = TextSecondary, fontSize = 12.sp)
-                                Text("2. When prompted in notifications, enter the pairing code from Wireless Debugging", color = TextSecondary, fontSize = 12.sp)
+                                Text(
+                                    text = "Pair Local Device (Automatic via Notification)",
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                )
 
-                                Button(
+                                Text(
+                                    text = "1. Tap 'Start Service' below.\n" +
+                                           "2. Tap 'Open Developer Options' -> 'Wireless Debugging'.\n" +
+                                           "3. Tap 'Pair device with pairing code'.\n" +
+                                           "4. Enter the 6-digit code in notification and hit Send!\n" +
+                                           "5. When paired, tap notification or return here to connect.",
+                                    color = TextSecondary,
+                                    fontSize = 12.sp,
+                                    lineHeight = 18.sp
+                                )
+
+                                if (isLocalPairingRunning) {
+                                    Card(
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = CardDefaults.cardColors(containerColor = BackgroundDark),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(8.dp)
+                                                        .clip(CircleShape)
+                                                        .background(StatusConnected)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Service Active: $localStatusMsg",
+                                                    color = CyberCyan,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                            if (discoveredPairingPort != null) {
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = "Discovered Pairing Port: $discoveredPairingPort",
+                                                    color = BananaGold,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                val canOverlay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) Settings.canDrawOverlays(context) else true
+
+                                if (!isLocalPairingRunning) {
+                                    // Start Service Button
+                                    Button(
+                                        onClick = {
+                                            viewModel.startLocalPairingService(context)
+                                            Toast.makeText(context, "Pairing service started! Check notifications.", Toast.LENGTH_SHORT).show()
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = CyberCyan)
+                                    ) {
+                                        Icon(Icons.Default.PlayArrow, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(18.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Start Local Pairing Service", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    }
+                                } else {
+                                    // Primary Button immediately transforms to Open Developer Options
+                                    Button(
+                                        onClick = {
+                                            try {
+                                                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).apply {
+                                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                }
+                                                context.startActivity(intent)
+                                            } catch (_: Exception) {
+                                                try {
+                                                    val intent = Intent(Settings.ACTION_SETTINGS).apply {
+                                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                    }
+                                                    context.startActivity(intent)
+                                                } catch (_: Exception) {
+                                                    Toast.makeText(context, "Could not open Settings", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = CyberCyan)
+                                    ) {
+                                        Icon(Icons.Default.Settings, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(18.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Open Developer Options", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    }
+
+                                    // Secondary Stop Service Button
+                                    OutlinedButton(
+                                        onClick = {
+                                            viewModel.stopLocalPairingService(context)
+                                            Toast.makeText(context, "Pairing service stopped", Toast.LENGTH_SHORT).show()
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(42.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError),
+                                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                                            brush = androidx.compose.ui.graphics.SolidColor(StatusError.copy(alpha = 0.5f))
+                                        )
+                                    ) {
+                                        Icon(Icons.Default.Stop, contentDescription = null, tint = StatusError, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Stop Service", color = StatusError, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                    }
+                                }
+
+                                // Overlay permission button for Auto-Return
+                                OutlinedButton(
                                     onClick = {
-                                        Toast.makeText(context, "Local pairing listener active", Toast.LENGTH_SHORT).show()
-                                        viewModel.startDiscovery()
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                            try {
+                                                val intent = Intent(
+                                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                                    Uri.parse("package:${context.packageName}")
+                                                ).apply {
+                                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                }
+                                                context.startActivity(intent)
+                                            } catch (_: Exception) {
+                                                context.startActivity(Intent(Settings.ACTION_SETTINGS))
+                                            }
+                                        }
                                     },
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = SurfaceCardHover),
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = if (canOverlay) StatusConnected else CyberCyan
+                                    ),
+                                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                                        brush = androidx.compose.ui.graphics.SolidColor(
+                                            if (canOverlay) StatusConnected.copy(alpha = 0.5f) else CyberCyan.copy(alpha = 0.5f)
+                                        )
+                                    )
                                 ) {
-                                    Icon(Icons.Default.NotificationsActive, contentDescription = null, tint = BananaGold, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Start Discovery Service", color = TextPrimary, fontSize = 13.sp)
+                                    Icon(
+                                        imageVector = if (canOverlay) Icons.Default.CheckCircle else Icons.Default.Layers,
+                                        contentDescription = null,
+                                        tint = if (canOverlay) StatusConnected else CyberCyan,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = if (canOverlay) "Auto-Return to App Enabled" else "Allow Auto-Return to App (Overlay)",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
                                 }
                             }
                         }
+
+                        // Collapsible Manual Local Pairing Section (Fallback)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showManualLocalPairing = !showManualLocalPairing }
+                                .padding(vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = if (showManualLocalPairing) "Hide Manual Local Pairing" else "Manual Local Pairing (Split-Screen)",
+                                    color = BananaGold,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 13.sp
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = if (showManualLocalPairing) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null,
+                                    tint = BananaGold,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+
+                        if (showManualLocalPairing) {
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(1.dp, CyberCyan.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Text("Manual Localhost Pairing", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+
+                                    // IP selection
+                                    Text("Target Interface:", color = TextMuted, fontSize = 11.sp)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val detectedIp = viewModel.getPreferredLocalIp()
+                                        listOf(detectedIp, "127.0.0.1").distinct().forEach { candidateIp ->
+                                            val isSelected = selectedLocalIp == candidateIp
+                                            OutlinedButton(
+                                                onClick = { selectedLocalIp = candidateIp },
+                                                modifier = Modifier.weight(1f).height(36.dp),
+                                                shape = RoundedCornerShape(8.dp),
+                                                colors = ButtonDefaults.outlinedButtonColors(
+                                                    containerColor = if (isSelected) CyberCyan.copy(alpha = 0.15f) else Color.Transparent,
+                                                    contentColor = if (isSelected) CyberCyan else TextSecondary
+                                                ),
+                                                border = ButtonDefaults.outlinedButtonBorder.copy(
+                                                    brush = androidx.compose.ui.graphics.SolidColor(if (isSelected) CyberCyan else SurfaceCardHover)
+                                                ),
+                                                contentPadding = PaddingValues(horizontal = 6.dp)
+                                            ) {
+                                                Text(
+                                                    text = if (candidateIp == "127.0.0.1") "127.0.0.1" else "Wi-Fi: $candidateIp",
+                                                    fontSize = 11.sp,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Inputs: Pairing Port & Pairing Code
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        OutlinedTextField(
+                                            value = localPairingPortInput,
+                                            onValueChange = { localPairingPortInput = it },
+                                            label = { Text("Pairing Port", fontSize = 11.sp) },
+                                            placeholder = { Text("e.g. 38491", fontSize = 11.sp) },
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                            modifier = Modifier.weight(1f),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedBorderColor = CyberCyan,
+                                                focusedLabelColor = CyberCyan
+                                            )
+                                        )
+
+                                        OutlinedTextField(
+                                            value = localPairingCodeInput,
+                                            onValueChange = { localPairingCodeInput = it },
+                                            label = { Text("Pairing Code", fontSize = 11.sp) },
+                                            placeholder = { Text("6 digits", fontSize = 11.sp) },
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                            modifier = Modifier.weight(1f),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedBorderColor = CyberCyan,
+                                                focusedLabelColor = CyberCyan
+                                            )
+                                        )
+                                    }
+
+                                    // Input: Connection Port
+                                    OutlinedTextField(
+                                        value = localConnectionPortInput,
+                                        onValueChange = { localConnectionPortInput = it },
+                                        label = { Text("Connection Port (from main Wireless Debugging screen)") },
+                                        placeholder = { Text("e.g. 41235") },
+                                        singleLine = true,
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = CyberCyan,
+                                            focusedLabelColor = CyberCyan
+                                        )
+                                    )
+
+                                    if (localPairingError != null) {
+                                        Text(
+                                            text = "Error: $localPairingError",
+                                            color = StatusError,
+                                            fontSize = 12.sp
+                                        )
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            val pPort = localPairingPortInput.trim().toIntOrNull()
+                                            val cPort = localConnectionPortInput.trim().toIntOrNull() ?: 5555
+                                            val code = localPairingCodeInput.trim()
+
+                                            if (pPort == null || code.length < 6) {
+                                                Toast.makeText(context, "Enter a valid pairing port and 6-digit code", Toast.LENGTH_SHORT).show()
+                                            } else {
+                                                viewModel.pairLocalDevice(
+                                                    ip = selectedLocalIp,
+                                                    pairingPort = pPort,
+                                                    pairingCode = code,
+                                                    connectionPort = cPort
+                                                ) { success ->
+                                                    if (success) {
+                                                        Toast.makeText(context, "Paired and connected to local device!", Toast.LENGTH_SHORT).show()
+                                                        onDismiss()
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        enabled = !isLocalPairingInProgress,
+                                        modifier = Modifier.fillMaxWidth().height(46.dp),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
+                                    ) {
+                                        if (isLocalPairingInProgress) {
+                                            CircularProgressIndicator(color = BackgroundDark, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("Pairing with Local Device...", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                                        } else {
+                                            Icon(Icons.Default.Check, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(18.dp))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("Pair & Connect Local Device", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }

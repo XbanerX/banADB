@@ -22,9 +22,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.screens.*
 import com.baner.banadb.ui.theme.*
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.baner.banadb.ui.viewmodel.AdbViewModel
 
 class MainActivity : ComponentActivity() {
+    override fun onResume() {
+        super.onResume()
+        val manager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
+        manager?.cancel(com.baner.banadb.service.LocalPairingReceiver.NOTIFICATION_ID_CONNECTED)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,6 +48,18 @@ class MainActivity : ComponentActivity() {
                 var showPairingDialog by remember { mutableStateOf(false) }
                 var showExitAppDialog by remember { mutableStateOf(false) }
                 val connectionState by viewModel.connectionState.collectAsState()
+
+                val permissionLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { /* Result handled */ }
+
+                LaunchedEffect(Unit) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                }
 
                 if (showSplash) {
                     SplashScreen(onTimeout = { showSplash = false })

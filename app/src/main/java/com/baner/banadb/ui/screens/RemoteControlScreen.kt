@@ -60,6 +60,7 @@ fun RemoteControlScreen(
     var activeTopTab by remember { mutableIntStateOf(0) } // 0: Live Control, 1: Terminal
     var toolsExpanded by remember { mutableStateOf(false) }
     var controlMode by remember { mutableIntStateOf(0) } // 0: D-Pad, 1: Touchpad, 2: Numpad
+    var powerUtilitiesExpanded by remember { mutableStateOf(false) }
     var textToSend by remember { mutableStateOf("") }
 
     // Dialog states
@@ -528,26 +529,35 @@ fun RemoteControlScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                ControlButton(icon = Icons.Default.VolumeDown, desc = "Vol -") {
+                                RemoteBtn(
+                                    icon = Icons.Default.VolumeDown,
+                                    label = "Vol -",
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_VOLUME_DOWN)
                                 }
-                                ControlButton(icon = Icons.Default.VolumeMute, desc = "Mute") {
+                                RemoteBtn(
+                                    icon = Icons.Default.VolumeMute,
+                                    label = "Mute",
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_VOLUME_MUTE)
                                 }
-                                ControlButton(icon = Icons.Default.VolumeUp, desc = "Vol +") {
+                                RemoteBtn(
+                                    icon = Icons.Default.VolumeUp,
+                                    label = "Vol +",
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_VOLUME_UP)
-                                }
-                                ControlButton(icon = Icons.Default.PlayArrow, desc = "Play/Pause") {
-                                    viewModel.sendKeyevent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
                                 }
                             }
                         }
 
-                        // Quick Tools row: Search, Notify, Screenshot, Power
+                        // Quick Tools row: Search, Notify, Screenshot
                         Card(
                             shape = RoundedCornerShape(14.dp),
                             colors = CardDefaults.cardColors(containerColor = SurfaceCard),
@@ -556,62 +566,239 @@ fun RemoteControlScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                ControlButton(icon = Icons.Default.Search, desc = "Search") {
-                                    viewModel.triggerRemoteSearch()
-                                    Toast.makeText(context, "Search triggered", Toast.LENGTH_SHORT).show()
+                                RemoteBtn(
+                                    icon = Icons.Default.Search,
+                                    label = "Search",
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    viewModel.sendKeyevent(KeyEvent.KEYCODE_SEARCH)
                                 }
-                                ControlButton(icon = Icons.Default.Notifications, desc = "Notify", tint = CyberCyan) {
+                                RemoteBtn(
+                                    icon = Icons.Default.Notifications,
+                                    label = "Notify",
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     viewModel.executeCommand("cmd statusbar expand-notifications")
                                 }
-                                ControlButton(icon = Icons.Default.CameraAlt, desc = "Screenshot", tint = BananaGold) {
+                                RemoteBtn(
+                                    icon = Icons.Default.CameraAlt,
+                                    label = "Screenshot",
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     Toast.makeText(context, "Capturing screenshot...", Toast.LENGTH_SHORT).show()
                                     viewModel.captureScreenshot { bmp ->
                                         capturedPreviewBitmap = bmp
                                         showScreenshotPreviewDialog = true
                                     }
                                 }
-                                ControlButton(icon = Icons.Default.PowerSettingsNew, desc = "Power", tint = StatusError) {
-                                    showPowerDialog = true
+                            }
+                        }
+
+                        // Power Utilities Card (Expandable)
+                        Card(
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { powerUtilitiesExpanded = !powerUtilitiesExpanded }
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PowerSettingsNew,
+                                        contentDescription = "Power Utilities",
+                                        tint = CyberCyan,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(14.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "Power Utilities",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = TextPrimary
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "Wake, Lock, Power, Brightness & System Shortcuts",
+                                            fontSize = 11.sp,
+                                            color = TextSecondary,
+                                            lineHeight = 15.sp
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = if (powerUtilitiesExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        contentDescription = if (powerUtilitiesExpanded) "Collapse Power Utilities" else "Expand Power Utilities",
+                                        tint = CyberCyan
+                                    )
+                                }
+
+                                AnimatedVisibility(visible = powerUtilitiesExpanded) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 12.dp)
+                                    ) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                                            color = SurfaceCardHover
+                                        )
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        // Row 1: Wake, Lock, Power, Bright+, Bright-
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 6.dp),
+                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            RemoteBtn(
+                                                icon = Icons.Default.WbSunny,
+                                                label = "Wake",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 224")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.Lock,
+                                                label = "Lock",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 223")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.PowerSettingsNew,
+                                                label = "Power",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 26")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.Brightness6,
+                                                label = "Bright+",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 221")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.Brightness5,
+                                                label = "Bright-",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 220")
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(10.dp))
+
+                                        // Row 2: Settings, Voice, Cut, Redo, Undo
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 6.dp),
+                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            RemoteBtn(
+                                                icon = Icons.Default.Settings,
+                                                label = "Settings",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("am start -a android.settings.SETTINGS")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.Mic,
+                                                label = "Voice",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 231")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.ContentCut,
+                                                label = "Cut",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 276")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.Redo,
+                                                label = "Redo",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 283")
+                                            }
+                                            RemoteBtn(
+                                                icon = Icons.Default.Undo,
+                                                label = "Undo",
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                viewModel.executeCommand("input keyevent 284")
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
 
-                        // Text Injection Field
+                        // Keyboard section header
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp, bottom = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            OutlinedTextField(
-                                value = textToSend,
-                                onValueChange = { textToSend = it },
-                                placeholder = { Text("Type text to send remotely...", fontSize = 13.sp) },
-                                singleLine = true,
-                                modifier = Modifier.weight(1f),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = BananaGold,
-                                    unfocusedBorderColor = SurfaceCardHover,
-                                    focusedLabelColor = BananaGold
-                                )
+                            Icon(
+                                imageVector = Icons.Default.Keyboard,
+                                contentDescription = "Keyboard",
+                                tint = CyberCyan,
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Button(
-                                onClick = {
+                            Text(
+                                text = "Keyboard",
+                                color = CyberCyan,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        // Text Injection Field with trailing send button
+                        OutlinedTextField(
+                            value = textToSend,
+                            onValueChange = { textToSend = it },
+                            placeholder = { Text("Type text to send...", color = TextSecondary, fontSize = 13.sp) },
+                            singleLine = true,
+                            trailingIcon = {
+                                IconButton(onClick = {
                                     if (textToSend.isNotEmpty()) {
                                         viewModel.sendText(textToSend)
                                         textToSend = ""
                                     }
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
-                                modifier = Modifier.height(56.dp)
-                            ) {
-                                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = BackgroundDark)
-                            }
-                        }
+                                }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.Send,
+                                        contentDescription = "Send",
+                                        tint = CyberCyan
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = CyberCyan,
+                                unfocusedBorderColor = SurfaceCardHover,
+                                focusedLabelColor = CyberCyan
+                            )
+                        )
 
                         // Special Keys Grid (Matching Screenshot 3)
                         Card(
@@ -1245,20 +1432,35 @@ private fun FeatureToolItem(
 }
 
 @Composable
-private fun ControlButton(
+private fun RemoteBtn(
     icon: ImageVector,
-    desc: String,
+    label: String,
+    modifier: Modifier = Modifier,
     tint: Color = TextPrimary,
     onClick: () -> Unit
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .size(46.dp)
-            .clip(CircleShape)
-            .background(SurfaceDark)
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp, horizontal = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Icon(icon, contentDescription = desc, tint = tint, modifier = Modifier.size(22.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = tint,
+            modifier = Modifier.size(26.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            color = TextSecondary,
+            fontSize = 11.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
     }
 }
 

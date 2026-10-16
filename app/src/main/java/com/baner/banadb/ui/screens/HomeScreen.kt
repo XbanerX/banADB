@@ -41,6 +41,10 @@ fun HomeScreen(
     val savedDevices by viewModel.savedDevices.collectAsState()
     var showAboutDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadSavedDevices()
+    }
+
     Scaffold(
         topBar = {
             BanaTopBar(

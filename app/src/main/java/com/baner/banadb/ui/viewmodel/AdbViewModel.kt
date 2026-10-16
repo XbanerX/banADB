@@ -13,14 +13,19 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.baner.banadb.adb.AdbManager
 import com.baner.banadb.adb.MdnsDiscoveryManager
+import com.baner.banadb.adb.NetworkUtils
 import com.baner.banadb.data.model.*
 import com.baner.banadb.data.repository.DevicePreferences
 import com.baner.banadb.service.AdbConnectionService
+import com.baner.banadb.service.LocalPairingService
+import com.baner.banadb.service.LocalPairingStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
@@ -93,10 +98,36 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    val localPairingState = LocalPairingStateHolder
+
     init {
         loadSavedDevices()
         loadScripts()
         appendConsole("banADB Terminal initialized.\nType a command or choose a suggestion below.\n")
+
+        // Monitor background connection state changes (e.g. from LocalPairingReceiver)
+        viewModelScope.launch {
+            while (isActive) {
+                kotlinx.coroutines.delay(1000)
+                if (AdbManager.isConnected && _connectionState.value !is ConnectionState.Connected) {
+                    val host = AdbManager.getConnectedHost().ifEmpty { "127.0.0.1" }
+                    val port = AdbManager.getConnectedPort()
+                    val devName = try { AdbManager.fetchDashboard().model } catch (_: Exception) { "Local Device" }
+                    _connectionState.value = ConnectionState.Connected(devName, host, port)
+                    val saved = SavedDevice(
+                        id = java.util.UUID.randomUUID().toString(),
+                        name = devName,
+                        ip = host,
+                        port = port,
+                        lastConnected = System.currentTimeMillis()
+                    )
+                    prefs.saveDevice(saved)
+                    loadSavedDevices()
+                    appendConsole("Connected to $devName ($host:$port)")
+                    refreshDashboard()
+                }
+            }
+        }
     }
 
     fun loadSavedDevices() {
@@ -113,6 +144,161 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
 
     fun stopDiscovery() {
         discoveryManager.stopDiscovery()
+    }
+
+    private val _isLocalScanning = MutableStateFlow(false)
+    val isLocalScanning: StateFlow<Boolean> = _isLocalScanning.asStateFlow()
+
+    fun scanAndConnectLocal(onPortFound: ((Int) -> Unit)? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLocalScanning.value = true
+            _statusMessage.value = "Scanning for local ADB daemon..."
+            appendConsole("Starting Auto-Scan for local ADB daemon on 127.0.0.1...")
+            discoveryManager.startDiscovery()
+
+            val excludePairingPort = LocalPairingStateHolder.discoveredPairingPort.value ?: -1
+            var foundPort: Int? = null
+
+            // 1. Check if LocalPairingStateHolder has a discovered connect port
+            val candidateConnectPort = LocalPairingStateHolder.discoveredConnectPort.value
+            if (candidateConnectPort != null && candidateConnectPort > 0 && candidateConnectPort != excludePairingPort) {
+                if (isPortOpen("127.0.0.1", candidateConnectPort)) {
+                    foundPort = candidateConnectPort
+                    Log.d("AdbViewModel", "Found active connect port from LocalPairingService: $foundPort")
+                }
+            }
+
+            // 2. Check if mDNS discovered a connect service
+            if (foundPort == null) {
+                val localIps = NetworkUtils.getLocalIpv4Addresses() + "127.0.0.1"
+                val mDnsDev = discoveredDevices.value.firstOrNull { dev ->
+                    !dev.isPairing && dev.port != excludePairingPort &&
+                        (localIps.contains(dev.ip) || dev.ip.startsWith("127."))
+                }
+                if (mDnsDev != null && isPortOpen("127.0.0.1", mDnsDev.port)) {
+                    foundPort = mDnsDev.port
+                    Log.d("AdbViewModel", "Found active connect port from mDNS: $foundPort")
+                }
+            }
+
+            // 3. Check standard port 5555
+            if (foundPort == null && excludePairingPort != 5555 && isPortOpen("127.0.0.1", 5555)) {
+                foundPort = 5555
+                Log.d("AdbViewModel", "Found open port 5555 on 127.0.0.1")
+            }
+
+            // 4. Scan dynamic Android 11+ Wireless Debugging ranges in parallel chunks
+            if (foundPort == null) {
+                val ranges = listOf(
+                    37000..45000,
+                    32768..36999,
+                    45001..52000
+                )
+                for (range in ranges) {
+                    if (foundPort != null || !isActive) break
+                    for (chunk in range.chunked(60)) {
+                        if (foundPort != null || !isActive) break
+                        val deferreds = chunk.map { p ->
+                            async(Dispatchers.IO) {
+                                if (p != excludePairingPort && isPortOpen("127.0.0.1", p, timeoutMs = 75)) p else null
+                            }
+                        }
+                        val results = deferreds.awaitAll()
+                        val detected = results.firstOrNull { it != null }
+                        if (detected != null) {
+                            foundPort = detected
+                            Log.d("AdbViewModel", "Auto-Scan detected open port: $foundPort")
+                            break
+                        }
+                    }
+                }
+            }
+
+            _isLocalScanning.value = false
+
+            withContext(Dispatchers.Main) {
+                if (foundPort != null) {
+                    onPortFound?.invoke(foundPort)
+                    _statusMessage.value = "Found local ADB on port $foundPort. Connecting..."
+                    appendConsole("Auto-Scan found port $foundPort! Connecting to 127.0.0.1:$foundPort...")
+                    connect("127.0.0.1", foundPort)
+                } else {
+                    _statusMessage.value = "No local ADB port found."
+                    appendConsole("Auto-Scan: No open ADB port detected on 127.0.0.1. Ensure Wireless Debugging is enabled.")
+                }
+            }
+        }
+    }
+
+    private fun isPortOpen(ip: String, port: Int, timeoutMs: Int = 100): Boolean {
+        return try {
+            java.net.Socket().use { socket ->
+                socket.connect(java.net.InetSocketAddress(ip, port), timeoutMs)
+                true
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun startLocalPairingService(context: Context) {
+        LocalPairingService.start(context)
+    }
+
+    fun stopLocalPairingService(context: Context) {
+        LocalPairingService.stop(context)
+    }
+
+    fun getPreferredLocalIp(): String = NetworkUtils.getPreferredLocalIp()
+
+    fun getLocalIpv4Addresses(): List<String> = NetworkUtils.getLocalIpv4Addresses()
+
+    fun pairLocalDevice(
+        ip: String,
+        pairingPort: Int,
+        pairingCode: String,
+        connectionPort: Int,
+        onComplete: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            _connectionState.value = ConnectionState.Pairing("Pairing local device on port $pairingPort...")
+            appendConsole("Local pairing on port $pairingPort (Code: $pairingCode)...")
+
+            val targetIps = if (ip.isNotBlank()) listOf(ip) else listOf(
+                NetworkUtils.getPreferredLocalIp(),
+                "127.0.0.1"
+            ).distinct()
+
+            var success = false
+            var usedIp = targetIps.first()
+            var lastErr = "Pairing failed"
+
+            for (targetIp in targetIps) {
+                appendConsole("Trying local pairing on $targetIp:$pairingPort...")
+                val result = AdbManager.pair(targetIp, pairingPort, pairingCode)
+                if (result.isSuccess) {
+                    success = true
+                    usedIp = targetIp
+                    break
+                } else {
+                    lastErr = result.exceptionOrNull()?.message ?: "Handshake failed"
+                    appendConsole("Failed on $targetIp: $lastErr")
+                }
+            }
+
+            if (success) {
+                appendConsole("Local pairing succeeded! Waiting for target daemon...")
+                kotlinx.coroutines.delay(800)
+                val connPort = if (connectionPort > 0) connectionPort else 5555
+                appendConsole("Connecting locally to $usedIp:$connPort...")
+                doConnect(usedIp, connPort)
+                onComplete(true)
+            } else {
+                _connectionState.value = ConnectionState.Error(lastErr)
+                appendConsole("Local pairing failed: $lastErr")
+                onComplete(false)
+            }
+        }
     }
 
     fun doPairing(ip: String, pairingPort: Int, pairingCode: String, connectionPort: Int, onComplete: (Boolean) -> Unit) {
