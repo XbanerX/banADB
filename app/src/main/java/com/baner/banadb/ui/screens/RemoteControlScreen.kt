@@ -34,10 +34,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.components.DirectionalPad
@@ -81,7 +83,7 @@ fun RemoteControlScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "Remote Control",
+                title = stringResource(R.string.remote_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -89,14 +91,14 @@ fun RemoteControlScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { showDisconnectConfirmDialog = true }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAboutDialog = true }) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
-                            contentDescription = "About banADB",
+                            contentDescription = stringResource(R.string.about_title),
                             tint = TextSecondary
                         )
                     }
@@ -113,7 +115,7 @@ fun RemoteControlScreen(
                         ) {
                             Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Disconnect", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.disconnect), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -434,9 +436,9 @@ fun RemoteControlScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark),
                         contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold, modifier = Modifier.size(18.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Back", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+                        Text(stringResource(R.string.remote_btn_back), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
                     }
 
                     // Home
@@ -447,9 +449,9 @@ fun RemoteControlScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark),
                         contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
                     ) {
-                        Icon(Icons.Default.Home, contentDescription = "Home", tint = BananaGold, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Home, contentDescription = stringResource(R.string.remote_btn_home), tint = BananaGold, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Home", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+                        Text(stringResource(R.string.remote_btn_home), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
                     }
 
                     // Recents
@@ -460,9 +462,9 @@ fun RemoteControlScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark),
                         contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
                     ) {
-                        Icon(Icons.Default.CropSquare, contentDescription = "Recents", tint = BananaGold, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.CropSquare, contentDescription = stringResource(R.string.remote_btn_recents), tint = BananaGold, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Recents", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+                        Text(stringResource(R.string.remote_btn_recents), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
                     }
                 }
             }
@@ -479,19 +481,19 @@ fun RemoteControlScreen(
                 Tab(
                     selected = controlMode == 0,
                     onClick = { controlMode = 0 },
-                    text = { Text("D-Pad", fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.remote_mode_dpad), fontWeight = FontWeight.Bold) },
                     icon = { Icon(Icons.Default.ControlCamera, contentDescription = null, modifier = Modifier.size(18.dp)) }
                 )
                 Tab(
                     selected = controlMode == 1,
                     onClick = { controlMode = 1 },
-                    text = { Text("Touchpad", fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.remote_mode_touchpad), fontWeight = FontWeight.Bold) },
                     icon = { Icon(Icons.Default.TouchApp, contentDescription = null, modifier = Modifier.size(18.dp)) }
                 )
                 Tab(
                     selected = controlMode == 2,
                     onClick = { controlMode = 2 },
-                    text = { Text("Numpad", fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.remote_mode_numpad), fontWeight = FontWeight.Bold) },
                     icon = { Icon(Icons.Default.Dialpad, contentDescription = null, modifier = Modifier.size(18.dp)) }
                 )
             }
@@ -621,14 +623,14 @@ fun RemoteControlScreen(
                                     Spacer(modifier = Modifier.width(14.dp))
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "Power Utilities",
+                                            text = stringResource(R.string.remote_power_utilities),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 15.sp,
                                             color = TextPrimary
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
-                                            text = "Wake, Lock, Power, Brightness & System Shortcuts",
+                                            text = stringResource(R.string.remote_power_utilities_sub),
                                             fontSize = 11.sp,
                                             color = TextSecondary,
                                             lineHeight = 15.sp
@@ -663,35 +665,35 @@ fun RemoteControlScreen(
                                         ) {
                                             RemoteBtn(
                                                 icon = Icons.Default.WbSunny,
-                                                label = "Wake",
+                                                label = stringResource(R.string.remote_wake),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 224")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.Lock,
-                                                label = "Lock",
+                                                label = stringResource(R.string.remote_lock),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 223")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.PowerSettingsNew,
-                                                label = "Power",
+                                                label = stringResource(R.string.remote_power),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 26")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.Brightness6,
-                                                label = "Bright+",
+                                                label = stringResource(R.string.remote_bright_plus),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 221")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.Brightness5,
-                                                label = "Bright-",
+                                                label = stringResource(R.string.remote_bright_minus),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 220")
@@ -710,35 +712,35 @@ fun RemoteControlScreen(
                                         ) {
                                             RemoteBtn(
                                                 icon = Icons.Default.Settings,
-                                                label = "Settings",
+                                                label = stringResource(R.string.remote_settings),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("am start -a android.settings.SETTINGS")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.Mic,
-                                                label = "Voice",
+                                                label = stringResource(R.string.remote_voice),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 231")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.ContentCut,
-                                                label = "Cut",
+                                                label = stringResource(R.string.remote_cut),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 276")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.Redo,
-                                                label = "Redo",
+                                                label = stringResource(R.string.remote_redo),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 283")
                                             }
                                             RemoteBtn(
                                                 icon = Icons.Default.Undo,
-                                                label = "Undo",
+                                                label = stringResource(R.string.remote_undo),
                                                 modifier = Modifier.weight(1f)
                                             ) {
                                                 viewModel.executeCommand("input keyevent 284")
@@ -1127,14 +1129,14 @@ fun RemoteControlScreen(
     if (showQuickSetDialog) {
         AlertDialog(
             onDismissRequest = { showQuickSetDialog = false },
-            title = { Text("Quick Settings", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.remote_quick_settings_title), color = BananaGold, fontWeight = FontWeight.Bold) },
             text = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     ListItem(
-                        headlineContent = { Text("Open Settings App", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_qs_open_settings), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.Settings, contentDescription = null, tint = BananaGold) },
                         modifier = Modifier.clickable {
                             viewModel.executeCommand("am start -a android.settings.SETTINGS")
@@ -1142,7 +1144,7 @@ fun RemoteControlScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Expand Quick Settings Panel", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_qs_expand_panel), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.Tune, contentDescription = null, tint = CyberCyan) },
                         modifier = Modifier.clickable {
                             viewModel.executeCommand("cmd statusbar expand-settings")
@@ -1150,7 +1152,7 @@ fun RemoteControlScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Toggle Wi-Fi ON", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_qs_wifi_on), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.Wifi, contentDescription = null, tint = NeonEmerald) },
                         modifier = Modifier.clickable {
                             viewModel.toggleWifi(true)
@@ -1158,7 +1160,7 @@ fun RemoteControlScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Toggle Bluetooth ON", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_qs_bt_on), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.Bluetooth, contentDescription = null, tint = CyberCyan) },
                         modifier = Modifier.clickable {
                             viewModel.toggleBluetooth(true)
@@ -1169,7 +1171,7 @@ fun RemoteControlScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showQuickSetDialog = false }) {
-                    Text("Close", color = TextSecondary)
+                    Text(stringResource(R.string.close), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark
@@ -1180,12 +1182,12 @@ fun RemoteControlScreen(
     if (showBatteryDialog) {
         AlertDialog(
             onDismissRequest = { showBatteryDialog = false },
-            title = { Text("Battery Status", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.remote_battery_title), color = BananaGold, fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Level: ${dashboardData.batteryLevel}%", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    Text("Status: ${dashboardData.batteryStatus}", color = TextSecondary)
-                    Text("Temperature: ${dashboardData.batteryTemp}°C", color = TextSecondary)
+                    Text(stringResource(R.string.remote_battery_level, dashboardData.batteryLevel), color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.remote_battery_status, dashboardData.batteryStatus), color = TextSecondary)
+                    Text(stringResource(R.string.remote_battery_temp, dashboardData.batteryTemp.toString()), color = TextSecondary)
                 }
             },
             confirmButton = {
@@ -1193,7 +1195,7 @@ fun RemoteControlScreen(
                     onClick = { showBatteryDialog = false },
                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
                 ) {
-                    Text("OK", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.ok), color = BackgroundDark, fontWeight = FontWeight.Bold)
                 }
             },
             containerColor = SurfaceDark
@@ -1204,11 +1206,11 @@ fun RemoteControlScreen(
     if (showPowerDialog) {
         AlertDialog(
             onDismissRequest = { showPowerDialog = false },
-            title = { Text("Power Utilities", color = StatusError, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.remote_power_menu_title), color = StatusError, fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     ListItem(
-                        headlineContent = { Text("Screen Off / Power Button", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_power_screen_off), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = StatusError) },
                         modifier = Modifier.clickable {
                             viewModel.sendKeyevent(KeyEvent.KEYCODE_POWER)
@@ -1216,7 +1218,7 @@ fun RemoteControlScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Reboot Device", color = StatusError) },
+                        headlineContent = { Text(stringResource(R.string.remote_power_reboot), color = StatusError) },
                         leadingContent = { Icon(Icons.Default.RestartAlt, contentDescription = null, tint = StatusError) },
                         modifier = Modifier.clickable {
                             viewModel.rebootDevice()
@@ -1225,7 +1227,7 @@ fun RemoteControlScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Reboot to Bootloader", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_power_bootloader), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.SystemUpdate, contentDescription = null, tint = BananaGold) },
                         modifier = Modifier.clickable {
                             viewModel.rebootDevice("bootloader")
@@ -1234,7 +1236,7 @@ fun RemoteControlScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Reboot to Recovery", color = TextPrimary) },
+                        headlineContent = { Text(stringResource(R.string.remote_power_recovery), color = TextPrimary) },
                         leadingContent = { Icon(Icons.Default.Build, contentDescription = null, tint = CyberCyan) },
                         modifier = Modifier.clickable {
                             viewModel.rebootDevice("recovery")
@@ -1246,7 +1248,7 @@ fun RemoteControlScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showPowerDialog = false }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark

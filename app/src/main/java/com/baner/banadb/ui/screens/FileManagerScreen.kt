@@ -32,12 +32,14 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.FileProvider
+import com.baner.banadb.R
 import com.baner.banadb.data.model.RemoteFile
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.theme.*
@@ -172,7 +174,7 @@ fun FileManagerScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "File Manager",
+                title = stringResource(R.string.files_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -187,12 +189,12 @@ fun FileManagerScreen(
                             onBack()
                         }
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showNewFolderDialog = true }) {
-                        Icon(Icons.Default.CreateNewFolder, contentDescription = "New Folder", tint = BananaGold)
+                        Icon(Icons.Default.CreateNewFolder, contentDescription = stringResource(R.string.files_new_folder), tint = BananaGold)
                     }
                     IconButton(onClick = { viewModel.refreshFiles() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = BananaGold)
@@ -660,12 +662,12 @@ fun FileManagerScreen(
     if (showNewFolderDialog) {
         AlertDialog(
             onDismissRequest = { showNewFolderDialog = false },
-            title = { Text("Create Folder", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.files_create_new_folder), color = BananaGold, fontWeight = FontWeight.Bold) },
             text = {
                 OutlinedTextField(
                     value = newFolderName,
                     onValueChange = { newFolderName = it },
-                    label = { Text("Folder Name") },
+                    label = { Text(stringResource(R.string.files_folder_name)) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = BananaGold,
@@ -684,12 +686,12 @@ fun FileManagerScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
                 ) {
-                    Text("Create", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.files_create), color = BackgroundDark, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNewFolderDialog = false }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark
@@ -700,8 +702,8 @@ fun FileManagerScreen(
     fileToDelete?.let { file ->
         AlertDialog(
             onDismissRequest = { fileToDelete = null },
-            title = { Text("Delete ${if (file.isDirectory) "folder" else "file"}?", color = BananaGold) },
-            text = { Text("Are you sure you want to delete '${file.name}'?", color = TextPrimary) },
+            title = { Text(stringResource(R.string.files_delete_title), color = BananaGold) },
+            text = { Text(stringResource(R.string.files_delete_desc, file.name), color = TextPrimary) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -710,12 +712,12 @@ fun FileManagerScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = StatusError)
                 ) {
-                    Text("Delete", color = Color.White)
+                    Text(stringResource(R.string.delete), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { fileToDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark

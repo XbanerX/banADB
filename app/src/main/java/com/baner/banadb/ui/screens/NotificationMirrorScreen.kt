@@ -30,10 +30,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.baner.banadb.R
 import com.baner.banadb.data.model.NotificationItem
 import com.baner.banadb.ui.theme.*
 import com.baner.banadb.ui.viewmodel.AdbViewModel
@@ -87,13 +89,13 @@ fun NotificationMirrorScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Notification Mirror",
+                            text = stringResource(R.string.notif_mirror_title),
                             color = TextPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
                         Text(
-                            text = "${notifications.size} active notifications",
+                            text = stringResource(R.string.notif_active_count, notifications.size),
                             color = TextSecondary,
                             fontSize = 12.sp
                         )
@@ -103,7 +105,7 @@ fun NotificationMirrorScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.remote_btn_back),
                             tint = TextPrimary
                         )
                     }

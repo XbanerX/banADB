@@ -1,3 +1,303 @@
 <resources>
+    <!-- App & General -->
     <string name="app_name">banADB</string>
+    <string name="app_tagline">Autonomous &amp; Wireless ADB Cockpit</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="delete">Delete</string>
+    <string name="remove">Remove</string>
+    <string name="save">Save</string>
+    <string name="send">Send</string>
+    <string name="clear">Clear</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connected">Connected</string>
+    <string name="connecting">Connecting</string>
+    <string name="pairing">Pairing</string>
+    <string name="error">Error</string>
+    <string name="offline">Offline</string>
+    <string name="unknown">Unknown</string>
+    <string name="success">Success</string>
+    <string name="failed">Failed</string>
+
+    <!-- Theme -->
+    <string name="theme_title">Theme</string>
+    <string name="theme_system">Follow System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_toggle">Toggle Theme</string>
+
+    <!-- Home Screen -->
+    <string name="home_connection_status">Connection Status</string>
+    <string name="home_disconnected_desc">Connect via Wi-Fi ADB to start controlling</string>
+    <string name="home_connected_desc">Device connected and ready</string>
+    <string name="home_open_dev_options">Open Developer Options (This Phone)</string>
+    <string name="home_saved_devices">Saved Devices</string>
+    <string name="home_saved_count">%1$d Saved</string>
+    <string name="home_no_saved_devices">No saved devices yet</string>
+    <string name="home_no_saved_desc">Tap \'+ Pair New Device\' to scan or add</string>
+    <string name="home_pair_new_device">Pair New Device</string>
+    <string name="home_remove_dialog_title">Remove Device?</string>
+    <string name="home_remove_dialog_desc">Are you sure you want to remove %1$s from saved devices?</string>
+    <string name="home_quick_actions">Remote Tools</string>
+
+    <!-- Navigation / Tool cards -->
+    <string name="tool_remote_control">Remote Control</string>
+    <string name="tool_terminal">Terminal</string>
+    <string name="tool_apps">Apps</string>
+    <string name="tool_files">Files</string>
+    <string name="tool_dashboard">Dashboard</string>
+    <string name="tool_processes">Processes</string>
+    <string name="tool_scripts">Scripts</string>
+    <string name="tool_mirror">Mirror</string>
+    <string name="tool_notifications">Notifications</string>
+    <string name="tool_gallery">Gallery</string>
+
+    <!-- Pairing Dialog -->
+    <string name="pair_dialog_title">Find &amp; Connect Device</string>
+    <string name="tab_android_11">Android 11+</string>
+    <string name="tab_android_10">Android 10</string>
+    <string name="tab_local_host">Local (Host)</string>
+    <string name="pair_searching_title">Searching for Android 11+ Wireless Debugging devices...</string>
+    <string name="pair_searching_steps">On target phone: Settings -&gt; Developer Options -&gt; Turn ON Wireless Debugging -&gt; Tap \'Pair device with pairing code\'.</string>
+    <string name="pair_manual_entry">Manual IP &amp; Port Entry</string>
+    <string name="pair_ip_hint">IP Address</string>
+    <string name="pair_port_hint">Port (e.g. 38491)</string>
+    <string name="pair_pairing_port_hint">Pairing Port (e.g. 42123)</string>
+    <string name="pair_code_hint">6-Digit Pairing Code (e.g. 123456)</string>
+    <string name="pair_btn_pair_connect">Pair &amp; Connect</string>
+    <string name="pair_btn_auto_scan">Auto-Scan</string>
+    <string name="pair_auto_scan_progress">Scanning ports (%1$d/%2$d)...</string>
+    <string name="pair_local_adb_title">Local ADB: %1$s</string>
+    <string name="pair_direct_connect_local">Direct Connect to Localhost</string>
+    <string name="pair_direct_connect_desc">Developer Options -&gt; Wireless Debugging shows: \'IP address &amp; Port: 192.168.x.x:PORT\'. Enter that PORT below:</string>
+    <string name="pair_connection_port_hint">Connection Port (e.g. 38491)</string>
+    <string name="pair_discovered_services">Discovered Local ADB Services:</string>
+    <string name="pair_local_service_card_title">Local ADB Service (Automatic via Notification)</string>
+    <string name="pair_service_running_badge">Service Running</string>
+    <string name="pair_service_stopped_badge">Service Stopped</string>
+    <string name="pair_btn_start_service">Start Discovery Service</string>
+    <string name="pair_btn_stop_service">Stop Service</string>
+    <string name="pair_service_steps">1. A notification with \'Open App\' was launched.\n2. Tap the button below to go to Developer Options.\n3. Turn ON Wireless Debugging -&gt; Tap \'Pair device with pairing code\'.\n4. Type the 6-digit code in the notification and tap Enter.\n5. Tap \'Open App\' in the notification to return here automatically.</string>
+
+    <!-- Remote Control Screen -->
+    <string name="remote_title">Remote Control</string>
+    <string name="remote_tab_live">Live Control</string>
+    <string name="remote_tab_terminal">Terminal</string>
+    <string name="remote_feature_tools">Remote Feature Tools</string>
+    <string name="remote_feature_tools_sub">Apps, Files, Mirror, Quick Set &amp; more</string>
+    <string name="remote_btn_back">Back</string>
+    <string name="remote_btn_home">Home</string>
+    <string name="remote_btn_recents">Recents</string>
+    <string name="remote_mode_dpad">D-Pad</string>
+    <string name="remote_mode_touchpad">Touchpad</string>
+    <string name="remote_mode_numpad">Numpad</string>
+    <string name="remote_vol_down">Vol -</string>
+    <string name="remote_vol_mute">Mute</string>
+    <string name="remote_vol_up">Vol +</string>
+    <string name="remote_search">Search</string>
+    <string name="remote_notify">Notify</string>
+    <string name="remote_screenshot">Screenshot</string>
+    <string name="remote_power_utilities">Power Utilities</string>
+    <string name="remote_power_utilities_sub">Wake, Lock, Power, Brightness &amp; System Shortcuts</string>
+    <string name="remote_wake">Wake</string>
+    <string name="remote_lock">Lock</string>
+    <string name="remote_power">Power</string>
+    <string name="remote_bright_plus">Bright+</string>
+    <string name="remote_bright_minus">Bright-</string>
+    <string name="remote_settings">Settings</string>
+    <string name="remote_voice">Voice</string>
+    <string name="remote_cut">Cut</string>
+    <string name="remote_redo">Redo</string>
+    <string name="remote_undo">Undo</string>
+    <string name="remote_keyboard">Keyboard</string>
+    <string name="remote_keyboard_placeholder">Type text to send remotely...</string>
+    <string name="remote_special_keys">Special Keys</string>
+    <string name="remote_key_enter">Enter</string>
+    <string name="remote_key_del">Del</string>
+    <string name="remote_key_tab">Tab</string>
+    <string name="remote_key_space">Space</string>
+    <string name="remote_key_esc">Esc</string>
+    <string name="remote_key_copy">Copy</string>
+    <string name="remote_key_paste">Paste</string>
+    <string name="remote_key_all">All</string>
+    <string name="remote_key_home">Home</string>
+    <string name="remote_key_end">End</string>
+    <string name="remote_key_pgup">PgUp</string>
+    <string name="remote_key_pgdn">PgDn</string>
+    <string name="remote_disconnect_dialog_title">Disconnect Remote Control?</string>
+    <string name="remote_disconnect_dialog_desc">Are you sure you want to disconnect from this device?</string>
+
+    <!-- Terminal -->
+    <string name="terminal_title">Terminal</string>
+    <string name="terminal_placeholder">Enter command...</string>
+    <string name="terminal_quick_cmds">Quick Commands</string>
+    <string name="terminal_clear">Clear</string>
+
+    <!-- App Manager -->
+    <string name="apps_title">App Manager</string>
+    <string name="apps_search_hint">Search by name or package...</string>
+    <string name="apps_tab_user">User Apps</string>
+    <string name="apps_tab_system">System Apps</string>
+    <string name="apps_launch">Launch</string>
+    <string name="apps_uninstall">Uninstall</string>
+    <string name="apps_disable">Disable</string>
+    <string name="apps_enable">Enable</string>
+    <string name="apps_clear_data">Clear Data</string>
+    <string name="apps_install_apk">Install APK</string>
+    <string name="apps_count">%1$d applications found</string>
+    <string name="apps_include_system">Include System</string>
+    <string name="apps_not_found">No matching apps found</string>
+    <string name="apps_launch_action">Launch Application</string>
+    <string name="apps_force_stop">Force Stop</string>
+    <string name="apps_clear_app_data">Clear Application Data</string>
+    <string name="apps_extract_apk">Extract APK to Downloads</string>
+    <string name="apps_extract_desc">Pulls APK file to local device Downloads folder</string>
+    <string name="apps_uninstall_action">Uninstall Application</string>
+    <string name="apps_uninstall_title">Uninstall %1$s?</string>
+    <string name="apps_uninstall_desc">This will completely remove %1$s from the remote device.</string>
+    <string name="operation_executing">Executing on device...</string>
+    <string name="operation_title">Remote Operation</string>
+
+    <!-- File Manager -->
+    <string name="files_title">File Manager</string>
+    <string name="files_download">Download</string>
+    <string name="files_upload">Upload</string>
+    <string name="files_new_folder">New Folder</string>
+    <string name="files_rename">Rename</string>
+    <string name="files_empty">No files found in this folder</string>
+    <string name="files_copy_path">Copy Path</string>
+    <string name="files_create_new_folder">Create New Folder</string>
+    <string name="files_folder_name">Folder Name</string>
+    <string name="files_create">Create</string>
+    <string name="files_delete_title">Delete File/Folder?</string>
+    <string name="files_delete_desc">Are you sure you want to delete %1$s? This action cannot be undone.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Device Dashboard</string>
+    <string name="dashboard_battery">Battery</string>
+    <string name="dashboard_storage">Storage</string>
+    <string name="dashboard_memory">Memory (RAM)</string>
+    <string name="dashboard_cpu">CPU</string>
+    <string name="dashboard_display">Display</string>
+    <string name="dashboard_system_info">System Info</string>
+    <string name="dash_battery_diag">Battery Diagnostics</string>
+    <string name="dash_storage_diag">Storage &amp; Partitions</string>
+    <string name="dash_memory_diag">Memory (RAM)</string>
+    <string name="dash_cpu_diag">CPU &amp; Architecture</string>
+    <string name="dash_display_diag">Display &amp; Density</string>
+    <string name="dash_system_diag">System &amp; Build</string>
+    <string name="dash_reboot_options">Reboot Options</string>
+
+    <!-- Processes -->
+    <string name="processes_title">Process Manager</string>
+    <string name="processes_search_hint">Filter processes by name or PID...</string>
+    <string name="processes_kill">Kill Process</string>
+    <string name="proc_kill_title">Kill Process %1$s?</string>
+    <string name="proc_kill_desc">Are you sure you want to kill PID %1$s (%2$s)?</string>
+
+    <!-- Scripts -->
+    <string name="scripts_title">Automation &amp; Scripts</string>
+    <string name="scripts_new">New Script</string>
+    <string name="scripts_run">Run</string>
+    <string name="scripts_subtitle">Pre-built &amp; Custom ADB Commands</string>
+    <string name="scripts_add_title">Add New Script</string>
+    <string name="scripts_title_hint">Script Title (e.g. Reboot to Bootloader)</string>
+    <string name="scripts_cmd_hint">ADB Command (e.g. reboot bootloader)</string>
+    <string name="scripts_cat_hint">Category (e.g. System, Network)</string>
+
+    <!-- Mirror & Notifications -->
+    <string name="mirror_title">Screen Mirror</string>
+    <string name="mirror_start">Start Mirror</string>
+    <string name="mirror_stop">Stop Mirror</string>
+    <string name="mirror_live">Live</string>
+    <string name="mirror_manual">Manual</string>
+    <string name="mirror_invert">Invert Gestures</string>
+    <string name="mirror_capture">Capture Screenshot</string>
+    <string name="notif_mirror_title">Notification Mirror</string>
+    <string name="notif_clear_all">Clear All</string>
+    <string name="notif_no_items">No notifications captured</string>
+    <string name="notif_active_count">%1$d active notifications</string>
+    <string name="notif_category_all">All</string>
+
+    <!-- Gallery -->
+    <string name="gallery_title">Remote Gallery</string>
+    <string name="gallery_empty">No media items found</string>
+    <string name="gallery_items_count">%1$d photos &amp; videos</string>
+
+    <!-- About Dialog -->
+    <string name="about_title">About banADB</string>
+    <string name="about_version">Version 1.0.0 (Build 1)</string>
+    <string name="about_author">Author</string>
+    <string name="about_contact">Contact</string>
+    <string name="about_license">License</string>
+    <string name="about_view_license_btn">View AGPL-3.0 License Terms</string>
+    <string name="about_copyright">© 2026 baner. All rights reserved under AGPL-3.0.</string>
+    <string name="dialog_exit_title">Exit banADB?</string>
+    <string name="dialog_exit_desc">Are you sure you want to close banADB?</string>
+    <string name="btn_exit">Exit</string>
+    <!-- Power Menu Dialog -->
+    <string name="remote_power_menu_title">Power Options</string>
+    <string name="remote_power_screen_off">Screen Off / Power Button</string>
+    <string name="remote_power_reboot">Reboot Device</string>
+    <string name="remote_power_bootloader">Reboot to Bootloader</string>
+    <string name="remote_power_recovery">Reboot to Recovery</string>
+
+    <!-- Clipboard Dialog -->
+    <string name="remote_clipboard_title">Clipboard Manager</string>
+    <string name="remote_clipboard_device">Remote Device Clipboard:</string>
+    <string name="remote_clipboard_paste">Paste Phone</string>
+    <string name="remote_clipboard_send_label">Text to send</string>
+    <string name="remote_clipboard_send_hint">Type or paste long text here...</string>
+    <string name="remote_clipboard_inject">Inject Direct</string>
+    <string name="remote_clipboard_set">Set Remote</string>
+
+    <!-- Quick Settings Dialog -->
+    <string name="remote_quick_settings_title">Quick Settings</string>
+    <string name="remote_qs_open_settings">Open Settings App</string>
+    <string name="remote_qs_expand_panel">Expand Quick Settings Panel</string>
+    <string name="remote_qs_wifi_on">Toggle Wi-Fi ON</string>
+    <string name="remote_qs_bt_on">Toggle Bluetooth ON</string>
+
+    <!-- Battery Status Dialog -->
+    <string name="remote_battery_title">Battery Status</string>
+    <string name="remote_battery_level">Level: %1$d%%</string>
+    <string name="remote_battery_status">Status: %1$s</string>
+    <string name="remote_battery_temp">Temperature: %1$s°C</string>
+
+    <!-- Screenshot Preview Dialog -->
+    <string name="remote_screenshot_retake">Retake</string>
+    <string name="remote_screenshot_save">Save</string>
+
+    <!-- Home Screen Additional -->
+    <string name="home_utilities">Device Utilities</string>
+    <string name="home_status_connected">Connected</string>
+    <string name="home_status_connecting">Connecting...</string>
+    <string name="home_status_pairing">Pairing in progress...</string>
+    <string name="home_status_disconnected">Not Connected</string>
+    <string name="home_status_error">Connection Error</string>
+    <string name="home_btn_control">Control</string>
+
+    <!-- Additional Pairing Dialog strings -->
+    <string name="pair_port_5555_scan">Scanning for Port 5555 Devices on LAN...</string>
+    <string name="pair_rescan_network">Re-scan Network</string>
+    <string name="pair_direct_connect_5555">Direct IP &amp; Port Entry</string>
+    <string name="pair_target_phone_ip">Target Phone IP</string>
+    <string name="pair_pairing_port">Pairing Port</string>
+    <string name="pair_connect_port">Connect Port</string>
+    <string name="pair_connect_port_auto_hint">Auto / 38091</string>
+    <string name="pair_6digit_code">6-Digit Pairing Code</string>
+    <string name="pair_device_ip_address">Device IP Address</string>
+    <string name="pair_port_default_5555">Port (default 5555)</string>
+    <string name="pair_connect_device_btn">Connect Device</string>
+    <string name="pair_local_adb_ready">Ready</string>
+    <string name="pair_start_local_service">Start Local Pairing Service</string>
+    <string name="pair_open_dev_options">Open Developer Options</string>
+    <string name="pair_stop_local_service">Stop Service</string>
+    <string name="pair_manual_localhost">Manual Localhost Pairing</string>
+    <string name="pair_target_interface">Target Interface:</string>
+    <string name="pair_pairing_with_local">Pairing with Local Device...</string>
+    <string name="pair_pair_and_connect_local">Pair &amp; Connect Local Device</string>
+    <string name="pair_direct_adb_connect">Direct ADB Connect</string>
 </resources>

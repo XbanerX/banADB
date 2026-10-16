@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -90,11 +91,11 @@ fun BanaTopBar(
                     Spacer(modifier = Modifier.width(8.dp))
                     // Status pill
                     val (statusColor, statusText) = when (connectionState) {
-                        is ConnectionState.Connected -> StatusConnected to "Connected"
-                        is ConnectionState.Connecting -> StatusPairing to "Connecting"
-                        is ConnectionState.Pairing -> StatusPairing to "Pairing"
-                        is ConnectionState.Error -> StatusError to "Error"
-                        ConnectionState.Disconnected -> StatusDisconnected to "Offline"
+                        is ConnectionState.Connected -> StatusConnected to stringResource(R.string.connected)
+                        is ConnectionState.Connecting -> StatusPairing to stringResource(R.string.connecting)
+                        is ConnectionState.Pairing -> StatusPairing to stringResource(R.string.pairing)
+                        is ConnectionState.Error -> StatusError to stringResource(R.string.error)
+                        ConnectionState.Disconnected -> StatusDisconnected to stringResource(R.string.offline)
                     }
                     Box(
                         modifier = Modifier
@@ -133,7 +134,7 @@ fun BanaTopBar(
                 IconButton(onClick = onDisconnect) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Disconnect",
+                        contentDescription = stringResource(R.string.disconnect),
                         tint = StatusError
                     )
                 }
@@ -215,7 +216,7 @@ fun DirectionalPad(
             modifier = Modifier.size(68.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text("OK", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(stringResource(R.string.ok), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
@@ -424,7 +425,7 @@ fun VirtualTrackpad(
             ) {
                 Icon(Icons.Default.Undo, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Back", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.remote_btn_back), color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

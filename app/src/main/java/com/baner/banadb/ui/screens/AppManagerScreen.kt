@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.data.model.RemoteAppInfo
 import com.baner.banadb.ui.components.BanaTopBar
@@ -69,7 +71,7 @@ fun AppManagerScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "App Manager",
+                title = stringResource(R.string.apps_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -77,7 +79,7 @@ fun AppManagerScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
@@ -93,7 +95,7 @@ fun AppManagerScreen(
                 containerColor = BananaGold,
                 contentColor = BackgroundDark,
                 icon = { Icon(Icons.Default.UploadFile, contentDescription = null, tint = BackgroundDark) },
-                text = { Text("Install APK", color = BackgroundDark, fontWeight = FontWeight.Bold) }
+                text = { Text(stringResource(R.string.apps_install_apk), color = BackgroundDark, fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -108,12 +110,12 @@ fun AppManagerScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search by name or package...") },
+                placeholder = { Text(stringResource(R.string.apps_search_hint)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextMuted) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextMuted)
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear), tint = TextMuted)
                         }
                     }
                 },
@@ -133,13 +135,13 @@ fun AppManagerScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${filteredApps.size} applications found",
+                    text = stringResource(R.string.apps_count, filteredApps.size),
                     color = TextSecondary,
                     fontSize = 13.sp
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Include System", color = TextSecondary, fontSize = 12.sp)
+                    Text(stringResource(R.string.apps_include_system), color = TextSecondary, fontSize = 12.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Switch(
                         checked = showSystemApps,
@@ -163,7 +165,7 @@ fun AppManagerScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.SearchOff, contentDescription = null, tint = TextMuted, modifier = Modifier.size(48.dp))
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("No matching apps found", color = TextSecondary)
+                        Text(stringResource(R.string.apps_not_found), color = TextSecondary)
                     }
                 }
             } else {
@@ -274,7 +276,7 @@ fun AppManagerScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ListItem(
-                    headlineContent = { Text("Launch Application", color = TextPrimary) },
+                    headlineContent = { Text(stringResource(R.string.apps_launch_action), color = TextPrimary) },
                     leadingContent = { Icon(Icons.Default.PlayArrow, contentDescription = null, tint = BananaGold) },
                     modifier = Modifier.clickable {
                         viewModel.launchApp(app.packageName)
@@ -282,7 +284,7 @@ fun AppManagerScreen(
                     }
                 )
                 ListItem(
-                    headlineContent = { Text("Force Stop", color = TextPrimary) },
+                    headlineContent = { Text(stringResource(R.string.apps_force_stop), color = TextPrimary) },
                     leadingContent = { Icon(Icons.Default.Stop, contentDescription = null, tint = StatusPairing) },
                     modifier = Modifier.clickable {
                         viewModel.forceStopApp(app.packageName)
@@ -290,7 +292,7 @@ fun AppManagerScreen(
                     }
                 )
                 ListItem(
-                    headlineContent = { Text("Clear Application Data", color = TextPrimary) },
+                    headlineContent = { Text(stringResource(R.string.apps_clear_app_data), color = TextPrimary) },
                     leadingContent = { Icon(Icons.Default.CleaningServices, contentDescription = null, tint = CyberCyan) },
                     modifier = Modifier.clickable {
                         viewModel.clearAppData(app.packageName)
@@ -298,8 +300,8 @@ fun AppManagerScreen(
                     }
                 )
                 ListItem(
-                    headlineContent = { Text("Extract APK to Downloads", color = TextPrimary) },
-                    supportingContent = { Text("Pulls APK file to local device Downloads folder", color = TextMuted, fontSize = 11.sp) },
+                    headlineContent = { Text(stringResource(R.string.apps_extract_apk), color = TextPrimary) },
+                    supportingContent = { Text(stringResource(R.string.apps_extract_desc), color = TextMuted, fontSize = 11.sp) },
                     leadingContent = { Icon(Icons.Default.Download, contentDescription = null, tint = BananaGold) },
                     modifier = Modifier.clickable {
                         viewModel.extractApk(app.packageName, app.label, context)
@@ -308,7 +310,7 @@ fun AppManagerScreen(
                 )
                 if (!app.isSystem) {
                     ListItem(
-                        headlineContent = { Text("Uninstall Application", color = StatusError) },
+                        headlineContent = { Text(stringResource(R.string.apps_uninstall_action), color = StatusError) },
                         leadingContent = { Icon(Icons.Default.DeleteForever, contentDescription = null, tint = StatusError) },
                         modifier = Modifier.clickable {
                             showUninstallConfirm = app
@@ -326,8 +328,8 @@ fun AppManagerScreen(
     showUninstallConfirm?.let { app ->
         AlertDialog(
             onDismissRequest = { showUninstallConfirm = null },
-            title = { Text("Uninstall ${app.label}?") },
-            text = { Text("This will completely remove ${app.packageName} from the remote device.") },
+            title = { Text(stringResource(R.string.apps_uninstall_title, app.label)) },
+            text = { Text(stringResource(R.string.apps_uninstall_desc, app.packageName)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -336,12 +338,12 @@ fun AppManagerScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = StatusError)
                 ) {
-                    Text("Uninstall", color = Color.White)
+                    Text(stringResource(R.string.apps_uninstall), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showUninstallConfirm = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark
@@ -352,7 +354,7 @@ fun AppManagerScreen(
     if (isOperationLoading) {
         AlertDialog(
             onDismissRequest = {},
-            title = { Text("Remote Operation", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.operation_title), color = BananaGold, fontWeight = FontWeight.Bold) },
             text = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -360,7 +362,7 @@ fun AppManagerScreen(
                 ) {
                     CircularProgressIndicator(color = BananaGold, modifier = Modifier.size(28.dp))
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(operationStatus ?: "Executing on device...", color = TextPrimary, fontSize = 14.sp)
+                    Text(operationStatus ?: stringResource(R.string.operation_executing), color = TextPrimary, fontSize = 14.sp)
                 }
             },
             confirmButton = {},
@@ -372,14 +374,14 @@ fun AppManagerScreen(
     if (!isOperationLoading && operationStatus != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearOperationStatus() },
-            title = { Text("banADB Status", color = BananaGold, fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.operation_title), color = BananaGold, fontWeight = FontWeight.Bold) },
             text = { Text(operationStatus ?: "", color = TextPrimary, fontSize = 14.sp) },
             confirmButton = {
                 Button(
                     onClick = { viewModel.clearOperationStatus() },
                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
                 ) {
-                    Text("OK", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.ok), color = BackgroundDark, fontWeight = FontWeight.Bold)
                 }
             },
             containerColor = SurfaceDark

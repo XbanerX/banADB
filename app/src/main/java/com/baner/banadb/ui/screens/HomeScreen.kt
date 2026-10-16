@@ -24,8 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.data.model.SavedDevice
+import com.baner.banadb.data.repository.DevicePreferences
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.theme.*
 import com.baner.banadb.ui.viewmodel.AdbViewModel
@@ -39,6 +42,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val connectionState by viewModel.connectionState.collectAsState()
     val savedDevices by viewModel.savedDevices.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsState()
     var showAboutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -52,10 +56,29 @@ fun HomeScreen(
                 connectionState = connectionState,
                 onDisconnect = { viewModel.disconnect() },
                 actions = {
+                    val (themeIcon, themeTooltip) = when (themeMode) {
+                        DevicePreferences.THEME_LIGHT -> Icons.Default.LightMode to stringResource(R.string.theme_light)
+                        DevicePreferences.THEME_DARK -> Icons.Default.DarkMode to stringResource(R.string.theme_dark)
+                        else -> Icons.Default.BrightnessAuto to stringResource(R.string.theme_system)
+                    }
+                    IconButton(onClick = {
+                        val nextMode = when (themeMode) {
+                            DevicePreferences.THEME_SYSTEM -> DevicePreferences.THEME_LIGHT
+                            DevicePreferences.THEME_LIGHT -> DevicePreferences.THEME_DARK
+                            else -> DevicePreferences.THEME_SYSTEM
+                        }
+                        viewModel.setThemeMode(nextMode)
+                    }) {
+                        Icon(
+                            imageVector = themeIcon,
+                            contentDescription = themeTooltip,
+                            tint = TextSecondary
+                        )
+                    }
                     IconButton(onClick = { showAboutDialog = true }) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
-                            contentDescription = "About banADB",
+                            contentDescription = stringResource(R.string.about_title),
                             tint = TextSecondary
                         )
                     }
@@ -67,8 +90,8 @@ fun HomeScreen(
                 onClick = onOpenPairing,
                 containerColor = BananaGold,
                 contentColor = BackgroundDark,
-                icon = { Icon(Icons.Default.Add, "Pair", tint = BackgroundDark) },
-                text = { Text("Pair New Device", color = BackgroundDark, fontWeight = FontWeight.Bold) }
+                icon = { Icon(Icons.Default.Add, stringResource(R.string.home_pair_new_device), tint = BackgroundDark) },
+                text = { Text(stringResource(R.string.home_pair_new_device), color = BackgroundDark, fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -98,7 +121,7 @@ fun HomeScreen(
                                     .weight(1f, fill = false)
                                     .padding(end = 8.dp)
                             ) {
-                                Text("Connection Status", color = TextSecondary, fontSize = 12.sp)
+                                Text(stringResource(R.string.home_connection_status), color = TextSecondary, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 when (val state = connectionState) {
                                     is ConnectionState.Connected -> {
@@ -114,20 +137,20 @@ fun HomeScreen(
                                         )
                                     }
                                     is ConnectionState.Connecting -> {
-                                        Text("Connecting...", style = MaterialTheme.typography.titleMedium, color = StatusPairing)
+                                        Text(stringResource(R.string.home_status_connecting), style = MaterialTheme.typography.titleMedium, color = StatusPairing)
                                         Text(state.message, color = TextMuted, fontSize = 12.sp)
                                     }
                                     is ConnectionState.Pairing -> {
-                                        Text("Pairing in progress...", style = MaterialTheme.typography.titleMedium, color = StatusPairing)
+                                        Text(stringResource(R.string.home_status_pairing), style = MaterialTheme.typography.titleMedium, color = StatusPairing)
                                         Text(state.message, color = TextMuted, fontSize = 12.sp)
                                     }
                                     is ConnectionState.Error -> {
-                                        Text("Connection Error", style = MaterialTheme.typography.titleMedium, color = StatusError)
+                                        Text(stringResource(R.string.home_status_error), style = MaterialTheme.typography.titleMedium, color = StatusError)
                                         Text(state.message, color = TextMuted, fontSize = 12.sp)
                                     }
                                     ConnectionState.Disconnected -> {
-                                        Text("Disconnected", style = MaterialTheme.typography.titleLarge, color = TextMuted)
-                                        Text("Connect via Wi-Fi ADB to start controlling", color = TextSecondary, fontSize = 13.sp)
+                                        Text(stringResource(R.string.home_status_disconnected), style = MaterialTheme.typography.titleLarge, color = TextMuted)
+                                        Text(stringResource(R.string.home_disconnected_desc), color = TextSecondary, fontSize = 13.sp)
                                     }
                                 }
                             }
@@ -138,7 +161,7 @@ fun HomeScreen(
                                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
                                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                                 ) {
-                                    Text("Control", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.home_btn_control), color = BackgroundDark, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -149,28 +172,28 @@ fun HomeScreen(
             // Quick Tool shortcuts if connected
             if (connectionState is ConnectionState.Connected) {
                 item {
-                    Text("Device Utilities", style = MaterialTheme.typography.titleMedium, color = BananaGold)
+                    Text(stringResource(R.string.home_utilities), style = MaterialTheme.typography.titleMedium, color = BananaGold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         QuickActionCard(
-                            title = "Terminal",
+                            title = stringResource(R.string.tool_terminal),
                             icon = Icons.Default.Terminal,
                             color = CyberCyan,
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateToSection("terminal") }
                         )
                         QuickActionCard(
-                            title = "Dashboard",
+                            title = stringResource(R.string.tool_dashboard),
                             icon = Icons.Default.Dashboard,
                             color = NeonEmerald,
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateToSection("dashboard") }
                         )
                         QuickActionCard(
-                            title = "Apps",
+                            title = stringResource(R.string.tool_apps),
                             icon = Icons.Default.Apps,
                             color = BananaGold,
                             modifier = Modifier.weight(1f),
@@ -183,21 +206,21 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         QuickActionCard(
-                            title = "Files",
+                            title = stringResource(R.string.tool_files),
                             icon = Icons.Default.Folder,
                             color = BananaGoldLight,
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateToSection("files") }
                         )
                         QuickActionCard(
-                            title = "Processes",
+                            title = stringResource(R.string.tool_processes),
                             icon = Icons.Default.Memory,
                             color = CyberCyanLight,
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateToSection("processes") }
                         )
                         QuickActionCard(
-                            title = "Mirror",
+                            title = stringResource(R.string.tool_mirror),
                             icon = Icons.Default.Screenshot,
                             color = StatusConnected,
                             modifier = Modifier.weight(1f),
@@ -226,7 +249,7 @@ fun HomeScreen(
                 ) {
                     Icon(Icons.Default.Settings, contentDescription = null, tint = BananaGold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Open Developer Options (This Phone)")
+                    Text(stringResource(R.string.home_open_dev_options))
                 }
             }
 
@@ -237,9 +260,9 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Saved Devices", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+                    Text(stringResource(R.string.home_saved_devices), style = MaterialTheme.typography.titleMedium, color = TextPrimary)
                     Text(
-                        text = "${savedDevices.size} Saved",
+                        text = stringResource(R.string.home_saved_count, savedDevices.size),
                         color = BananaGold,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
@@ -263,8 +286,8 @@ fun HomeScreen(
                                 modifier = Modifier.size(48.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("No saved devices yet", color = TextSecondary, fontSize = 14.sp)
-                            Text("Tap '+ Pair New Device' to scan or add", color = TextMuted, fontSize = 12.sp)
+                            Text(stringResource(R.string.home_no_saved_devices), color = TextSecondary, fontSize = 14.sp)
+                            Text(stringResource(R.string.home_no_saved_desc), color = TextMuted, fontSize = 12.sp)
                         }
                     }
                 }
@@ -286,7 +309,10 @@ fun HomeScreen(
     }
 
     if (showAboutDialog) {
-        AboutDialog(onDismiss = { showAboutDialog = false })
+        AboutDialog(
+            viewModel = viewModel,
+            onDismiss = { showAboutDialog = false }
+        )
     }
 }
 
@@ -379,13 +405,13 @@ private fun SavedDeviceCard(
                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text("Connect", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false)
+                    Text(stringResource(R.string.connect), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false)
                 }
                 IconButton(
                     onClick = onDelete,
                     modifier = Modifier.size(36.dp)
                 ) {
-                    Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = StatusError.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.delete), tint = StatusError.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
                 }
             }
         }

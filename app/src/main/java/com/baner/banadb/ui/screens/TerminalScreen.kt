@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.theme.*
@@ -63,7 +65,7 @@ fun TerminalScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "Terminal",
+                title = stringResource(R.string.terminal_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -71,12 +73,12 @@ fun TerminalScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.clearConsole() }) {
-                        Icon(Icons.Default.DeleteSweep, contentDescription = "Clear", tint = TextSecondary)
+                        Icon(Icons.Default.DeleteSweep, contentDescription = stringResource(R.string.clear), tint = TextSecondary)
                     }
                 }
             )
@@ -146,7 +148,7 @@ fun TerminalScreen(
                 OutlinedTextField(
                     value = commandInput,
                     onValueChange = { commandInput = it },
-                    placeholder = { Text("Enter adb shell command...", fontSize = 13.sp, fontFamily = FontFamily.Monospace) },
+                    placeholder = { Text(stringResource(R.string.terminal_placeholder), fontSize = 13.sp, fontFamily = FontFamily.Monospace) },
                     singleLine = true,
                     textStyle = androidx.compose.ui.text.TextStyle(
                         fontFamily = FontFamily.Monospace,
@@ -186,7 +188,7 @@ fun TerminalScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Execute",
+                        contentDescription = stringResource(R.string.send),
                         tint = BackgroundDark
                     )
                 }

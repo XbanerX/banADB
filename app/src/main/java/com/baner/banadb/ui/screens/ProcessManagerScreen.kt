@@ -14,10 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.data.model.RunningProcess
 import com.baner.banadb.ui.components.BanaTopBar
@@ -52,7 +54,7 @@ fun ProcessManagerScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "Process Manager",
+                title = stringResource(R.string.processes_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -60,7 +62,7 @@ fun ProcessManagerScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
@@ -82,12 +84,12 @@ fun ProcessManagerScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Filter processes by name or PID...") },
+                placeholder = { Text(stringResource(R.string.processes_search_hint)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextMuted) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextMuted)
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear), tint = TextMuted)
                         }
                     }
                 },
@@ -178,8 +180,8 @@ fun ProcessManagerScreen(
     processToKill?.let { proc ->
         AlertDialog(
             onDismissRequest = { processToKill = null },
-            title = { Text("Kill Process?") },
-            text = { Text("Terminate PID ${proc.pid} (${proc.name})?") },
+            title = { Text(stringResource(R.string.proc_kill_title, proc.name)) },
+            text = { Text(stringResource(R.string.proc_kill_desc, proc.pid, proc.name)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -188,12 +190,12 @@ fun ProcessManagerScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = StatusError)
                 ) {
-                    Text("Kill", color = Color.White)
+                    Text(stringResource(R.string.processes_kill), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { processToKill = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark

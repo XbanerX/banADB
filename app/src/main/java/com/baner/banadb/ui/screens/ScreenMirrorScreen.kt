@@ -22,8 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.theme.*
@@ -62,7 +64,7 @@ fun ScreenMirrorScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "Screen Mirror",
+                title = stringResource(R.string.mirror_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -70,7 +72,7 @@ fun ScreenMirrorScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
@@ -78,12 +80,12 @@ fun ScreenMirrorScreen(
                         IconButton(onClick = { invertGestures = !invertGestures }) {
                             Icon(
                                 imageVector = Icons.Default.SwapVert,
-                                contentDescription = "Invert Gestures",
+                                contentDescription = stringResource(R.string.mirror_invert),
                                 tint = if (invertGestures) BananaGold else TextMuted
                             )
                         }
                         Text(
-                            text = if (autoRefresh) "Live" else "Manual",
+                            text = if (autoRefresh) stringResource(R.string.mirror_live) else stringResource(R.string.mirror_manual),
                             color = if (autoRefresh) NeonEmerald else TextMuted,
                             fontSize = 12.sp
                         )
@@ -95,7 +97,7 @@ fun ScreenMirrorScreen(
                             )
                         }
                         IconButton(onClick = { viewModel.captureScreenshot() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Capture", tint = BananaGold)
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.mirror_capture), tint = BananaGold)
                         }
                     }
                 }

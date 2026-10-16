@@ -1,0 +1,304 @@
+<resources>
+    <!-- App & General -->
+    <string name="app_name">banADB</string>
+    <string name="app_tagline">Cabina de Control ADB Inalámbrica y Autónoma</string>
+    <string name="ok">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="close">Cerrar</string>
+    <string name="delete">Eliminar</string>
+    <string name="remove">Quitar</string>
+    <string name="save">Guardar</string>
+    <string name="send">Enviar</string>
+    <string name="clear">Limpiar</string>
+    <string name="connect">Conectar</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="connected">Conectado</string>
+    <string name="connecting">Conectando</string>
+    <string name="pairing">Emparejando</string>
+    <string name="error">Error</string>
+    <string name="offline">Desconectado</string>
+    <string name="unknown">Desconocido</string>
+    <string name="success">Éxito</string>
+    <string name="failed">Fallido</string>
+
+    <!-- Theme -->
+    <string name="theme_title">Tema</string>
+    <string name="theme_system">Seguir el sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="theme_toggle">Cambiar Tema</string>
+
+    <!-- Home Screen -->
+    <string name="home_connection_status">Estado de Conexión</string>
+    <string name="home_disconnected_desc">Conéctate por Wi-Fi ADB para comenzar a controlar</string>
+    <string name="home_connected_desc">Dispositivo conectado y listo</string>
+    <string name="home_open_dev_options">Abrir Opciones de Desarrollador (Este Teléfono)</string>
+    <string name="home_saved_devices">Dispositivos Guardados</string>
+    <string name="home_saved_count">%1$d Guardados</string>
+    <string name="home_no_saved_devices">Aún no hay dispositivos guardados</string>
+    <string name="home_no_saved_desc">Toca \'+ Emparejar Nuevo Dispositivo\' para buscar o agregar</string>
+    <string name="home_pair_new_device">Emparejar Nuevo Dispositivo</string>
+    <string name="home_remove_dialog_title">¿Eliminar Dispositivo?</string>
+    <string name="home_remove_dialog_desc">¿Seguro que deseas eliminar %1$s de los dispositivos guardados?</string>
+    <string name="home_quick_actions">Herramientas Remotas</string>
+
+    <!-- Navigation / Tool cards -->
+    <string name="tool_remote_control">Control Remoto</string>
+    <string name="tool_terminal">Terminal</string>
+    <string name="tool_apps">Aplicaciones</string>
+    <string name="tool_files">Archivos</string>
+    <string name="tool_dashboard">Panel</string>
+    <string name="tool_processes">Procesos</string>
+    <string name="tool_scripts">Scripts</string>
+    <string name="tool_mirror">Pantalla</string>
+    <string name="tool_notifications">Notificaciones</string>
+    <string name="tool_gallery">Galería</string>
+
+    <!-- Pairing Dialog -->
+    <string name="pair_dialog_title">Buscar y Conectar Dispositivo</string>
+    <string name="tab_android_11">Android 11+</string>
+    <string name="tab_android_10">Android 10</string>
+    <string name="tab_local_host">Local (Host)</string>
+    <string name="pair_searching_title">Buscando dispositivos con Depuración Inalámbrica de Android 11+...</string>
+    <string name="pair_searching_steps">En el teléfono objetivo: Ajustes -&gt; Opciones de Desarrollador -&gt; Activa Depuración Inalámbrica -&gt; Toca \'Vincular dispositivo con código de vinculación\'.</string>
+    <string name="pair_manual_entry">Entrada Manual de IP y Puerto</string>
+    <string name="pair_ip_hint">Dirección IP</string>
+    <string name="pair_port_hint">Puerto (ej. 38491)</string>
+    <string name="pair_pairing_port_hint">Puerto de Vinculación (ej. 42123)</string>
+    <string name="pair_code_hint">Código de Vinculación de 6 dígitos (ej. 123456)</string>
+    <string name="pair_btn_pair_connect">Vincular y Conectar</string>
+    <string name="pair_btn_auto_scan">Auto-Escaneo</string>
+    <string name="pair_auto_scan_progress">Escaneando puertos (%1$d/%2$d)...</string>
+    <string name="pair_local_adb_title">ADB Local: %1$s</string>
+    <string name="pair_direct_connect_local">Conexión Directa a Localhost</string>
+    <string name="pair_direct_connect_desc">Opciones de Desarrollador -&gt; Depuración Inalámbrica muestra: \'Dirección IP y puerto: 192.168.x.x:PUERTO\'. Ingresa ese PUERTO abajo:</string>
+    <string name="pair_connection_port_hint">Puerto de Conexión (ej. 38491)</string>
+    <string name="pair_discovered_services">Servicios ADB Locales Detectados:</string>
+    <string name="pair_local_service_card_title">Servicio ADB Local (Automático por Notificación)</string>
+    <string name="pair_service_running_badge">Servicio Activo</string>
+    <string name="pair_service_stopped_badge">Servicio Detenido</string>
+    <string name="pair_btn_start_service">Iniciar Servicio de Búsqueda</string>
+    <string name="pair_btn_stop_service">Detener Servicio</string>
+    <string name="pair_service_steps">1. Se inició una notificación con \'Abrir App\'.\n2. Toca el botón de abajo para ir a Opciones de Desarrollador.\n3. Activa Depuración Inalámbrica -&gt; Toca \'Vincular dispositivo con código de vinculación\'.\n4. Escribe el código de 6 dígitos en la notificación y pulsa Enter.\n5. Toca \'Abrir App\' en la notificación para regresar aquí automáticamente.</string>
+
+    <!-- Remote Control Screen -->
+    <string name="remote_title">Control Remoto</string>
+    <string name="remote_tab_live">Control en Vivo</string>
+    <string name="remote_tab_terminal">Terminal</string>
+    <string name="remote_feature_tools">Herramientas Remotas</string>
+    <string name="remote_feature_tools_sub">Apps, Archivos, Pantalla, Ajustes rápidos y más</string>
+    <string name="remote_btn_back">Atrás</string>
+    <string name="remote_btn_home">Inicio</string>
+    <string name="remote_btn_recents">Recientes</string>
+    <string name="remote_mode_dpad">D-Pad</string>
+    <string name="remote_mode_touchpad">Panel Táctil</string>
+    <string name="remote_mode_numpad">Teclado Num</string>
+    <string name="remote_vol_down">Vol -</string>
+    <string name="remote_vol_mute">Silenciar</string>
+    <string name="remote_vol_up">Vol +</string>
+    <string name="remote_search">Buscar</string>
+    <string name="remote_notify">Notificar</string>
+    <string name="remote_screenshot">Captura</string>
+    <string name="remote_power_utilities">Utilidades de Energía</string>
+    <string name="remote_power_utilities_sub">Despertar, Bloqueo, Encendido, Brillo y Accesos</string>
+    <string name="remote_wake">Despertar</string>
+    <string name="remote_lock">Bloquear</string>
+    <string name="remote_power">Encendido</string>
+    <string name="remote_bright_plus">Brillo+</string>
+    <string name="remote_bright_minus">Brillo-</string>
+    <string name="remote_settings">Ajustes</string>
+    <string name="remote_voice">Voz</string>
+    <string name="remote_cut">Cortar</string>
+    <string name="remote_redo">Rehacer</string>
+    <string name="remote_undo">Deshacer</string>
+    <string name="remote_keyboard">Teclado</string>
+    <string name="remote_keyboard_placeholder">Escribe texto para enviar de forma remota...</string>
+    <string name="remote_special_keys">Teclas Especiales</string>
+    <string name="remote_key_enter">Enter</string>
+    <string name="remote_key_del">Borrar</string>
+    <string name="remote_key_tab">Tab</string>
+    <string name="remote_key_space">Espacio</string>
+    <string name="remote_key_esc">Esc</string>
+    <string name="remote_key_copy">Copiar</string>
+    <string name="remote_key_paste">Pegar</string>
+    <string name="remote_key_all">Todo</string>
+    <string name="remote_key_home">Inicio</string>
+    <string name="remote_key_end">Fin</string>
+    <string name="remote_key_pgup">RePág</string>
+    <string name="remote_key_pgdn">AvPág</string>
+    <string name="remote_disconnect_dialog_title">¿Desconectar Control Remoto?</string>
+    <string name="remote_disconnect_dialog_desc">¿Seguro que deseas desconectarte de este dispositivo?</string>
+
+    <!-- Terminal -->
+    <string name="terminal_title">Terminal</string>
+    <string name="terminal_placeholder">Ingresa un comando...</string>
+    <string name="terminal_quick_cmds">Comandos Rápidos</string>
+    <string name="terminal_clear">Limpiar</string>
+
+    <!-- App Manager -->
+    <string name="apps_title">Gestor de Apps</string>
+    <string name="apps_search_hint">Buscar por nombre o paquete...</string>
+    <string name="apps_tab_user">Apps de Usuario</string>
+    <string name="apps_tab_system">Apps del Sistema</string>
+    <string name="apps_launch">Abrir</string>
+    <string name="apps_uninstall">Desinstalar</string>
+    <string name="apps_disable">Deshabilitar</string>
+    <string name="apps_enable">Habilitar</string>
+    <string name="apps_clear_data">Borrar Datos</string>
+    <string name="apps_install_apk">Instalar APK</string>
+    <string name="apps_count">%1$d aplicaciones encontradas</string>
+    <string name="apps_include_system">Incluir Sistema</string>
+    <string name="apps_not_found">No se encontraron aplicaciones coincidentes</string>
+    <string name="apps_launch_action">Iniciar Aplicación</string>
+    <string name="apps_force_stop">Forzar Detención</string>
+    <string name="apps_clear_app_data">Borrar Datos de la Aplicación</string>
+    <string name="apps_extract_apk">Extraer APK a Descargas</string>
+    <string name="apps_extract_desc">Descarga el archivo APK a la carpeta Descargas de este dispositivo</string>
+    <string name="apps_uninstall_action">Desinstalar Aplicación</string>
+    <string name="apps_uninstall_title">¿Desinstalar %1$s?</string>
+    <string name="apps_uninstall_desc">Esto eliminará por completo %1$s del dispositivo remoto.</string>
+    <string name="operation_executing">Ejecutando en el dispositivo...</string>
+    <string name="operation_title">Operación Remota</string>
+
+    <!-- File Manager -->
+    <string name="files_title">Gestor de Archivos</string>
+    <string name="files_download">Descargar</string>
+    <string name="files_upload">Subir</string>
+    <string name="files_new_folder">Nueva Carpeta</string>
+    <string name="files_rename">Renombrar</string>
+    <string name="files_empty">No se encontraron archivos en esta carpeta</string>
+    <string name="files_copy_path">Copiar Ruta</string>
+    <string name="files_create_new_folder">Crear Nueva Carpeta</string>
+    <string name="files_folder_name">Nombre de Carpeta</string>
+    <string name="files_create">Crear</string>
+    <string name="files_delete_title">¿Eliminar Archivo/Carpeta?</string>
+    <string name="files_delete_desc">¿Seguro que deseas eliminar %1$s? Esta acción no se puede deshacer.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Panel del Dispositivo</string>
+    <string name="dashboard_battery">Batería</string>
+    <string name="dashboard_storage">Almacenamiento</string>
+    <string name="dashboard_memory">Memoria (RAM)</string>
+    <string name="dashboard_cpu">CPU</string>
+    <string name="dashboard_display">Pantalla</string>
+    <string name="dashboard_system_info">Información del Sistema</string>
+    <string name="dash_battery_diag">Diagnóstico de Batería</string>
+    <string name="dash_storage_diag">Almacenamiento y Particiones</string>
+    <string name="dash_memory_diag">Memoria (RAM)</string>
+    <string name="dash_cpu_diag">CPU y Arquitectura</string>
+    <string name="dash_display_diag">Pantalla y Densidad</string>
+    <string name="dash_system_diag">Sistema y Compilación</string>
+    <string name="dash_reboot_options">Opciones de Reinicio</string>
+
+    <!-- Processes -->
+    <string name="processes_title">Gestor de Procesos</string>
+    <string name="processes_search_hint">Filtrar procesos por nombre o PID...</string>
+    <string name="processes_kill">Terminar Proceso</string>
+    <string name="proc_kill_title">¿Terminar Proceso %1$s?</string>
+    <string name="proc_kill_desc">¿Seguro que deseas terminar el PID %1$s (%2$s)?</string>
+
+    <!-- Scripts -->
+    <string name="scripts_title">Automatización y Scripts</string>
+    <string name="scripts_new">Nuevo Script</string>
+    <string name="scripts_run">Ejecutar</string>
+    <string name="scripts_subtitle">Comandos ADB Predefinidos y Personalizados</string>
+    <string name="scripts_add_title">Agregar Nuevo Script</string>
+    <string name="scripts_title_hint">Título del Script (ej. Reiniciar a Bootloader)</string>
+    <string name="scripts_cmd_hint">Comando ADB (ej. reboot bootloader)</string>
+    <string name="scripts_cat_hint">Categoría (ej. Sistema, Red)</string>
+
+    <!-- Mirror & Notifications -->
+    <string name="mirror_title">Transmisión de Pantalla</string>
+    <string name="mirror_start">Iniciar Pantalla</string>
+    <string name="mirror_stop">Detener Pantalla</string>
+    <string name="mirror_live">En Vivo</string>
+    <string name="mirror_manual">Manual</string>
+    <string name="mirror_invert">Invertir Gestos</string>
+    <string name="mirror_capture">Capturar Pantalla</string>
+    <string name="notif_mirror_title">Espejo de Notificaciones</string>
+    <string name="notif_clear_all">Borrar Todas</string>
+    <string name="notif_no_items">No hay notificaciones capturadas</string>
+    <string name="notif_active_count">%1$d notificaciones activas</string>
+    <string name="notif_category_all">Todas</string>
+
+    <!-- Gallery -->
+    <string name="gallery_title">Galería Remota</string>
+    <string name="gallery_empty">No se encontraron archivos multimedia</string>
+    <string name="gallery_items_count">%1$d fotos y videos</string>
+
+    <!-- About Dialog -->
+    <string name="about_title">Acerca de banADB</string>
+    <string name="about_version">Versión 1.0.0 (Build 1)</string>
+    <string name="about_author">Autor</string>
+    <string name="about_contact">Contacto</string>
+    <string name="about_license">Licencia</string>
+    <string name="about_view_license_btn">Ver Términos de Licencia AGPL-3.0</string>
+    <string name="about_copyright">© 2026 baner. Todos los derechos reservados bajo AGPL-3.0.</string>
+    <string name="dialog_exit_title">¿Salir de banADB?</string>
+    <string name="dialog_exit_desc">¿Seguro que deseas cerrar banADB?</string>
+    <string name="btn_exit">Salir</string>
+
+    <!-- Power Menu Dialog -->
+    <string name="remote_power_menu_title">Opciones de Apagado</string>
+    <string name="remote_power_screen_off">Apagar Pantalla / Botón de Encendido</string>
+    <string name="remote_power_reboot">Reiniciar Dispositivo</string>
+    <string name="remote_power_bootloader">Reiniciar en Bootloader</string>
+    <string name="remote_power_recovery">Reiniciar en Recovery</string>
+
+    <!-- Clipboard Dialog -->
+    <string name="remote_clipboard_title">Administrador de Portapapeles</string>
+    <string name="remote_clipboard_device">Portapapeles del dispositivo remoto:</string>
+    <string name="remote_clipboard_paste">Pegar Teléfono</string>
+    <string name="remote_clipboard_send_label">Texto a enviar</string>
+    <string name="remote_clipboard_send_hint">Escribe o pega texto largo aquí...</string>
+    <string name="remote_clipboard_inject">Inyectar Directo</string>
+    <string name="remote_clipboard_set">Copiar a Remoto</string>
+
+    <!-- Quick Settings Dialog -->
+    <string name="remote_quick_settings_title">Ajustes Rápidos</string>
+    <string name="remote_qs_open_settings">Abrir Ajustes</string>
+    <string name="remote_qs_expand_panel">Desplegar Panel de Ajustes Rápidos</string>
+    <string name="remote_qs_wifi_on">Activar Wi-Fi</string>
+    <string name="remote_qs_bt_on">Activar Bluetooth</string>
+
+    <!-- Battery Status Dialog -->
+    <string name="remote_battery_title">Estado de la Batería</string>
+    <string name="remote_battery_level">Nivel: %1$d%%</string>
+    <string name="remote_battery_status">Estado: %1$s</string>
+    <string name="remote_battery_temp">Temperatura: %1$s°C</string>
+
+    <!-- Screenshot Preview Dialog -->
+    <string name="remote_screenshot_retake">Repetir</string>
+    <string name="remote_screenshot_save">Guardar</string>
+
+    <!-- Home Screen Additional -->
+    <string name="home_utilities">Utilidades del Dispositivo</string>
+    <string name="home_status_connected">Conectado</string>
+    <string name="home_status_connecting">Conectando...</string>
+    <string name="home_status_pairing">Emparejamiento en progreso...</string>
+    <string name="home_status_disconnected">No Conectado</string>
+    <string name="home_status_error">Error de Conexión</string>
+    <string name="home_btn_control">Controlar</string>
+
+    <!-- Additional Pairing Dialog strings -->
+    <string name="pair_port_5555_scan">Buscando dispositivos con Puerto 5555 en la red...</string>
+    <string name="pair_rescan_network">Re-escanear Red</string>
+    <string name="pair_direct_connect_5555">Entrada Directa de IP y Puerto</string>
+    <string name="pair_target_phone_ip">IP del Teléfono</string>
+    <string name="pair_pairing_port">Puerto de Vinculación</string>
+    <string name="pair_connect_port">Puerto de Conexión</string>
+    <string name="pair_connect_port_auto_hint">Auto / 38091</string>
+    <string name="pair_6digit_code">Código de Vinculación de 6 Dígitos</string>
+    <string name="pair_device_ip_address">Dirección IP del Dispositivo</string>
+    <string name="pair_port_default_5555">Puerto (por defecto 5555)</string>
+    <string name="pair_connect_device_btn">Conectar Dispositivo</string>
+    <string name="pair_local_adb_ready">Listo</string>
+    <string name="pair_start_local_service">Iniciar Servicio Local</string>
+    <string name="pair_open_dev_options">Abrir Opciones de Desarrollador</string>
+    <string name="pair_stop_local_service">Detener Servicio</string>
+    <string name="pair_manual_localhost">Emparejamiento Manual Localhost</string>
+    <string name="pair_target_interface">Interfaz de red:</string>
+    <string name="pair_pairing_with_local">Emparejando con Dispositivo Local...</string>
+    <string name="pair_pair_and_connect_local">Emparejar y Conectar Dispositivo Local</string>
+    <string name="pair_direct_adb_connect">Conexión Directa ADB</string>
+</resources>

@@ -20,9 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.ui.components.BanaTopBar
 import com.baner.banadb.ui.theme.*
@@ -49,7 +51,7 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "Device Dashboard",
+                title = stringResource(R.string.dashboard_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -57,7 +59,7 @@ fun DashboardScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
@@ -92,7 +94,7 @@ fun DashboardScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.BatteryChargingFull, contentDescription = null, tint = BananaGold)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Battery Diagnostics", style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.dash_battery_diag), style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
                         }
                         if (isRefreshing) {
                             CircularProgressIndicator(modifier = Modifier.size(16.dp), color = BananaGold, strokeWidth = 2.dp)
@@ -146,7 +148,7 @@ fun DashboardScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Smartphone, contentDescription = null, tint = CyberCyan)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Device Specifications", style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.dashboard_system_info), style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -175,7 +177,7 @@ fun DashboardScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.ContentPaste, contentDescription = null, tint = NeonEmerald)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Remote Clipboard", style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.remote_clipboard_title), style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
                         }
 
                         TextButton(
@@ -286,7 +288,7 @@ fun DashboardScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = StatusError)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Power & Reboot Controls", style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.dash_reboot_options), style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -302,7 +304,7 @@ fun DashboardScreen(
                             contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Reboot", fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.remote_power_reboot), fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
                         }
 
                         OutlinedButton(
@@ -312,7 +314,7 @@ fun DashboardScreen(
                             contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Recovery", fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.remote_power_recovery), fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
                         }
 
                         OutlinedButton(
@@ -322,7 +324,7 @@ fun DashboardScreen(
                             contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Bootloader", fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.remote_power_bootloader), fontSize = 11.sp, maxLines = 1, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
@@ -332,7 +334,7 @@ fun DashboardScreen(
 
     // Reboot confirmation dialog
     showRebootConfirm?.let { mode ->
-        val modeTitle = if (mode.isEmpty()) "Reboot Device" else "Reboot to $mode"
+        val modeTitle = if (mode.isEmpty()) stringResource(R.string.remote_power_reboot) else "${stringResource(R.string.remote_power_reboot)} ($mode)"
         AlertDialog(
             onDismissRequest = { showRebootConfirm = null },
             title = { Text(modeTitle) },
@@ -346,12 +348,12 @@ fun DashboardScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = StatusError)
                 ) {
-                    Text("Reboot Now", color = Color.White)
+                    Text(stringResource(R.string.remote_power_reboot), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRebootConfirm = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark

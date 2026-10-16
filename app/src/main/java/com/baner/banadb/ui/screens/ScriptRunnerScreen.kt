@@ -13,10 +13,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
 import com.baner.banadb.data.model.ScriptItem
 import com.baner.banadb.ui.components.BanaTopBar
@@ -40,7 +42,7 @@ fun ScriptRunnerScreen(
     Scaffold(
         topBar = {
             BanaTopBar(
-                title = "Automation & Scripts",
+                title = stringResource(R.string.scripts_title),
                 connectionState = connectionState,
                 onDisconnect = {
                     viewModel.disconnect()
@@ -48,7 +50,7 @@ fun ScriptRunnerScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = BananaGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.remote_btn_back), tint = BananaGold)
                     }
                 },
                 actions = {
@@ -63,8 +65,8 @@ fun ScriptRunnerScreen(
                 onClick = { showAddScriptDialog = true },
                 containerColor = BananaGold,
                 contentColor = BackgroundDark,
-                icon = { Icon(Icons.Default.Add, "Add Script", tint = BackgroundDark) },
-                text = { Text("New Script", color = BackgroundDark, fontWeight = FontWeight.Bold) }
+                icon = { Icon(Icons.Default.Add, contentDescription = null, tint = BackgroundDark) },
+                text = { Text(stringResource(R.string.scripts_new), color = BackgroundDark, fontWeight = FontWeight.Bold) }
             )
         },
         containerColor = BackgroundDark
@@ -76,7 +78,7 @@ fun ScriptRunnerScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Pre-built & Custom ADB Commands",
+                text = stringResource(R.string.scripts_subtitle),
                 color = TextSecondary,
                 fontSize = 13.sp
             )
@@ -170,13 +172,13 @@ fun ScriptRunnerScreen(
     if (showAddScriptDialog) {
         AlertDialog(
             onDismissRequest = { showAddScriptDialog = false },
-            title = { Text("Create Custom Script") },
+            title = { Text(stringResource(R.string.scripts_add_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = scriptTitle,
                         onValueChange = { scriptTitle = it },
-                        label = { Text("Script Title") },
+                        label = { Text(stringResource(R.string.scripts_title_hint)) },
                         placeholder = { Text("e.g. Force Dark Mode") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = BananaGold, focusedLabelColor = BananaGold)
@@ -184,7 +186,7 @@ fun ScriptRunnerScreen(
                     OutlinedTextField(
                         value = scriptCommand,
                         onValueChange = { scriptCommand = it },
-                        label = { Text("ADB Shell Command") },
+                        label = { Text(stringResource(R.string.scripts_cmd_hint)) },
                         placeholder = { Text("e.g. cmd uimode night yes") },
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = BananaGold, focusedLabelColor = BananaGold)
                     )
@@ -202,12 +204,12 @@ fun ScriptRunnerScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
                 ) {
-                    Text("Save", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save), color = BackgroundDark, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddScriptDialog = false }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark

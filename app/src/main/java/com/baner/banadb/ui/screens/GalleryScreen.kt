@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
+import com.baner.banadb.R
 import com.baner.banadb.data.model.RemoteMediaItem
 import com.baner.banadb.ui.theme.*
 import com.baner.banadb.ui.viewmodel.AdbViewModel
@@ -90,13 +92,13 @@ fun GalleryScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Remote Gallery",
+                            text = stringResource(R.string.gallery_title),
                             color = TextPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
                         Text(
-                            text = "${mediaItems.size} photos & videos",
+                            text = stringResource(R.string.gallery_items_count, mediaItems.size),
                             color = TextSecondary,
                             fontSize = 12.sp
                         )
@@ -106,7 +108,7 @@ fun GalleryScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.remote_btn_back),
                             tint = TextPrimary
                         )
                     }

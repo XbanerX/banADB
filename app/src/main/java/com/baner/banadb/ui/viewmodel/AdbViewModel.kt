@@ -53,6 +53,14 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
 
     val discoveredDevices = discoveryManager.discoveredDevices
 
+    private val _themeMode = MutableStateFlow(prefs.getThemeMode())
+    val themeMode: StateFlow<String> = _themeMode.asStateFlow()
+
+    fun setThemeMode(mode: String) {
+        prefs.setThemeMode(mode)
+        _themeMode.value = mode
+    }
+
     private val _savedDevices = MutableStateFlow<List<SavedDevice>>(emptyList())
     val savedDevices: StateFlow<List<SavedDevice>> = _savedDevices.asStateFlow()
 

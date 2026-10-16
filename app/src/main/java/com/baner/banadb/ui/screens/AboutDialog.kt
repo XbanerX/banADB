@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -35,14 +36,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.baner.banadb.R
+import com.baner.banadb.data.repository.DevicePreferences
 import com.baner.banadb.ui.theme.*
+import com.baner.banadb.ui.viewmodel.AdbViewModel
 
 @Composable
 fun AboutDialog(
+    viewModel: AdbViewModel? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     var showFullLicense by remember { mutableStateOf(false) }
+    val themeMode by (viewModel?.themeMode?.collectAsState() ?: remember { mutableStateOf(DevicePreferences.THEME_SYSTEM) })
 
     if (showFullLicense) {
         FullLicenseDialog(onDismiss = { showFullLicense = false })
@@ -71,7 +76,7 @@ fun AboutDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                     }
                 }
 
@@ -101,7 +106,7 @@ fun AboutDialog(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Autonomous & Wireless ADB Cockpit",
+                    text = stringResource(R.string.app_tagline),
                     color = TextMuted,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
@@ -118,14 +123,83 @@ fun AboutDialog(
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Version 1.0.0 (Build 1)",
+                        text = stringResource(R.string.about_version),
                         color = CyberCyan,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Theme Selector Card
+                if (viewModel != null) {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, SurfaceCardHover, RoundedCornerShape(16.dp))
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Outlined.Palette, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.theme_title), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                val themes: List<Triple<String, String, ImageVector>> = listOf(
+                                    Triple(DevicePreferences.THEME_SYSTEM, stringResource(R.string.theme_system), Icons.Default.BrightnessAuto),
+                                    Triple(DevicePreferences.THEME_LIGHT, stringResource(R.string.theme_light), Icons.Default.LightMode),
+                                    Triple(DevicePreferences.THEME_DARK, stringResource(R.string.theme_dark), Icons.Default.DarkMode)
+                                )
+                                themes.forEach { (mode, label, icon) ->
+                                    val selected = themeMode == mode
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(if (selected) CyberCyan.copy(alpha = 0.2f) else SurfaceDark)
+                                            .border(
+                                                1.dp,
+                                                if (selected) CyberCyan else SurfaceCardHover,
+                                                RoundedCornerShape(10.dp)
+                                            )
+                                            .clickable { viewModel?.setThemeMode(mode) }
+                                            .padding(vertical = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(
+                                                imageVector = icon,
+                                                contentDescription = label,
+                                                tint = if (selected) CyberCyan else TextSecondary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = label,
+                                                fontSize = 10.sp,
+                                                color = if (selected) CyberCyan else TextSecondary,
+                                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
 
                 // Metadata Info Card
                 Card(
@@ -138,7 +212,7 @@ fun AboutDialog(
                     Column(modifier = Modifier.padding(14.dp)) {
                         AboutInfoRow(
                             icon = Icons.Outlined.Person,
-                            label = "Author",
+                            label = stringResource(R.string.about_author),
                             value = "baner"
                         )
 
@@ -149,7 +223,7 @@ fun AboutDialog(
 
                         AboutInfoRow(
                             icon = Icons.Outlined.Email,
-                            label = "Contact",
+                            label = stringResource(R.string.about_contact),
                             value = "bandroid@banerxus.com",
                             isClickable = true,
                             onClick = {
@@ -172,7 +246,7 @@ fun AboutDialog(
 
                         AboutInfoRow(
                             icon = Icons.Outlined.Gavel,
-                            label = "License",
+                            label = stringResource(R.string.about_license),
                             value = "GNU AGPL v3.0",
                             isClickable = true,
                             onClick = { showFullLicense = true }
@@ -192,14 +266,14 @@ fun AboutDialog(
                 ) {
                     Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("View AGPL-3.0 License Terms", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.about_view_license_btn), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Bottom Copyright
                 Text(
-                    text = "© 2026 baner. All rights reserved under AGPL-3.0.",
+                    text = stringResource(R.string.about_copyright),
                     color = TextMuted,
                     fontSize = 10.sp,
                     textAlign = TextAlign.Center
@@ -303,7 +377,7 @@ private fun FullLicenseDialog(
                         fontSize = 16.sp
                     )
                     IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                     }
                 }
 
@@ -352,7 +426,7 @@ private fun FullLicenseDialog(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Close", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.close), color = BackgroundDark, fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,8 +42,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BanaAdbTheme {
-                val viewModel: AdbViewModel = viewModel()
+            val viewModel: AdbViewModel = viewModel()
+            val themeMode by viewModel.themeMode.collectAsState()
+            val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val isDark = when (themeMode) {
+                "LIGHT" -> false
+                "DARK" -> true
+                else -> isSystemDark
+            }
+            BanaAdbTheme(darkTheme = isDark) {
                 var showSplash by remember { mutableStateOf(true) }
                 var currentRoute by remember { mutableStateOf("home") }
                 var showPairingDialog by remember { mutableStateOf(false) }
@@ -173,8 +181,8 @@ class MainActivity : ComponentActivity() {
                         AlertDialog(
                             onDismissRequest = { showExitAppDialog = false },
                             icon = { Icon(Icons.Default.ExitToApp, contentDescription = null, tint = BananaGold, modifier = Modifier.size(32.dp)) },
-                            title = { Text("Exit banADB?", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp) },
-                            text = { Text("Are you sure you want to close banADB?", color = TextSecondary, fontSize = 14.sp) },
+                            title = { Text(stringResource(R.string.dialog_exit_title), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+                            text = { Text(stringResource(R.string.dialog_exit_desc), color = TextSecondary, fontSize = 14.sp) },
                             confirmButton = {
                                 Button(
                                     onClick = {
@@ -184,12 +192,12 @@ class MainActivity : ComponentActivity() {
                                     colors = ButtonDefaults.buttonColors(containerColor = StatusError),
                                     shape = RoundedCornerShape(10.dp)
                                 ) {
-                                    Text("Exit", color = Color.White, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.btn_exit), color = Color.White, fontWeight = FontWeight.Bold)
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showExitAppDialog = false }) {
-                                    Text("Cancel", color = TextSecondary)
+                                    Text(stringResource(R.string.cancel), color = TextSecondary)
                                 }
                             },
                             containerColor = SurfaceDark,

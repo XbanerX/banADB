@@ -145,8 +145,21 @@ class DevicePreferences(context: Context) {
         ScriptItem("p8", "Clear App Cache", "pm trim-caches 999M", "Apps", true)
     )
 
+    fun getThemeMode(): String {
+        return prefs.getString(KEY_THEME_MODE, "SYSTEM") ?: "SYSTEM"
+    }
+
+    fun setThemeMode(mode: String) {
+        prefs.edit().putString(KEY_THEME_MODE, mode).apply()
+    }
+
     companion object {
         private const val KEY_SAVED_DEVICES = "key_saved_devices"
         private const val KEY_CUSTOM_SCRIPTS = "key_custom_scripts"
+        private const val KEY_THEME_MODE = "key_theme_mode"
+
+        const val THEME_SYSTEM = "SYSTEM"
+        const val THEME_LIGHT = "LIGHT"
+        const val THEME_DARK = "DARK"
     }
 }
