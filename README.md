@@ -89,7 +89,7 @@ For step-by-step instructions on every feature, read the full [User Guide (USAGE
 ### GitHub Releases
 Pre-compiled, ready-to-install APKs are published on the releases page:
 
-👉 **[Download banADB from GitHub Releases](https://github.com/baner/banadb/releases)**
+👉 **[Download banADB from GitHub Releases](https://github.com/XbanerX/banADB/releases)**
 
 1. Download `banadb.apk` on your Android device.
 2. Open the downloaded file and grant permission to install unknown apps if prompted by your browser or file manager.
@@ -114,7 +114,7 @@ If you want to build banADB yourself or contribute to the project:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/baner/banadb.git
+   git clone https://github.com/XbanerX/banADB.git
    cd banadb
    ```
 
