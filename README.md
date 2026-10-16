@@ -14,7 +14,7 @@
   <a href="#features">Features</a> •
   <a href="USAGE.md">User Guide</a> •
   <a href="#building-from-source">Development</a> •
-  <a href="LICENSE">License</a>
+  <a href="#license">License</a>
 </p>
 
 ---
@@ -144,4 +144,7 @@ If you want to build banADB yourself or contribute to the project:
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
+
+Full license text is available locally in [LICENSE](./LICENSE) and [LICENSE.md](./LICENSE.md), or online at [gnu.org/licenses/agpl-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
+
