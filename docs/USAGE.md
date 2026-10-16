@@ -1,212 +1,213 @@
-# Manual de Uso de banADB
+# banADB User Guide
 
-Esta guía detalla el funcionamiento de cada una de las herramientas integradas en **banADB**, para qué sirve cada función y el procedimiento paso a paso para utilizarlas.
-
----
-
-## Índice
-
-1. [Preparación Inicial del Dispositivo Objetivo](#1-preparación-inicial-del-dispositivo-objetivo)
-2. [Conexión y Emparejamiento](#2-conexión-y-emparejamiento)
-   - [Emparejamiento en Android 11 o superior (Código de 6 dígitos)](#emparejamiento-en-android-11-o-superior-código-de-6-dígitos)
-   - [Conexión directa en Android 10 o inferior (Puerto 5555)](#conexión-directa-en-android-10-o-inferior-puerto-5555)
-   - [Conexión al propio dispositivo local](#conexión-al-propio-dispositivo-local)
-3. [Control Remoto en Vivo (Cockpit)](#3-control-remoto-en-vivo-cockpit)
-   - [Modo D-Pad](#modo-d-pad)
-   - [Modo Trackpad](#modo-trackpad)
-   - [Modo Numpad y Entrada de Texto](#modo-numpad-y-entrada-de-texto)
-   - [Botones de Sistema y Control de Volumen](#botones-de-sistema-y-control-de-volumen)
-4. [Galería Remota (Remote Gallery)](#4-galería-remota-remote-gallery)
-5. [Explorador de Archivos (File Manager)](#5-explorador-de-archivos-file-manager)
-6. [Gestor de Aplicaciones (App Manager)](#6-gestor-de-aplicaciones-app-manager)
-   - [Extraer APKs hacia tu teléfono](#extraer-apks-hacia-tu-teléfono)
-   - [Instalar APKs remotamente](#instalar-apks-remotamente)
-   - [Control de ciclo de vida (Lanzar, Detener, Limpiar, Desinstalar)](#control-de-ciclo-de-vida)
-7. [Espejo de Notificaciones (Notification Mirror)](#7-espejo-de-notificaciones-notification-mirror)
-8. [Puente de Portapapeles (Remote Clipboard)](#8-puente-de-portapapeles-remote-clipboard)
-9. [Terminal Interactiva y Scripts](#9-terminal-interactiva-y-scripts)
-10. [Diagnóstico de Batería y Hardware](#10-diagnóstico-de-batería-y-hardware)
-11. [Comportamiento en Segundo Plano y Desconexión](#11-comportamiento-en-segundo-plano-y-desconexión)
+A complete, practical reference manual explaining how each feature in **banADB** works, what it does, and how to use it step by step.
 
 ---
 
-## 1. Preparación Inicial del Dispositivo Objetivo
+## Table of Contents
 
-Para poder controlar un dispositivo Android de forma inalámbrica, ambos dispositivos deben estar conectados a la **misma red Wi-Fi** o compartir un punto de acceso (zona Wi-Fi móvil).
-
-En el teléfono o televisor que deseas controlar:
-1. Ve a **Ajustes** -> **Información del teléfono**.
-2. Toca 7 veces consecutivas sobre el **Número de compilación** hasta que aparezca el aviso de que las opciones de desarrollador están activas.
-3. Entra a **Ajustes** -> **Sistema** (o Ajustes adicionales) -> **Opciones de desarrollador**.
-4. Activa la casilla **Depuración por Wi-Fi** (o *Wireless Debugging*).
-   - En dispositivos de marcas como Xiaomi, Oppo o Realme, activa también la opción llamada **Depuración USB (ajustes de seguridad)** para permitir que los comandos de entrada (toques y teclas) sean aceptados.
-
----
-
-## 2. Conexión y Emparejamiento
-
-Al abrir banADB, la pantalla de inicio te mostrará tus dispositivos previamente guardados y el botón **+ Pair New Device**.
-
-### Emparejamiento en Android 11 o superior (Código de 6 dígitos)
-Android 11 en adelante utiliza TLS y puertos dinámicos para emparejar:
-
-1. En el teléfono objetivo, entra a la sección de **Depuración inalámbrica** y pulsa en **Emparejar dispositivo con código de vinculación**.
-2. Verás en pantalla una dirección IP, un puerto de emparejamiento (ej. `192.168.1.45:41235`) y un código numérico de 6 dígitos.
-3. En banADB, pulsa **+ Pair New Device**:
-   - **Detección mDNS:** Si tu red permite multidifusión, el teléfono aparecerá automáticamente en la lista. Toca sobre él, introduce el código de 6 dígitos y pulsa **Pair Code**.
-   - **Ingreso manual:** Si no aparece automáticamente, despliega la sección **Manual IP & Port Entry**, escribe la IP, el puerto de emparejamiento que muestra la pantalla y los 6 dígitos del código.
-4. Pulsa **Pair**. Una vez emparejado, banADB guardará la clave criptográfica y se conectará automáticamente.
-
-### Conexión directa en Android 10 o inferior (Puerto 5555)
-Dispositivos antiguos o teléfonos donde ya se ejecutó una vez el comando `adb tcpip 5555` escuchan permanentemente en el puerto 5555:
-
-1. Pulsa **+ Pair New Device** y ve a la pestaña **Android 10**.
-2. Escribe la IP del dispositivo y el puerto (por defecto `5555`).
-3. Pulsa **Connect**. En la pantalla del dispositivo objetivo aparecerá una ventana preguntando si permites la depuración desde esa clave; pulsa **Permitir siempre**.
-
-### Conexión al propio dispositivo local
-banADB puede conectarse a sí mismo (localhost) para tareas de automatización interna:
-1. En **+ Pair New Device**, selecciona la pestaña **Local (Host)**.
-2. Si tu teléfono tiene activa la depuración inalámbrica en el puerto 5555, presiona **Connect to 127.0.0.1:5555**.
+1. [Initial Target Device Setup](#1-initial-target-device-setup)
+2. [Connection & Pairing](#2-connection--pairing)
+   - [Android 11+ Wireless Pairing (6-Digit Code)](#android-11-wireless-pairing-6-digit-code)
+   - [Android 10 & Below Direct Connection (Port 5555)](#android-10--below-direct-connection-port-5555)
+   - [Local Host Loopback Connection](#local-host-loopback-connection)
+3. [Remote Cockpit (Live Control)](#3-remote-cockpit-live-control)
+   - [D-Pad Mode](#d-pad-mode)
+   - [Trackpad Mode](#trackpad-mode)
+   - [Numpad & Text Injection](#numpad--text-injection)
+   - [System Keys & Volume Bar](#system-keys--volume-bar)
+4. [Remote Gallery](#4-remote-gallery)
+5. [Remote File Manager](#5-remote-file-manager)
+6. [Application Manager](#6-application-manager)
+   - [Extracting APKs to Your Phone](#extracting-apks-to-your-phone)
+   - [Installing APKs Remotely](#installing-apks-remotely)
+   - [Lifecycle Controls (Launch, Force Stop, Clear Data, Uninstall)](#lifecycle-controls)
+7. [Notification Mirror](#7-notification-mirror)
+8. [Remote Clipboard Bridge](#8-remote-clipboard-bridge)
+9. [Interactive Terminal & Scripts](#9-interactive-terminal--scripts)
+10. [Battery & Device Diagnostics](#10-battery--device-diagnostics)
+11. [Background Service & Disconnection](#11-background-service--disconnection)
 
 ---
 
-## 3. Control Remoto en Vivo (Cockpit)
+## 1. Initial Target Device Setup
 
-Al conectar un dispositivo entrarás a la pantalla de control principal. Esta interfaz incluye una cruceta de navegación, un trackpad táctil y controles multimedia.
+To control another Android device over Wi-Fi, both devices must be connected to the **same local network** (or one connected to the other's portable Wi-Fi hotspot).
 
-### Modo D-Pad
-Ideal para Android TV, reproductores multimedia o navegar menús sin tocar la pantalla directamente:
-- **Flechas Direccionales:** Envían eventos `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT` y `DPAD_RIGHT`.
-- **Botón OK Central:** Ejecuta la acción de selección (`DPAD_CENTER` o `ENTER`).
-- **Respuesta táctil:** Cada pulsación genera vibración hápitca para confirmar el comando.
-
-### Modo Trackpad
-Convierte la pantalla de tu móvil en un ratón táctil para el dispositivo remoto:
-- **Tocar una vez:** Envía un toque en la posición relativa actual.
-- **Arrastrar el dedo:** Envía un deslizamiento suave (*swipe*) en la pantalla remota.
-- **Interruptor Invert (Invertir eje):** Por defecto el movimiento sigue el desplazamiento natural del dedo. Si prefieres que funcione como el desplazamiento inverso de una rueda de ratón, activa este interruptor.
-
-### Modo Numpad y Entrada de Texto
-- **Teclas numéricas (0-9):** Para introducir contraseñas, pines o canales en televisores.
-- **Campo de texto inferior:** Escribe cualquier texto o URL en la barra y presiona enviar para inyectarlo en el campo de texto activo del teléfono remoto mediante `input text`.
-
-### Botones de Sistema y Control de Volumen
-- **Fila de navegación rápida:**
-  - **Back:** Botón Atrás del sistema.
-  - **Home:** Va a la pantalla de inicio.
-  - **Recents:** Abre la vista de aplicaciones recientes o multitarea.
-- **Barra multimedia inferior:**
-  - **Bajar Volumen (Vol -)**
-  - **Silencio (Mute)**
-  - **Subir Volumen (Vol +)**
-  - **Reproducir / Pausar:** Envía la señal multimedia global para pausar música o videos.
+On the device you want to control (the target):
+1. Open **Settings** -> **About Phone**.
+2. Tap the **Build Number** 7 times until you see a message confirming Developer Options are enabled.
+3. Go to **Settings** -> **System** (or Additional Settings) -> **Developer Options**.
+4. Enable **Wireless Debugging** (Depuración por Wi-Fi).
+   - On devices running MIUI/HyperOS (Xiaomi), ColorOS (Oppo), or Realme UI, also toggle on **USB Debugging (Security Settings)** so the system allows incoming synthetic touch and key events.
 
 ---
 
-## 4. Galería Remota (Remote Gallery)
+## 2. Connection & Pairing
 
-Permite visualizar el contenido multimedia del teléfono remoto sin necesidad de transferir archivos pesados:
+When opening banADB, the Home screen displays previously connected devices and the floating **+ Pair New Device** button.
 
-- **Detección automática:** Escanea automáticamente las carpetas `DCIM/Camera`, `DCIM/Screenshots` y `Pictures/`.
-- **Filtros por pestaña:** Organiza rápidamente los archivos en **All**, **Camera** o **Screenshots**.
-- **Miniaturas optimizadas:** Genera vistas previas ligeras a través del canal ADB para que la galería cargue con fluidez.
-- **Identificación de Video:** Los archivos de video (`.mp4`, `.mkv`) muestran un indicador de duración y el botón de reproducción.
-- **Previsualización:** Al tocar cualquier foto, se abre un visor detallado donde puedes ver la imagen a mayor resolución, su peso exacto, fecha de captura y la opción de descargarla a tu teléfono.
+### Android 11+ Wireless Pairing (6-Digit Code)
+Android 11 and later enforces TLS encryption and dynamic pairing ports:
 
----
+1. On the target device, open **Wireless Debugging** settings and tap **Pair device with pairing code**.
+2. A popup will display an IP address, a pairing port (e.g. `192.168.1.45:41235`), and a 6-digit numeric code.
+3. In banADB, tap **+ Pair New Device**:
+   - **mDNS Auto-Discovery:** If your Wi-Fi router allows local multicast, the target phone will show up automatically in the list. Tap it, enter the 6-digit code, and tap **Pair Code**.
+   - **Manual Entry:** If it does not show up automatically, expand **Manual IP & Port Entry**, enter the target IP, the specific pairing port shown on the screen, and the 6-digit code.
+4. Tap **Pair**. Once paired, banADB stores the generated cryptographic keys and establishes the permanent ADB connection.
 
-## 5. Explorador de Archivos (File Manager)
+### Android 10 & Below Direct Connection (Port 5555)
+Legacy Android versions or devices that have already been put into TCP/IP mode via `adb tcpip 5555` listen on port 5555:
 
-Un administrador de archivos completo que opera directamente sobre el almacenamiento del dispositivo remoto (`/sdcard/`):
+1. Tap **+ Pair New Device** and switch to the **Android 10** tab.
+2. Enter the device IP and port (defaults to `5555`).
+3. Tap **Connect**. On the target phone's screen, an "Allow USB debugging?" dialog will appear; check **Always allow from this computer** and accept.
 
-- **Navegación por carpetas:** Toca cualquier carpeta para entrar en ella. La barra superior muestra la ruta actual y permite volver atrás en el árbol de directorios.
-- **Crear carpetas:** Toca el botón **+** en la esquina superior para crear un nuevo directorio remoto.
-- **Eliminar archivos:** El icono de papelera al lado de cada elemento elimina el archivo o carpeta tras una confirmación para evitar pérdidas accidentales.
-- **Visualización directa:** Al pulsar sobre una imagen, documento de texto o archivo compatible, banADB descarga una copia temporal en tu teléfono y la abre con tu visor predeterminado.
-- **Instalación de APKs:** Si tocas un archivo con extensión `.apk` dentro del explorador, la app te preguntará si deseas instalarlo de inmediato en el dispositivo remoto mediante `pm install -r`.
-
----
-
-## 6. Gestor de Aplicaciones (App Manager)
-
-Permite supervisar y gestionar todos los paquetes instalados en el dispositivo remoto.
-
-### Extraer APKs hacia tu teléfono
-Si quieres hacer una copia de seguridad de una app que está instalada en el dispositivo remoto:
-1. Localiza la aplicación en la lista (puedes usar el buscador por nombre o nombre de paquete).
-2. Toca el menú de tres puntos al lado de la app.
-3. Selecciona **Extract APK**.
-4. banADB obtendrá la ruta base del paquete mediante `pm path`, descargará el archivo APK y lo guardará en tu carpeta local de descargas (`/sdcard/Download/banADB/`).
-
-### Instalar APKs remotamente
-1. Pulsa el botón flotante **Install APK** en la esquina inferior.
-2. Selecciona un archivo `.apk` almacenado en tu teléfono local.
-3. banADB transferirá el archivo al teléfono remoto y ejecutará la instalación de forma silenciosa. Al concluir, recibirás una notificación de confirmación.
-
-### Control de ciclo de vida
-Desde el menú contextual de cada aplicación puedes:
-- **Lanzar App:** Abre la actividad principal de la app en la pantalla del dispositivo remoto.
-- **Forzar Detención (Force Stop):** Cierra inmediatamente el proceso de la app (`am force-stop`).
-- **Limpiar Datos (Clear Data):** Borra la memoria caché y datos de usuario de la app (`pm clear`), dejándola como recién instalada.
-- **Desinstalar:** Desinstala por completo la aplicación del sistema.
+### Local Host Loopback Connection
+banADB can connect to its own device to run scripts or automate local tasks:
+1. In **+ Pair New Device**, switch to the **Local (Host)** tab.
+2. Make sure Wireless Debugging is running on port 5555 on the phone.
+3. Tap **Connect to 127.0.0.1:5555**.
 
 ---
 
-## 7. Espejo de Notificaciones (Notification Mirror)
+## 3. Remote Cockpit (Live Control)
 
-Esta función te permite leer las notificaciones que están llegando al teléfono remoto sin tener que mirar su pantalla:
+Connecting to a device opens the Remote Control dashboard. This screen provides tactile input tools, multimedia controls, and access to all remote utilities.
 
-- **Lectura directa:** Extrae el título, texto descriptivo, aplicación remitente y hora de llegada de cada notificación activa.
-- **Filtros inteligentes:** Puedes filtrar las notificaciones por categorías:
-  - **Messages:** SMS, WhatsApp, Telegram, etc.
-  - **Social:** Redes sociales y avisos comunitarios.
-  - **Email:** Correos de Gmail, Outlook, etc.
-  - **System:** Notificaciones propias del sistema Android (batería, descargas, conexiones).
-- **Auto-Sync:** Activa el interruptor en la parte superior para que la lista se refresque automáticamente cada 5 segundos.
-- **Acciones:**
-  - **Copy:** Copia el texto íntegro de la notificación al portapapeles de tu teléfono.
-  - **Dismiss:** Descarta la notificación en el dispositivo remoto.
+### D-Pad Mode
+Ideal for Android TV boxes, media players, or navigating interface menus without a mouse cursor:
+- **Directional Arrows:** Send `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, and `DPAD_RIGHT` key events.
+- **Center OK Button:** Triggers selection (`DPAD_CENTER` / `ENTER`).
+- **Haptic Feedback:** Every button press emits subtle vibration to confirm the event was sent.
 
----
+### Trackpad Mode
+Converts your phone screen into a multi-touch touchpad for the target device:
+- **Tap:** Sends a click event at the corresponding relative coordinates on the remote display.
+- **Drag / Swipe:** Emits a continuous touch swipe across the remote screen.
+- **Invert Toggle:** By default, dragging follows direct finger movement. Toggle "Invert" if you prefer inverted scrolling (like a laptop touchpad scroll wheel).
 
-## 8. Puente de Portapapeles (Remote Clipboard)
+### Numpad & Text Injection
+- **Numeric Keys (0-9):** Quick entry for PINs, passwords, and channels.
+- **Text Bar:** Type or paste any string or URL and tap Send. banADB encodes the text and injects it into whatever input field is currently focused on the remote device via `input text`.
 
-Compartir textos largos, enlaces o contraseñas entre dos teléfonos suele ser incómodo. banADB incluye un puente bidireccional:
-
-- **Escribir en el remoto:** Pega o escribe el texto que deseas enviar en el campo superior y pulsa **Send to Remote Clipboard**. El contenido quedará listo para pegarse en cualquier app del dispositivo objetivo.
-- **Leer del remoto:** Pulsa **Read Remote Clipboard**. banADB consultará el contenido actual del portapapeles del teléfono remoto y te lo mostrará en pantalla con un botón para copiarlo a tu propio portapapeles.
-
----
-
-## 9. Terminal Interactiva y Scripts
-
-Para usuarios avanzados, administradores de sistemas y desarrolladores:
-
-- **Consola Shell:** Ubicada en la pestaña **Terminal**, te permite enviar cualquier comando POSIX o ADB shell directamente (`ls`, `top`, `logcat`, `dumpsys`, `am`, etc.).
-- **Atajos frecuentes:** Botones de un toque para comandos habituales:
-  - `pm list packages -3`: Lista todas las apps de terceros instaladas.
-  - `dumpsys battery`: Muestra el volcado completo del subsistema de energía.
-  - `getprop`: Consulta propiedades de compilación y hardware.
-- **Scripts Preconfigurados:** En el panel de herramientas, la sección **Scripts** te permite ejecutar secuencias de automatización almacenadas con un solo clic.
+### System Keys & Volume Bar
+- **System Navigation:**
+  - **Back:** Sends the Android Back button event.
+  - **Home:** Returns to the launcher home screen.
+  - **Recents:** Opens the recent apps / multitasking switcher.
+- **Bottom Bar:**
+  - **Volume Down (Vol -)**
+  - **Mute / Unmute**
+  - **Volume Up (Vol +)**
+  - **Play / Pause:** Global media playback toggle for audio and video apps.
 
 ---
 
-## 10. Diagnóstico de Batería y Hardware
+## 4. Remote Gallery
 
-En la sección **Battery** y **Status** del panel de herramientas:
-- **Batería:** Monitorea en tiempo real el porcentaje de carga, estado (cargando / descargando), temperatura del sensor térmico (en grados Celsius), voltaje en milivoltios y estado de degradación de la celda.
-- **Hardware y OS:** Informa la marca del dispositivo, modelo comercial, versión de Android instalada, nivel de API del SDK, resolución nativa del panel táctil y tiempo transcurrido desde el último encendido (*uptime*).
+Allows you to inspect photos, screenshots, and videos on the remote phone without transferring multi-gigabyte folders:
+
+- **Automatic Directory Scanning:** Scans standard media paths including `DCIM/Camera`, `DCIM/Screenshots`, and `Pictures/`.
+- **Category Filters:** Switch quickly between **All**, **Camera**, and **Screenshots**.
+- **Lightweight Thumbnails:** Streams compressed image thumbnails over ADB so the gallery loads quickly without choking your Wi-Fi bandwidth.
+- **Video Indicator:** Video files (`.mp4`, `.mkv`) display file size, timestamp, and a play overlay.
+- **Fullscreen Preview:** Tap any picture to open a high-res inspection dialog showing exact resolution, file size, date, and a download button to save a copy locally.
 
 ---
 
-## 11. Comportamiento en Segundo Plano y Desconexión
+## 5. Remote File Manager
 
-banADB está diseñado para no interrumpir tu trabajo cuando cambias de aplicación:
+A full-featured file manager operating on the remote filesystem (`/sdcard/`):
 
-- **Servicio Persistente:** Mientras estés conectado a un dispositivo, se mantendrá un servicio en primer plano con una notificación en la barra de estado. Esto evita que Android cierre la conexión TCP si abres otra app o bloqueas la pantalla.
-- **Gesto Atrás:** Al pulsar el botón de volver atrás desde la pantalla de control, la app te presentará tres opciones:
-  - **Desconectar:** Cierra la sesión ADB y regresa a la lista de dispositivos.
-  - **Mantener conectado:** Vuelve al menú principal pero conserva la conexión activa en segundo plano para que puedas reconectar al instante.
-  - **Cancelar:** Permanece en la pantalla de control remoto.
-- **Salida de la Aplicación:** Al presionar Atrás en la pantalla de inicio, se te solicitará confirmación antes de cerrar la aplicación para evitar salidas accidentales.
+- **Directory Tree:** Tap folders to navigate downward; use the path breadcrumb bar at the top to navigate back up.
+- **Folder Creation:** Tap the **+** folder icon in the top bar to create a new directory remotely.
+- **Deletion:** Tap the trash can icon next to any file or directory. A safety confirmation dialog prevents accidental deletion.
+- **File Preview:** Tapping images, text files, or logs downloads a temporary copy to your local device and opens it using your system's default viewer.
+- **APK Installation:** Tapping any `.apk` file inside the file manager prompts you to install it immediately on the remote device via `pm install -r`.
+
+---
+
+## 6. Application Manager
+
+Inspects and controls all packages installed on the remote device.
+
+### Extracting APKs to Your Phone
+If you want to backup or copy an app installed on the remote phone:
+1. Find the app in the list (use the search bar to filter by app name or package identifier).
+2. Tap the three-dot menu next to the application.
+3. Select **Extract APK**.
+4. banADB resolves the base path using `pm path`, pulls the APK file over ADB, and saves it in your local storage at `/sdcard/Download/banADB/`.
+
+### Installing APKs Remotely
+1. Tap the floating **Install APK** button in the lower-right corner.
+2. Select any `.apk` file stored on your local phone.
+3. banADB streams the package to the remote target's temporary directory and executes `pm install -r`. A status message confirms when installation finishes.
+
+### Lifecycle Controls
+From each app's contextual menu, you can also:
+- **Launch App:** Starts the application's default launcher activity on the remote phone.
+- **Force Stop:** Immediately kills all processes associated with the package (`am force-stop`).
+- **Clear Data:** Wipes the app's cache and user databases (`pm clear`), resetting it to a clean state.
+- **Uninstall:** Completely uninstalls the package from the device.
+
+---
+
+## 7. Notification Mirror
+
+Monitors incoming active notifications from the remote phone without needing physical access to its display:
+
+- **Notification Inspection:** Reads active notifications from the Android notification subsystem, extracting title, message text, originating app, and post time.
+- **Category Tabs:** Filter by message type:
+  - **Messages:** SMS, WhatsApp, Telegram, Signal, etc.
+  - **Social:** Social media platforms.
+  - **Email:** Gmail, Outlook, and mail clients.
+  - **System:** Android OS status notifications (charging, downloads, connectivity).
+- **Auto-Sync:** Toggle the switch at the top to automatically refresh active notifications every 5 seconds.
+- **Actions:**
+  - **Copy:** Copies the full notification content to your phone's clipboard.
+  - **Dismiss:** Cancels the notification on the remote device.
+
+---
+
+## 8. Remote Clipboard Bridge
+
+Share text, clipboard data, and long strings between devices:
+
+- **Send to Remote:** Type or paste text into the input field and tap **Send to Remote Clipboard**. The text is immediately placed into the target device's clipboard, ready to paste in any app.
+- **Read from Remote:** Tap **Read Remote Clipboard**. banADB queries the remote clipboard manager and displays the current string with a button to copy it locally.
+
+---
+
+## 9. Interactive Terminal & Scripts
+
+Designed for advanced users, system administrators, and power users:
+
+- **Shell Console:** Located in the **Terminal** tab, this lets you execute POSIX shell commands directly (`ls`, `top`, `logcat`, `dumpsys`, `am`, etc.).
+- **Quick Action Chips:** One-tap chips for common diagnostic tasks:
+  - `pm list packages -3`: Lists third-party installed packages.
+  - `dumpsys battery`: Prints detailed power subsystem metrics.
+  - `getprop`: Dumps system hardware and build properties.
+- **Custom Scripts:** The **Scripts** tool lets you store and execute multi-command batch workflows with a single press.
+
+---
+
+## 10. Battery & Device Diagnostics
+
+In the **Battery** and **Status** panels under Remote Feature Tools:
+- **Battery:** Displays real-time battery level, charging/discharging state, thermal temperature in °C, voltage in millivolts, and battery health condition.
+- **Hardware & OS:** Displays device manufacturer, marketing model, Android version, SDK API level, physical touchscreen resolution, and system uptime since last boot.
+
+---
+
+## 11. Background Service & Disconnection
+
+banADB maintains persistent connections to avoid accidental drops:
+
+- **Foreground Service:** While connected, a persistent notification runs in your phone's notification shade to ensure the Android system does not kill the TCP connection when you switch apps or lock your screen.
+- **Back Navigation Handling:** Pressing the Back button from the Remote Control cockpit displays a confirmation dialog with three options:
+  - **Disconnect:** Terminates the ADB session and returns to the home screen.
+  - **Stay Connected:** Returns to the home device list while leaving the background connection active so you can re-enter immediately without re-authenticating.
+  - **Cancel:** Dismisses the dialog and remains on the remote control screen.
+- **Exit Confirmation:** Pressing Back on the Home screen prompts for confirmation before closing the app.

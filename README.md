@@ -5,148 +5,143 @@
 </p>
 
 <p align="center">
-  <b>Control remoto ADB inalámbrico y gestor integral de Android a Android.</b><br>
-  Sin necesidad de PC. Sin necesidad de root.
+  <b>Wireless Android-to-Android ADB remote cockpit & device manager.</b><br>
+  No computer required. No root needed.
 </p>
 
 <p align="center">
-  <a href="#descarga-e-instalación">Descargas</a> •
-  <a href="#características">Características</a> •
-  <a href="USAGE.md">Guía de Uso</a> •
-  <a href="#compilación-y-desarrollo">Desarrollo</a> •
-  <a href="LICENSE">Licencia</a>
+  <a href="#downloads--installation">Downloads</a> •
+  <a href="#features">Features</a> •
+  <a href="USAGE.md">User Guide</a> •
+  <a href="#building-from-source">Development</a> •
+  <a href="LICENSE">License</a>
 </p>
 
 ---
 
-## Capturas de Pantalla
+## Screenshots
 
-| Dispositivos y Home | Emparejamiento Inalámbrico | Control Remoto (D-Pad) |
+| Devices & Home | Wireless Pairing | Remote Control (D-Pad) |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/01_home.png" width="240" /> | <img src="docs/screenshots/02_pairing.png" width="240" /> | <img src="docs/screenshots/03_remote_dpad.png" width="240" /> |
 
-| Modo Trackpad | Panel de Herramientas | Galería Remota con Miniaturas |
+| Trackpad Mode | Feature Tools Panel | Remote Gallery & Thumbnails |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/04_remote_touchpad.png" width="240" /> | <img src="docs/screenshots/05_remote_tools.png" width="240" /> | <img src="docs/screenshots/06_gallery.png" width="240" /> |
 
-| Gestor de Archivos | Administrador de Apps | Espejo de Notificaciones |
+| Remote File Manager | App Manager (APK Install/Extract) | Notification Mirror |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/07_files.png" width="240" /> | <img src="docs/screenshots/08_apps.png" width="240" /> | <img src="docs/screenshots/09_notifications.png" width="240" /> |
 
 ---
 
-## ⚡ Características
+## Features
 
-- **Emparejamiento Inalámbrico (Android 11+):**
-  - Detección automática por mDNS de teléfonos con Depuración Inalámbrica activa.
-  - Emparejamiento en un paso con código de 6 dígitos.
-  - Soporte para emparejamiento manual ingresando IP y puerto asignado.
-- **Conexión Clásica (Android 10 o inferior):**
-  - Conexión directa al puerto ADB `5555` (para dispositivos configurados previamente con `adb tcpip 5555` o dispositivos rooteados).
-  - Conexión local al propio dispositivo (`127.0.0.1:5555`).
-- **Control Remoto Interactivo:**
-  - **Modo D-Pad:** Cruceta táctil de cuatro direcciones y botón central OK para navegación rápida en Android TV, cajas inteligentes o teléfonos.
-  - **Modo Trackpad:** Superficie táctil que traduce deslizamientos y toques en eventos de puntero reales sobre la pantalla remota (con opción de invertir eje).
-  - **Modo Numpad:** Teclado numérico y barra de inyección de texto directo.
-  - **Botones de sistema:** Atrás, Inicio, Recientes, Encendido, Volumen (+ / - / Silencio) y Controles Multimedia.
-- **Galería Remota con Miniaturas:**
-  - Explora fotos y videos remotos en `DCIM/` y `Pictures/` sin necesidad de descargarlos manualmente.
-  - Miniaturas cargadas en streaming ligero para no saturar la red Wi-Fi.
-  - Vista previa a pantalla completa y visor de detalles (resolución, tamaño, fecha).
-- **Gestor de Archivos Remoto:**
-  - Navegación rápida por el almacenamiento interno (`/sdcard`).
-  - Creación de carpetas, borrado de archivos e inspección de tamaños y fechas.
-  - Descarga y visualización directa de archivos en el teléfono local.
-  - Detección de archivos `.apk` para instalarlos remotamente con un toque.
-- **Administrador de Aplicaciones:**
-  - Listado de apps instaladas con filtro rápido (todas o solo de usuario).
-  - Lanzar apps, forzar detención (*Force Stop*) y limpiar datos/caché remotamente.
-  - **Extracción de APK:** Descarga el archivo APK de cualquier aplicación del teléfono remoto a tu almacenamiento local.
-  - **Instalación de APK:** Selecciona un APK de tu teléfono y envíalo a instalar en el remoto.
-- **Espejo de Notificaciones Remotas:**
-  - Lee las notificaciones activas del teléfono objetivo clasificadas por categoría (mensajería, redes, sistema).
-  - Modo Auto-Sync con actualización periódica en vivo.
-  - Botón para copiar el texto de la notificación o descartarla remotamente.
-- **Puente de Portapapeles (Clipboard):**
-  - Lee lo que hay actualmente en el portapapeles del teléfono remoto.
-  - Envía textos largos directamente al portapapeles remoto sin complicaciones.
-- **Terminal ADB y Scripts Rápidos:**
-  - Consola interactiva para ejecutar comandos `sh` y `adb shell`.
-  - Atajos rápidos para comandos frecuentes (`pm list packages`, `dumpsys battery`, `getprop`, `top`, `logcat`, etc.).
-  - Gestor de scripts para automatizar tareas repetitivas.
-- **Diagnóstico y Estado del Sistema:**
-  - Lectura en tiempo real de batería (temperatura en °C, voltaje, porcentaje y estado de salud).
-  - Especificaciones del dispositivo (fabricante, modelo, versión de Android, API, resolución de pantalla, uptime).
-- **Servicio en Segundo Plano:**
-  - Mantiene la sesión ADB activa con una notificación persistente, evitando que el sistema cierre la conexión al cambiar de app.
+- **Wireless Pairing (Android 11+):**
+  - Automatic local network discovery via mDNS.
+  - Quick pairing with standard 6-digit Wi-Fi pairing code.
+  - Manual IP and port input support for custom networks.
+- **Classic ADB Connection (Android 10 & below):**
+  - Connect directly to port `5555` on rooted devices or devices pre-configured with `adb tcpip 5555`.
+  - Local loopback connection support (`127.0.0.1:5555`) to control or script the host phone itself.
+- **Interactive Remote Cockpit:**
+  - **D-Pad Mode:** 4-way directional pad with center OK button for menu navigation, smart TVs, or media boxes.
+  - **Trackpad Mode:** Touch surface mapping swipes and taps to cursor touch events on the remote screen, with an invert scroll/drag toggle.
+  - **Numpad & Text Injection:** Numeric keypad for PINs plus a direct text input field (`input text`) to send long URLs and strings without manual typing.
+  - **System Navigation Keys:** Dedicated buttons for Back, Home, Recents, Power, Volume (+ / - / Mute), and Media Play/Pause.
+- **Remote Gallery with Live Thumbnails:**
+  - Browse photos and videos stored in `DCIM/` and `Pictures/` without downloading entire files first.
+  - Fast thumbnail generation streamed over ADB.
+  - Fullscreen preview with media metadata (dimensions, file size, timestamp).
+- **Remote File Explorer:**
+  - Browse internal storage (`/sdcard`) with breadcrumb navigation.
+  - Create directories, delete files/folders, and inspect sizes and dates.
+  - Download and open files locally with your device's default viewers.
+  - One-tap APK installation directly from the file browser.
+- **Application Manager:**
+  - Search installed apps with quick filters (all packages vs. user-installed only).
+  - Launch apps, force stop, or clear application data remotely.
+  - **APK Extraction:** Pull the base APK file from the remote target directly into your local `/sdcard/Download/banADB/` folder.
+  - **Remote APK Installation:** Pick any APK file from your phone and install it remotely via ADB package manager (`pm install -r`).
+- **Live Notification Mirroring:**
+  - View incoming active notifications from the remote phone sorted by category (Messages, Social, Email, System).
+  - Auto-Sync mode refreshing every 5 seconds.
+  - Copy notification text or dismiss notifications remotely.
+- **Clipboard Bridge:**
+  - Inspect current clipboard contents on the remote phone.
+  - Push clipboard text from your device directly into the remote clipboard.
+- **Terminal & Fast Scripts:**
+  - Built-in interactive console for custom `sh` and `adb shell` commands.
+  - Quick-action chips for frequent queries (`pm list packages`, `dumpsys battery`, `getprop`, `logcat`, etc.).
+  - Save and run custom shell scripts.
+- **Battery & Device Diagnostics:**
+  - Real-time battery stats: percentage, charging status, temperature in °C, voltage, and health.
+  - Hardware specs: manufacturer, model, Android version, SDK level, display resolution, and uptime.
+- **Foreground Connection Service:**
+  - Persistent background service keeps the ADB socket open when switching between apps or locking the screen.
 
-Para ver instrucciones detalladas de cada función, consulta el [Manual de Uso (USAGE.md)](USAGE.md).
+For step-by-step instructions on every feature, read the full [User Guide (USAGE.md)](USAGE.md).
 
 ---
 
-## 📥 Descarga e Instalación
+## Downloads & Installation
 
-### Desde GitHub Releases
-La forma recomendada de instalar banADB es descargar el paquete APK firmado más reciente directamente desde la página de versiones:
+### GitHub Releases
+Pre-compiled, ready-to-install APKs are published on the releases page:
 
-👉 **[Descargar banADB en GitHub Releases](https://github.com/baner/banadb/releases)**
+👉 **[Download banADB from GitHub Releases](https://github.com/baner/banadb/releases)**
 
-1. Descarga el archivo `banadb.apk` en tu dispositivo Android.
-2. Abre el archivo descargado y autoriza la instalación desde tu navegador o explorador de archivos.
-3. ¡Listo! Abre banADB y comienza a emparejar tus dispositivos.
+1. Download `banadb.apk` on your Android device.
+2. Open the downloaded file and grant permission to install unknown apps if prompted by your browser or file manager.
+3. Launch banADB and start pairing your devices.
 
 ### F-Droid
-> ⏳ **Próximamente disponible en F-Droid:** Se está preparando la inclusión en el repositorio oficial de F-Droid para permitir instalaciones y actualizaciones automáticas con código 100% abierto.
+> ⏳ **Coming soon to F-Droid:** Inclusion in the official F-Droid repository is currently in progress for automated open-source updates.
 
 ---
 
-## 🛠️ Compilación y Desarrollo
+## Building from Source
 
-Si deseas compilar la aplicación tú mismo o contribuir al código fuente, sigue estos pasos:
+If you want to build banADB yourself or contribute to the project:
 
-### Requisitos Previos
-- **Git** instalado en tu sistema.
-- **JDK 17** (OpenJDK 17 recomendado).
-- **Android SDK** con herramientas de compilación (`build-tools 34.0.0` o superior).
-- Acceso a internet para que Gradle descargue las dependencias.
+### Prerequisites
+- **Git**
+- **JDK 17** (OpenJDK 17 recommended)
+- **Android SDK** with build tools (API level 34+)
+- Internet connection for Gradle dependencies
 
-### Pasos para Compilar
+### Compilation Steps
 
-1. **Clonar el repositorio:**
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/baner/banadb.git
    cd banadb
    ```
 
-2. **Configurar el entorno Java:**
-   Asegúrate de que `JAVA_HOME` apunte a Java 17:
+2. **Set your Java path:**
+   Make sure `JAVA_HOME` points to your JDK 17 installation:
    ```bash
    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
    ```
 
-3. **Compilar el APK de depuración:**
+3. **Build the debug APK:**
    ```bash
    ./gradlew assembleDebug
    ```
 
-4. **Ubicación del APK resultante:**
-   Una vez concluida la compilación exitosamente, encontrarás el archivo APK en:
+4. **Locate the APK:**
+   Once compilation completes, the APK is located at:
    ```
    app/build/outputs/apk/debug/app-debug.apk
    ```
 
-5. **Instalar en un teléfono conectado:**
-   Puedes instalarlo directamente en tu dispositivo conectado por cable USB o Wi-Fi:
+5. **Install on a test device:**
    ```bash
    adb install -r app/build/outputs/apk/debug/app-debug.apk
    ```
 
 ---
 
-## 📄 Licencia y Créditos
+## License
 
-- **Proyecto:** banADB
-- **Versión:** 1.0.0 (Build 1)
-- **Autor:** baner
-- **Contacto:** [bandroid@banerxus.com](mailto:bandroid@banerxus.com)
-- **Licencia:** Distribuido bajo los términos de la [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
