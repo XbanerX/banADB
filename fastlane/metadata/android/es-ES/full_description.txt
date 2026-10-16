@@ -1,0 +1,18 @@
+banADB es una herramienta de código abierto para control remoto y gestión inalámbrica de dispositivos Android a través del protocolo ADB. Te permite operar, diagnosticar y transferir archivos a otro dispositivo Android a través de tu red Wi-Fi local sin necesidad de ordenador ni permisos de root.
+
+Características principales:
+* Emparejamiento inalámbrico (Android 11+): Detección automática mDNS y emparejamiento con código de 6 dígitos.
+* Conexión ADB clásica (Android 10 o inferior): Conexión directa al puerto 5555 o al propio teléfono (127.0.0.1:5555).
+* Panel de Control Remoto interactivo:
+  - Cruceta D-Pad táctil con botón OK central y respuesta háptica.
+  - Trackpad multitáctil con desplazamiento relativo e inversión de arrastre.
+  - Teclado numérico y barra de inyección directa de texto.
+  - Teclas de navegación del sistema (Atrás, Inicio, Recientes, Encendido) y barra multimedia de volumen y reproducción.
+* Galería Remota: Visualiza fotos y videos en DCIM/Pictures con miniaturas en streaming y vista previa a pantalla completa.
+* Gestor de Archivos Remoto: Explora /sdcard, descarga y abre archivos, crea carpetas e instala paquetes APK directamente.
+* Administrador de Aplicaciones: Búsqueda de apps instaladas, extracción de APKs al almacenamiento local e instalación remota.
+* Espejo de Notificaciones: Lectura en tiempo real de notificaciones activas con filtros por categoría y sincronización automática.
+* Puente de Portapapeles: Lee y escribe en el portapapeles remoto sin permisos root.
+* Terminal y Scripts rápidos: Consola interactiva para comandos ADB y chips de acciones frecuentes.
+* Diagnósticos: Monitoreo en tiempo real de batería (temperatura en °C, voltaje, salud) y especificaciones de hardware.
+* Servicio en primer plano: Mantiene la conexión ADB activa al cambiar de aplicación.

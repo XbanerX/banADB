@@ -1,0 +1,18 @@
+banADB is an open-source wireless ADB remote control cockpit and device manager for Android. It lets you remotely operate, diagnose, and transfer files to another Android device over Wi-Fi without needing a computer or root privileges.
+
+Features:
+* Wireless Pairing (Android 11+): Automatic mDNS discovery & 6-digit Wi-Fi pairing code support.
+* Legacy ADB (Android 10 & below): Connect directly to port 5555 or loopback localhost (127.0.0.1:5555).
+* Interactive Remote Cockpit:
+  - Tactile D-Pad with center OK button and haptic feedback.
+  - Multi-touch Trackpad surface with optional inverted drag.
+  - Numeric keypad and direct text injection field.
+  - System navigation (Back, Home, Recents, Power) and dedicated volume/media playback bar.
+* Remote Gallery: Browse DCIM/Pictures with lightweight streaming thumbnails and full-screen preview.
+* Remote File Manager: Browse /sdcard, download and inspect files, create directories, and install APKs.
+* Application Manager: Search installed apps, extract base APKs to local storage, and install APKs remotely.
+* Live Notification Mirroring: Real-time inspection of active notifications with category filters and auto-sync.
+* Remote Clipboard Bridge: Read and send clipboard data without root.
+* Terminal & Fast Scripts: Interactive shell console with quick-action chips for frequent ADB commands.
+* Diagnostics: Real-time battery status (temp in °C, voltage, health) and hardware specifications.
+* Foreground Connection Service: Keeps your ADB session active when switching between apps.

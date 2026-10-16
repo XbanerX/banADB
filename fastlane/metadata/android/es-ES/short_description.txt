@@ -1,0 +1,1 @@
+Control remoto ADB inalámbrico y gestor de dispositivos Android a Android. Sin PC ni root.
