@@ -230,6 +230,7 @@
     <string name="about_title">About banADB</string>
     <string name="about_version">Version 1.0.0 (Build 1)</string>
     <string name="about_author">Author</string>
+    <string name="about_github">GitHub</string>
     <string name="about_contact">Contact</string>
     <string name="about_license">License</string>
     <string name="about_view_license_btn">View AGPL-3.0 License Terms</string>
@@ -300,4 +301,256 @@
     <string name="pair_pairing_with_local">Pairing with Local Device...</string>
     <string name="pair_pair_and_connect_local">Pair &amp; Connect Local Device</string>
     <string name="pair_direct_adb_connect">Direct ADB Connect</string>
+
+    <!-- General Actions -->
+    <string name="copy">Copy</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="refresh">Refresh</string>
+
+    <!-- Additional Feature Tools -->
+    <string name="tool_clipboard">Clipboard</string>
+    <string name="tool_quick_set">Quick Set</string>
+    <string name="tool_battery">Battery</string>
+    <string name="tool_screenshot">Screenshot</string>
+
+    <!-- Pairing Screen & Local Discovery -->
+    <string name="pair_discovered_pairing_title">Discovered Pairing Devices (6-Digit Code):</string>
+    <string name="pair_tap_enter_code">Tap to enter 6-Digit Pairing Code</string>
+    <string name="pair_pairing_with_target">Pairing with %1$s:%2$d</string>
+    <string name="pair_enter_code_label">Enter 6-Digit Wi-Fi Pairing Code:</string>
+    <string name="pair_hide_manual_entry">Hide Manual Entry</string>
+    <string name="pair_discovered_adb10_title">Discovered Android 10 Devices (Port 5555):</string>
+    <string name="pair_local_connected">Connected: %1$s</string>
+    <string name="pair_local_disconnected">Local ADB: Disconnected</string>
+    <string name="pair_scanning">Scanning...</string>
+    <string name="pair_no_local_services">No local services detected yet. Tap \'Auto-Scan\' or turn ON Wireless Debugging.</string>
+    <string name="pair_service_active">Service Active: %1$s</string>
+    <string name="pair_discovered_port">Discovered Pairing Port: %1$d</string>
+    <string name="pair_overlay_enabled">Auto-Return to App Enabled</string>
+    <string name="pair_allow_overlay">Allow Auto-Return to App (Overlay)</string>
+    <string name="pair_hide_manual_local">Hide Manual Local Pairing</string>
+    <string name="pair_show_manual_local">Manual Local Pairing (Split-Screen)</string>
+    <string name="pair_6digits_placeholder">6 digits</string>
+    <string name="pair_conn_port_main_screen">Connection Port (Settings)</string>
+    <string name="pair_error_prefix">Error: %1$s</string>
+
+    <!-- Toasts -->
+    <string name="toast_pairing_service_started">Pairing service started! Check notifications.</string>
+    <string name="toast_could_not_open_settings">Could not open Settings</string>
+    <string name="toast_pairing_service_stopped">Pairing service stopped</string>
+    <string name="toast_invalid_pairing_input">Enter a valid pairing port and 6-digit code</string>
+    <string name="toast_paired_and_connected">Paired and connected to local device!</string>
+    <string name="toast_capturing_screenshot">Capturing screenshot...</string>
+    <string name="toast_clipboard_updated">Remote clipboard updated</string>
+    <string name="toast_copied_to_phone">Copied to phone clipboard</string>
+    <string name="toast_pasted_from_phone">Pasted from phone clipboard</string>
+    <string name="toast_phone_clipboard_empty">Phone clipboard is empty</string>
+    <string name="toast_text_injected">Text injected into target focus</string>
+    <string name="toast_remote_clipboard_set">Target clipboard set</string>
+    <string name="toast_remote_clipboard_failed">Target clipboard failed</string>
+    <string name="toast_retaking_screenshot">Retaking...</string>
+    <string name="toast_saved_to_gallery">Saved to Gallery: %1$s</string>
+    <string name="toast_remote_clipboard_fetched">Remote clipboard fetched</string>
+    <string name="toast_failed">Failed</string>
+    <string name="toast_could_not_open_file">Could not open file: %1$s</string>
+    <string name="toast_fetch_file_failed">Failed to fetch file from remote device</string>
+    <string name="toast_saved_to_downloads">Saved to Downloads: %1$s</string>
+    <string name="toast_download_failed">Download failed</string>
+    <string name="toast_copied_content">Copied content to clipboard</string>
+    <string name="toast_saved_to_pictures">Saved to Pictures/banADB!</string>
+    <string name="toast_loading_file_first">Loading file first...</string>
+    <string name="toast_no_app_play_media">No app available to play media</string>
+    <string name="toast_cannot_share">Cannot share file: %1$s</string>
+    <string name="toast_copied_notification">Copied notification text</string>
+    <string name="toast_dismissing_notification">Dismissing notification...</string>
+
+    <!-- Remote & Dashboard Extras -->
+    <string name="remote_tools_collapse">Tap to collapse tools grid</string>
+    <string name="remote_clipboard_empty_or_protected">(Remote clipboard is empty or protected)</string>
+    <string name="remote_clipboard_tip">Tip: \'Inject Direct\' types directly into active remote input field. \'Set Remote\' sets the target clipboard buffer.</string>
+    <string name="screenshot_captured_title">Screenshot Captured</string>
+    <string name="disconnect_dialog_title">Disconnect from device?</string>
+    <string name="disconnect_dialog_desc">Are you sure you want to disconnect from %1$s and return to the home screen?</string>
+    <string name="dash_clip_placeholder">Paste or type text to sync...</string>
+    <string name="dash_get_remote">Get Remote</string>
+    <string name="dash_send_clip">Send Clip</string>
+    <string name="dash_inject">Inject</string>
+    <string name="remote_reboot_confirm_desc">Are you sure you want to reboot the remote device? The ADB connection will be closed.</string>
+
+    <!-- File Manager -->
+    <string name="files_dir_empty">Directory is empty</string>
+    <string name="files_action_open">View / Open File</string>
+    <string name="files_action_save_downloads">Save to Downloads</string>
+    <string name="files_action_delete">Delete File</string>
+    <string name="files_image_decode_failed">Failed to decode image</string>
+    <string name="files_open_with">Open With</string>
+    <string name="files_copy_all">Copy All</string>
+
+    <!-- Gallery -->
+    <string name="gallery_scanning">Scanning remote media files...</string>
+    <string name="gallery_no_media_cat">No %1$s media found on remote phone.</string>
+    <string name="gallery_no_media">No media files found on remote phone.</string>
+    <string name="gallery_delete_title">Delete Remote Media?</string>
+    <string name="gallery_delete_desc">Are you sure you want to permanently delete \"%1$s\" from the remote phone?</string>
+    <string name="gallery_video_preview">Video Preview</string>
+    <string name="gallery_photo_preview">Photo Preview</string>
+    <string name="gallery_loading_preview">Loading preview from remote...</string>
+    <string name="gallery_tap_to_play">Tap to Play Video</string>
+    <string name="gallery_cannot_render">Cannot render image preview</string>
+    <string name="gallery_preview_unavailable">Preview unavailable</string>
+    <string name="gallery_path_label">Path: %1$s</string>
+    <string name="gallery_size_label">Size: %1$s</string>
+    <string name="gallery_date_label">Date: %1$s</string>
+    <string name="gallery_save_to_phone">Save to Phone</string>
+
+    <!-- Notification Mirror -->
+    <string name="notif_auto_sync_title">Live Auto-Sync (5s)</string>
+    <string name="notif_auto_sync_desc">Real-time mirror from remote target phone</string>
+    <string name="notif_search_placeholder">Search notifications, apps, titles...</string>
+    <string name="notif_empty_filters">No notifications match your filters.</string>
+    <string name="notif_empty_active">No active notifications on remote phone.</string>
+
+    <!-- Process Manager -->
+    <string name="processes_running_count">%1$d processes running</string>
+    <string name="processes_no_matching">No matching processes</string>
+    <string name="processes_kill_action">Kill Process</string>
+
+    <!-- Screen Mirror -->
+    <string name="mirror_capturing">Capturing remote screen...</string>
+    <string name="mirror_no_frame">No frame captured yet</string>
+    <string name="mirror_tap_to_start">Tap refresh or live to start</string>
+
+    <!-- Script Runner -->
+    <string name="scripts_title_placeholder">e.g. Force Dark Mode</string>
+    <string name="scripts_cmd_placeholder">e.g. cmd uimode night yes</string>
+
+    <!-- Trackpad &amp; Gestures -->
+    <string name="trackpad_invert_on">Invert: ON</string>
+    <string name="trackpad_invert_off">Invert: OFF</string>
+    <string name="trackpad_touch_surface">Trackpad Touch Surface</string>
+    <string name="trackpad_gesture_hint">Tap to Click • Drag to Swipe</string>
+    <string name="trackpad_tap_btn">Tap</string>
+
+    <!-- App Manager -->
+    <string name="apps_badge_system">SYSTEM</string>
+
+    <!-- System Notifications &amp; Services -->
+    <string name="notif_pairing_active_title">banADB Local Pairing Active</string>
+    <string name="notif_pairing_active_desc">Open Dev Options -&gt; Wireless Debugging -&gt; \'Pair device with pairing code\'</string>
+    <string name="notif_pairing_detected_title">Pairing Service Detected! (Port %1$d)</string>
+    <string name="notif_pairing_detected_desc">Tap \'Enter Code\' below to submit the 6-digit pairing code</string>
+    <string name="notif_action_dev_options">Dev Options</string>
+    <string name="notif_action_enter_code">Enter Code</string>
+    <string name="notif_action_stop">Stop</string>
+    <string name="notif_action_open_app">Open App</string>
+    <string name="notif_paired_success_title">Paired Successfully!</string>
+    <string name="notif_paired_success_desc">Open banADB to connect to your Wireless Debugging connection port.</string>
+    <string name="notif_pairing_failed_title">Pairing Failed</string>
+    <string name="notif_pairing_failed_desc">%1$s. Tap \'Enter Code\' to retry.</string>
+    <string name="notif_connected_local_title">Connected to %1$s</string>
+    <string name="notif_connected_local_desc">Local ADB active. Tap \'Open App\' to return.</string>
+    <string name="notif_connected_local_big">Local ADB connected (%1$s). Tap \'Open App\' below to return to banADB.</string>
+    <string name="notif_connected_title">banADB Connected: %1$s</string>
+    <string name="notif_active_session">Active session with %1$s</string>
+
+    <!-- AdbViewModel Status Messages -->
+    <string name="status_apk_installing">Transferring APK to remote device...</string>
+    <string name="status_apk_executing">Executing remote install...</string>
+    <string name="status_apk_success">APK installed successfully!</string>
+    <string name="status_apk_extracting">Extracting %1$s APK...</string>
+    <string name="status_apk_extracted">APK extracted to Downloads: %1$s</string>
+    <string name="status_downloading_file">Downloading %1$s...</string>
+    <string name="status_auto_scan_no_port">Auto-Scan: No open ADB port detected on 127.0.0.1. Ensure Wireless Debugging is enabled.</string>
+
+    <!-- Additional Dashboard Specs -->
+    <string name="dash_temp">Temp</string>
+    <string name="dash_voltage">Voltage</string>
+    <string name="dash_health">Health</string>
+    <string name="dash_model">Model</string>
+    <string name="dash_manufacturer">Manufacturer</string>
+    <string name="dash_android_ver">Android Version</string>
+    <string name="dash_resolution">Resolution</string>
+    <string name="dash_uptime">Uptime</string>
+    <string name="dash_connected_host">Connected Host</string>
+    <string name="dash_uptime_active">Active</string>
+    <string name="dash_voltage_val">%1$d mV</string>
+    <string name="dash_temp_val">%1$d °C</string>
+    <string name="dash_res_val">%1$d x %2$d px</string>
+    <string name="dash_android_ver_val">Android %1$s (API %2$s)</string>
+
+    <!-- Additional Gallery Keys -->
+    <string name="gallery_cat_all">All</string>
+    <string name="gallery_cat_camera">Camera</string>
+    <string name="gallery_cat_screenshots">Screenshots</string>
+    <string name="gallery_cat_videos">Videos</string>
+    <string name="gallery_cat_downloads">Downloads</string>
+    <string name="gallery_cat_pictures">Pictures</string>
+    <string name="gallery_video_badge">VIDEO</string>
+    <string name="gallery_saving_to_phone">Saving to your phone...</string>
+    <string name="gallery_share_media">Share Media</string>
+    <string name="gallery_deleted_item">Deleted %1$s</string>
+    <string name="gallery_delete_failed">Failed to delete file</string>
+
+    <!-- Additional Notification Mirror Keys -->
+    <string name="notif_cat_all">All</string>
+    <string name="notif_cat_messages">Messages</string>
+    <string name="notif_cat_social">Social</string>
+    <string name="notif_cat_email">Email</string>
+    <string name="notif_cat_system">System</string>
+    <string name="notif_copy_btn">Copy</string>
+    <string name="notif_dismiss_btn">Dismiss</string>
+    <string name="notif_clip_label">Notification</string>
+
+    <!-- Additional Trackpad & Receiver Strings -->
+    <string name="trackpad_nav_hint">Touch or drag to navigate</string>
+    <string name="trackpad_tap_at">Tap at (%1$d, %2$d)</string>
+    <string name="trackpad_swipe_at">Swipe (%1$d, %2$d)</string>
+    <string name="trackpad_content_desc">Trackpad</string>
+    <string name="trackpad_scroll_up">Scroll Up</string>
+    <string name="trackpad_scroll_down">Scroll Down</string>
+    <string name="notif_pair_code_empty_title">Pairing Code Empty</string>
+    <string name="notif_pair_code_empty_desc">Please tap \'Enter Code\' and provide a 6-digit code.</string>
+    <string name="notif_pairing_in_progress_title">Pairing in Progress...</string>
+    <string name="notif_pairing_in_progress_desc">Contacting local ADB daemon on port %1$d...</string>
+    <string name="notif_pair_remote_input_label">Enter 6-digit code or PORT:CODE</string>
+    <string name="notif_pairing_error_title">Pairing Error</string>
+    <string name="pair_placeholder_port">e.g. 38491</string>
+    <string name="pair_placeholder_conn_port">e.g. 41235</string>
+    <string name="remote_device_fallback">Remote Device</string>
+    <string name="local_device_fallback">Local Device</string>
+    <!-- Additional Local Pairing, Status, D-Pad & Error Strings -->
+    <string name="pair_btn_pair_code">Pair Code</string>
+    <string name="pair_err_invalid_ip">Please enter a valid IP address</string>
+    <string name="pair_err_invalid_port">Please enter a valid Pairing Port</string>
+    <string name="pair_err_invalid_code">Please enter 6-digit Pairing Code</string>
+    <string name="dpad_up">Up</string>
+    <string name="dpad_down">Down</string>
+    <string name="dpad_left">Left</string>
+    <string name="dpad_right">Right</string>
+    <string name="local_pairing_status_listening">Listening for local pairing service...</string>
+    <string name="local_pairing_status_nsd_unavailable">NsdManager unavailable</string>
+    <string name="local_pairing_status_detected">Pairing service detected on port %1$d</string>
+    <string name="local_pairing_status_port_unknown">Pairing port unknown. Reply with PORT:CODE</string>
+    <string name="local_pairing_status_in_progress">Pairing with port %1$d using code %2$s...</string>
+    <string name="local_pairing_status_succeeded_connecting">Pairing succeeded! Connecting...</string>
+    <string name="local_pairing_status_connected">Connected to %1$s</string>
+    <string name="local_pairing_status_paired_open_app">Paired! Open app to enter connection port.</string>
+    <string name="local_pairing_status_failed">Pairing failed: %1$s</string>
+    <string name="notif_pairing_succeeded_title">Pairing Successful!</string>
+    <string name="notif_pairing_authenticating_desc">Authenticating with local ADB session...</string>
+    <string name="notif_pairing_unexpected_error">An unexpected error occurred.</string>
+    <string name="notif_unknown_error">Unknown error</string>
+    <string name="notif_handshake_failed">Handshake failed</string>
+    <string name="status_auto_scan_scanning">Scanning for local ADB daemon...</string>
+    <string name="status_auto_scan_found">Found local ADB on port %1$d. Connecting...</string>
+    <string name="status_auto_scan_none">No local ADB port found.</string>
+    <string name="status_apk_install_failed">Install failed: %1$s</string>
+    <string name="status_apk_extract_failed">Extract failed: %1$s</string>
+    <string name="status_pairing_local">Pairing local device on port %1$d...</string>
+    <string name="status_pairing_remote">Pairing with %1$s...</string>
+    <string name="status_connecting_to">Connecting to %1$s...</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="share">Share</string>
+    <string name="options">Options</string>
+    <string name="call">Call</string>
 </resources>

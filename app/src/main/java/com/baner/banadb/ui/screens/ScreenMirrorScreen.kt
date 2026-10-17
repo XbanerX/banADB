@@ -174,12 +174,12 @@ fun ScreenMirrorScreen(
                         if (isRefreshing) {
                             CircularProgressIndicator(color = BananaGold)
                             Spacer(modifier = Modifier.height(12.dp))
-                            Text("Capturing remote screen...", color = TextSecondary, fontSize = 13.sp)
+                            Text(stringResource(R.string.mirror_capturing), color = TextSecondary, fontSize = 13.sp)
                         } else {
                             Icon(Icons.Default.ScreenShare, contentDescription = null, tint = TextMuted, modifier = Modifier.size(54.dp))
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("No frame captured yet", color = TextSecondary, fontSize = 13.sp)
-                            Text("Tap refresh or live to start", color = TextMuted, fontSize = 11.sp)
+                            Text(stringResource(R.string.mirror_no_frame), color = TextSecondary, fontSize = 13.sp)
+                            Text(stringResource(R.string.mirror_tap_to_start), color = TextMuted, fontSize = 11.sp)
                         }
                     }
                 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -101,13 +102,15 @@ fun BanaTopBar(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .background(statusColor.copy(alpha = 0.2f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                            .padding(horizontal = 7.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = statusText,
                             color = statusColor,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 } else {
@@ -172,7 +175,7 @@ fun DirectionalPad(
                 .padding(top = 8.dp)
                 .size(54.dp)
         ) {
-            Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Up", tint = BananaGold, modifier = Modifier.size(36.dp))
+            Icon(Icons.Default.KeyboardArrowUp, contentDescription = stringResource(R.string.dpad_up), tint = BananaGold, modifier = Modifier.size(36.dp))
         }
 
         // DOWN
@@ -183,7 +186,7 @@ fun DirectionalPad(
                 .padding(bottom = 8.dp)
                 .size(54.dp)
         ) {
-            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Down", tint = BananaGold, modifier = Modifier.size(36.dp))
+            Icon(Icons.Default.KeyboardArrowDown, contentDescription = stringResource(R.string.dpad_down), tint = BananaGold, modifier = Modifier.size(36.dp))
         }
 
         // LEFT
@@ -194,7 +197,7 @@ fun DirectionalPad(
                 .padding(start = 8.dp)
                 .size(54.dp)
         ) {
-            Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Left", tint = BananaGold, modifier = Modifier.size(36.dp))
+            Icon(Icons.Default.KeyboardArrowLeft, contentDescription = stringResource(R.string.dpad_left), tint = BananaGold, modifier = Modifier.size(36.dp))
         }
 
         // RIGHT
@@ -205,7 +208,7 @@ fun DirectionalPad(
                 .padding(end = 8.dp)
                 .size(54.dp)
         ) {
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Right", tint = BananaGold, modifier = Modifier.size(36.dp))
+            Icon(Icons.Default.KeyboardArrowRight, contentDescription = stringResource(R.string.dpad_right), tint = BananaGold, modifier = Modifier.size(36.dp))
         }
 
         // CENTER OK
@@ -230,7 +233,9 @@ fun VirtualTrackpad(
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    var gestureInfo by remember { mutableStateOf("Touch or drag to navigate") }
+    val context = LocalContext.current
+    val defaultGestureInfo = stringResource(R.string.trackpad_nav_hint)
+    var gestureInfo by remember { mutableStateOf<String?>(null) }
     var invertDirection by remember { mutableStateOf(false) }
 
     val safeWidth = if (remoteWidth > 0) remoteWidth.toFloat() else 1080f
@@ -257,7 +262,7 @@ fun VirtualTrackpad(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = gestureInfo,
+                    text = gestureInfo ?: defaultGestureInfo,
                     color = TextSecondary,
                     fontSize = 12.sp
                 )
@@ -265,7 +270,7 @@ fun VirtualTrackpad(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (invertDirection) "Invert: ON" else "Invert: OFF",
+                    text = if (invertDirection) stringResource(R.string.trackpad_invert_on) else stringResource(R.string.trackpad_invert_off),
                     color = if (invertDirection) BananaGold else TextMuted,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -299,7 +304,7 @@ fun VirtualTrackpad(
                     detectTapGestures { offset ->
                         val rx = (offset.x / size.width) * safeWidth
                         val ry = (offset.y / size.height) * safeHeight
-                        gestureInfo = "Tap at (${rx.toInt()}, ${ry.toInt()})"
+                        gestureInfo = context.getString(R.string.trackpad_tap_at, rx.toInt(), ry.toInt())
                         onTap(rx, ry)
                     }
                 }
@@ -330,7 +335,7 @@ fun VirtualTrackpad(
                                 } else {
                                     arrayOf(startX, startY, currentX, currentY)
                                 }
-                                gestureInfo = "Swipe (${(ex - sx).toInt()}, ${(ey - sy).toInt()})"
+                                gestureInfo = context.getString(R.string.trackpad_swipe_at, (ex - sx).toInt(), (ey - sy).toInt())
                                 onSwipe(sx, sy, ex, ey, 220)
                             }
                         }
@@ -344,19 +349,19 @@ fun VirtualTrackpad(
             ) {
                 Icon(
                     imageVector = Icons.Default.TouchApp,
-                    contentDescription = "Trackpad",
+                    contentDescription = stringResource(R.string.trackpad_content_desc),
                     tint = BananaGold.copy(alpha = 0.4f),
                     modifier = Modifier.size(52.dp)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Trackpad Touch Surface",
+                    text = stringResource(R.string.trackpad_touch_surface),
                     color = TextMuted,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Tap to Click • Drag to Swipe",
+                    text = stringResource(R.string.trackpad_gesture_hint),
                     color = TextSecondary.copy(alpha = 0.7f),
                     fontSize = 11.sp
                 )
@@ -381,7 +386,7 @@ fun VirtualTrackpad(
             ) {
                 Icon(Icons.Default.TouchApp, contentDescription = null, tint = BananaGold, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Tap", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.trackpad_tap_btn), color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
 
             // Scroll Up
@@ -396,7 +401,7 @@ fun VirtualTrackpad(
                     .clip(RoundedCornerShape(12.dp))
                     .background(SurfaceCard)
             ) {
-                Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll Up", tint = BananaGold)
+                Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.trackpad_scroll_up), tint = BananaGold)
             }
 
             // Scroll Down
@@ -411,7 +416,7 @@ fun VirtualTrackpad(
                     .clip(RoundedCornerShape(12.dp))
                     .background(SurfaceCard)
             ) {
-                Icon(Icons.Default.ArrowDownward, contentDescription = "Scroll Down", tint = BananaGold)
+                Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.trackpad_scroll_down), tint = BananaGold)
             }
 
             // Right Click / Back

@@ -135,12 +135,12 @@ fun ScriptRunnerScreen(
                                     ) {
                                         Icon(Icons.Default.PlayArrow, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Run", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                        Text(stringResource(R.string.scripts_run), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                     }
 
                                     if (!script.isPreset) {
                                         IconButton(onClick = { viewModel.deleteScript(script.id) }) {
-                                            Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = StatusError.copy(alpha = 0.7f))
+                                            Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.delete), tint = StatusError.copy(alpha = 0.7f))
                                         }
                                     }
                                 }
@@ -179,7 +179,7 @@ fun ScriptRunnerScreen(
                         value = scriptTitle,
                         onValueChange = { scriptTitle = it },
                         label = { Text(stringResource(R.string.scripts_title_hint)) },
-                        placeholder = { Text("e.g. Force Dark Mode") },
+                        placeholder = { Text(stringResource(R.string.scripts_title_placeholder)) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = BananaGold, focusedLabelColor = BananaGold)
                     )
@@ -187,7 +187,7 @@ fun ScriptRunnerScreen(
                         value = scriptCommand,
                         onValueChange = { scriptCommand = it },
                         label = { Text(stringResource(R.string.scripts_cmd_hint)) },
-                        placeholder = { Text("e.g. cmd uimode night yes") },
+                        placeholder = { Text(stringResource(R.string.scripts_cmd_placeholder)) },
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = BananaGold, focusedLabelColor = BananaGold)
                     )
                 }

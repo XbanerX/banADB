@@ -184,6 +184,7 @@ fun RemoteControlScreen(
                         onClick = { activeTopTab = 0 },
                         modifier = Modifier.weight(1f).height(42.dp),
                         shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (liveSelected) BananaGold else Color.Transparent,
                             contentColor = if (liveSelected) BackgroundDark else TextSecondary
@@ -197,10 +198,12 @@ fun RemoteControlScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Live Control",
+                            stringResource(R.string.remote_tab_live),
                             color = if (liveSelected) BackgroundDark else TextSecondary,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
 
@@ -212,6 +215,7 @@ fun RemoteControlScreen(
                         },
                         modifier = Modifier.weight(1f).height(42.dp),
                         shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (termSelected) BananaGold else Color.Transparent,
                             contentColor = if (termSelected) BackgroundDark else TextSecondary
@@ -225,10 +229,12 @@ fun RemoteControlScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Terminal",
+                            stringResource(R.string.remote_tab_terminal),
                             color = if (termSelected) BackgroundDark else TextSecondary,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -270,13 +276,13 @@ fun RemoteControlScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "Remote Feature Tools",
+                                    text = stringResource(R.string.remote_feature_tools),
                                     color = TextPrimary,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp
                                 )
                                 Text(
-                                    text = if (toolsExpanded) "Tap to collapse tools grid" else "Apps, Files, Mirror, Quick Set & more",
+                                    text = if (toolsExpanded) stringResource(R.string.remote_tools_collapse) else stringResource(R.string.remote_feature_tools_sub),
                                     color = TextMuted,
                                     fontSize = 11.sp
                                 )
@@ -308,28 +314,28 @@ fun RemoteControlScreen(
                             ) {
                                 FeatureToolItem(
                                     icon = Icons.Default.Apps,
-                                    label = "App Mgr",
+                                    label = stringResource(R.string.tool_apps),
                                     tint = BananaGold,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("apps") }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.Folder,
-                                    label = "Files",
+                                    label = stringResource(R.string.tool_files),
                                     tint = CyberCyan,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("files") }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.ContentPaste,
-                                    label = "Clipboard",
+                                    label = stringResource(R.string.tool_clipboard),
                                     tint = NeonEmerald,
                                     modifier = Modifier.weight(1f)
                                 ) { showClipboardDialog = true }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.ScreenshotMonitor,
-                                    label = "Mirror",
+                                    label = stringResource(R.string.tool_mirror),
                                     tint = BananaGold,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("mirror") }
@@ -342,28 +348,28 @@ fun RemoteControlScreen(
                             ) {
                                 FeatureToolItem(
                                     icon = Icons.Default.Tune,
-                                    label = "Quick Set",
+                                    label = stringResource(R.string.tool_quick_set),
                                     tint = BananaGold,
                                     modifier = Modifier.weight(1f)
                                 ) { showQuickSetDialog = true }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.Dns,
-                                    label = "Tasks",
+                                    label = stringResource(R.string.tool_processes),
                                     tint = CyberCyan,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("processes") }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.PhotoLibrary,
-                                    label = "Gallery",
+                                    label = stringResource(R.string.tool_gallery),
                                     tint = CyberCyan,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("gallery") }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.Speed,
-                                    label = "Status",
+                                    label = stringResource(R.string.tool_dashboard),
                                     tint = NeonEmerald,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("dashboard") }
@@ -376,32 +382,32 @@ fun RemoteControlScreen(
                             ) {
                                 FeatureToolItem(
                                     icon = Icons.Default.Notifications,
-                                    label = "Notify",
+                                    label = stringResource(R.string.tool_notifications),
                                     tint = CyberCyan,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("notifications") }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.Code,
-                                    label = "Scripts",
+                                    label = stringResource(R.string.tool_scripts),
                                     tint = BananaGold,
                                     modifier = Modifier.weight(1f)
                                 ) { onNavigateToSection("scripts") }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.BatteryChargingFull,
-                                    label = "Battery",
+                                    label = stringResource(R.string.tool_battery),
                                     tint = NeonEmerald,
                                     modifier = Modifier.weight(1f)
                                 ) { showBatteryDialog = true }
 
                                 FeatureToolItem(
                                     icon = Icons.Default.CameraAlt,
-                                    label = "Screenshot",
+                                    label = stringResource(R.string.tool_screenshot),
                                     tint = BananaGold,
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Toast.makeText(context, "Capturing screenshot...", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_capturing_screenshot), Toast.LENGTH_SHORT).show()
                                     viewModel.captureScreenshot { bmp ->
                                         capturedPreviewBitmap = bmp
                                         showScreenshotPreviewDialog = true
@@ -481,19 +487,19 @@ fun RemoteControlScreen(
                 Tab(
                     selected = controlMode == 0,
                     onClick = { controlMode = 0 },
-                    text = { Text(stringResource(R.string.remote_mode_dpad), fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.remote_mode_dpad), fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false) },
                     icon = { Icon(Icons.Default.ControlCamera, contentDescription = null, modifier = Modifier.size(18.dp)) }
                 )
                 Tab(
                     selected = controlMode == 1,
                     onClick = { controlMode = 1 },
-                    text = { Text(stringResource(R.string.remote_mode_touchpad), fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.remote_mode_touchpad), fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false) },
                     icon = { Icon(Icons.Default.TouchApp, contentDescription = null, modifier = Modifier.size(18.dp)) }
                 )
                 Tab(
                     selected = controlMode == 2,
                     onClick = { controlMode = 2 },
-                    text = { Text(stringResource(R.string.remote_mode_numpad), fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.remote_mode_numpad), fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false) },
                     icon = { Icon(Icons.Default.Dialpad, contentDescription = null, modifier = Modifier.size(18.dp)) }
                 )
             }
@@ -537,21 +543,21 @@ fun RemoteControlScreen(
                             ) {
                                 RemoteBtn(
                                     icon = Icons.Default.VolumeDown,
-                                    label = "Vol -",
+                                    label = stringResource(R.string.remote_vol_down),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_VOLUME_DOWN)
                                 }
                                 RemoteBtn(
                                     icon = Icons.Default.VolumeMute,
-                                    label = "Mute",
+                                    label = stringResource(R.string.remote_vol_mute),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_VOLUME_MUTE)
                                 }
                                 RemoteBtn(
                                     icon = Icons.Default.VolumeUp,
-                                    label = "Vol +",
+                                    label = stringResource(R.string.remote_vol_up),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_VOLUME_UP)
@@ -574,24 +580,24 @@ fun RemoteControlScreen(
                             ) {
                                 RemoteBtn(
                                     icon = Icons.Default.Search,
-                                    label = "Search",
+                                    label = stringResource(R.string.remote_search),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     viewModel.sendKeyevent(KeyEvent.KEYCODE_SEARCH)
                                 }
                                 RemoteBtn(
                                     icon = Icons.Default.Notifications,
-                                    label = "Notify",
+                                    label = stringResource(R.string.remote_notify),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     viewModel.executeCommand("cmd statusbar expand-notifications")
                                 }
                                 RemoteBtn(
                                     icon = Icons.Default.CameraAlt,
-                                    label = "Screenshot",
+                                    label = stringResource(R.string.remote_screenshot),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Toast.makeText(context, "Capturing screenshot...", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_capturing_screenshot), Toast.LENGTH_SHORT).show()
                                     viewModel.captureScreenshot { bmp ->
                                         capturedPreviewBitmap = bmp
                                         showScreenshotPreviewDialog = true
@@ -766,7 +772,7 @@ fun RemoteControlScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Keyboard",
+                                text = stringResource(R.string.remote_keyboard),
                                 color = CyberCyan,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -777,7 +783,7 @@ fun RemoteControlScreen(
                         OutlinedTextField(
                             value = textToSend,
                             onValueChange = { textToSend = it },
-                            placeholder = { Text("Type text to send...", color = TextSecondary, fontSize = 13.sp) },
+                            placeholder = { Text(stringResource(R.string.remote_keyboard_placeholder), color = TextSecondary, fontSize = 13.sp) },
                             singleLine = true,
                             trailingIcon = {
                                 IconButton(onClick = {
@@ -812,30 +818,30 @@ fun RemoteControlScreen(
                                 modifier = Modifier.padding(10.dp),
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text("Special Keys", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.remote_special_keys), color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
 
                                 // Row 1
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    KeyButton("Enter", icon = Icons.Default.KeyboardReturn, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ENTER) }
-                                    KeyButton("Del", icon = Icons.Default.Backspace, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_DEL) }
-                                    KeyButton("Tab", icon = Icons.Default.KeyboardTab, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_TAB) }
-                                    KeyButton("Space", icon = Icons.Default.SpaceBar, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_SPACE) }
+                                    KeyButton(stringResource(R.string.remote_key_enter), icon = Icons.Default.KeyboardReturn, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ENTER) }
+                                    KeyButton(stringResource(R.string.remote_key_del), icon = Icons.Default.Backspace, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_DEL) }
+                                    KeyButton(stringResource(R.string.remote_key_tab), icon = Icons.Default.KeyboardTab, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_TAB) }
+                                    KeyButton(stringResource(R.string.remote_key_space), icon = Icons.Default.SpaceBar, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_SPACE) }
                                 }
                                 // Row 2
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    KeyButton("Esc", icon = Icons.Default.Cancel, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ESCAPE) }
-                                    KeyButton("Copy", icon = Icons.Default.ContentCopy, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_COPY) }
-                                    KeyButton("Paste", icon = Icons.Default.ContentPaste, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PASTE) }
-                                    KeyButton("All", icon = Icons.Default.SelectAll, modifier = Modifier.weight(1f)) {
+                                    KeyButton(stringResource(R.string.remote_key_esc), icon = Icons.Default.Cancel, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_ESCAPE) }
+                                    KeyButton(stringResource(R.string.remote_key_copy), icon = Icons.Default.ContentCopy, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_COPY) }
+                                    KeyButton(stringResource(R.string.remote_key_paste), icon = Icons.Default.ContentPaste, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PASTE) }
+                                    KeyButton(stringResource(R.string.remote_key_all), icon = Icons.Default.SelectAll, modifier = Modifier.weight(1f)) {
                                         viewModel.executeCommand("input keyevent --meta 113 29") // Ctrl+A
                                     }
                                 }
                                 // Row 3
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    KeyButton("Home", icon = Icons.Default.VerticalAlignTop, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_HOME) }
-                                    KeyButton("End", icon = Icons.Default.VerticalAlignBottom, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_END) }
-                                    KeyButton("PgUp", icon = Icons.Default.KeyboardArrowUp, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_UP) }
-                                    KeyButton("PgDn", icon = Icons.Default.KeyboardArrowDown, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_DOWN) }
+                                    KeyButton(stringResource(R.string.remote_key_home), icon = Icons.Default.VerticalAlignTop, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_HOME) }
+                                    KeyButton(stringResource(R.string.remote_key_end), icon = Icons.Default.VerticalAlignBottom, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_MOVE_END) }
+                                    KeyButton(stringResource(R.string.remote_key_pgup), icon = Icons.Default.KeyboardArrowUp, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_UP) }
+                                    KeyButton(stringResource(R.string.remote_key_pgdn), icon = Icons.Default.KeyboardArrowDown, modifier = Modifier.weight(1f)) { viewModel.sendKeyevent(KeyEvent.KEYCODE_PAGE_DOWN) }
                                 }
                             }
                         }
@@ -896,7 +902,7 @@ fun RemoteControlScreen(
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark)
                             ) {
-                                Icon(Icons.Default.Backspace, contentDescription = "Delete", tint = StatusError, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Backspace, contentDescription = stringResource(R.string.delete), tint = StatusError, modifier = Modifier.size(20.dp))
                             }
 
                             Button(
@@ -905,7 +911,7 @@ fun RemoteControlScreen(
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = NeonEmerald.copy(alpha = 0.2f))
                             ) {
-                                Icon(Icons.Default.Call, contentDescription = "Call", tint = NeonEmerald, modifier = Modifier.size(22.dp))
+                                Icon(Icons.Default.Call, contentDescription = stringResource(R.string.call), tint = NeonEmerald, modifier = Modifier.size(22.dp))
                             }
 
                             Button(
@@ -914,7 +920,7 @@ fun RemoteControlScreen(
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
                             ) {
-                                Icon(Icons.Default.KeyboardReturn, contentDescription = "Enter", tint = BackgroundDark, modifier = Modifier.size(22.dp))
+                                Icon(Icons.Default.KeyboardReturn, contentDescription = stringResource(R.string.remote_key_enter), tint = BackgroundDark, modifier = Modifier.size(22.dp))
                             }
                         }
                     }
@@ -947,7 +953,7 @@ fun RemoteControlScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.ContentPaste, contentDescription = null, tint = BananaGold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Clipboard Manager", color = BananaGold, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.remote_clipboard_title), color = BananaGold, fontWeight = FontWeight.Bold)
                 }
             },
             text = {
@@ -967,7 +973,7 @@ fun RemoteControlScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Remote Device Clipboard:", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.remote_clipboard_device), color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                                 if (isFetching) {
                                     CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = BananaGold)
                                 } else {
@@ -978,22 +984,22 @@ fun RemoteControlScreen(
                                                 viewModel.syncClipboardFromRemote { text ->
                                                     remoteClip = text
                                                     isFetching = false
-                                                    Toast.makeText(context, "Remote clipboard updated", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, context.getString(R.string.toast_clipboard_updated), Toast.LENGTH_SHORT).show()
                                                 }
                                             },
                                             modifier = Modifier.size(24.dp)
                                         ) {
-                                            Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = BananaGold, modifier = Modifier.size(16.dp))
+                                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh), tint = BananaGold, modifier = Modifier.size(16.dp))
                                         }
                                         if (remoteClip.isNotEmpty()) {
                                             IconButton(
                                                 onClick = {
                                                     localClipboardManager.setText(AnnotatedString(remoteClip))
-                                                    Toast.makeText(context, "Copied to phone clipboard", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, context.getString(R.string.toast_copied_to_phone), Toast.LENGTH_SHORT).show()
                                                 },
                                                 modifier = Modifier.size(24.dp)
                                             ) {
-                                                Icon(Icons.Default.ContentCopy, contentDescription = "Copy to Phone", tint = CyberCyan, modifier = Modifier.size(16.dp))
+                                                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy), tint = CyberCyan, modifier = Modifier.size(16.dp))
                                             }
                                         }
                                     }
@@ -1001,7 +1007,7 @@ fun RemoteControlScreen(
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = remoteClip.ifEmpty { "(Remote clipboard is empty or protected)" },
+                                text = remoteClip.ifEmpty { stringResource(R.string.remote_clipboard_empty_or_protected) },
                                 color = if (remoteClip.isEmpty()) TextMuted else TextPrimary,
                                 fontSize = 12.sp,
                                 maxLines = 4
@@ -1019,9 +1025,9 @@ fun RemoteControlScreen(
                                 val phoneText = localClipboardManager.getText()?.text ?: ""
                                 if (phoneText.isNotEmpty()) {
                                     inputClip = phoneText
-                                    Toast.makeText(context, "Pasted from phone clipboard", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_pasted_from_phone), Toast.LENGTH_SHORT).show()
                                 } else {
-                                    Toast.makeText(context, "Phone clipboard is empty", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_phone_clipboard_empty), Toast.LENGTH_SHORT).show()
                                 }
                             },
                             modifier = Modifier.weight(1f),
@@ -1031,7 +1037,7 @@ fun RemoteControlScreen(
                         ) {
                             Icon(Icons.Default.ContentPasteGo, contentDescription = null, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Paste Phone", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.remote_clipboard_paste), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
 
                         OutlinedButton(
@@ -1043,7 +1049,7 @@ fun RemoteControlScreen(
                         ) {
                             Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Clear", fontSize = 11.sp)
+                            Text(stringResource(R.string.clear), fontSize = 11.sp)
                         }
                     }
 
@@ -1051,8 +1057,8 @@ fun RemoteControlScreen(
                     OutlinedTextField(
                         value = inputClip,
                         onValueChange = { inputClip = it },
-                        label = { Text("Text to send", fontSize = 12.sp) },
-                        placeholder = { Text("Type or paste long text here...", fontSize = 11.sp) },
+                        label = { Text(stringResource(R.string.remote_clipboard_send_label), fontSize = 12.sp) },
+                        placeholder = { Text(stringResource(R.string.remote_clipboard_send_hint), fontSize = 11.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 5,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -1064,7 +1070,7 @@ fun RemoteControlScreen(
 
                     // Explanation note
                     Text(
-                        text = "Tip: 'Inject Direct' types directly into active remote input field. 'Set Remote' sets the target clipboard buffer.",
+                        text = stringResource(R.string.remote_clipboard_tip),
                         color = TextMuted,
                         fontSize = 10.sp
                     )
@@ -1080,7 +1086,7 @@ fun RemoteControlScreen(
                         onClick = {
                             if (inputClip.isNotBlank()) {
                                 viewModel.sendText(inputClip)
-                                Toast.makeText(context, "Text injected into target focus", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_text_injected), Toast.LENGTH_SHORT).show()
                                 showClipboardDialog = false
                             }
                         },
@@ -1091,7 +1097,7 @@ fun RemoteControlScreen(
                     ) {
                         Icon(Icons.Default.KeyboardAlt, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Inject Direct", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        Text(stringResource(R.string.remote_clipboard_inject), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                     }
 
                     // Set target clipboard
@@ -1099,7 +1105,7 @@ fun RemoteControlScreen(
                         onClick = {
                             if (inputClip.isNotBlank()) {
                                 viewModel.syncClipboardToRemote(inputClip, injectInput = false) { success ->
-                                    Toast.makeText(context, if (success) "Target clipboard set" else "Target clipboard failed", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, if (success) context.getString(R.string.toast_remote_clipboard_set) else context.getString(R.string.toast_remote_clipboard_failed), Toast.LENGTH_SHORT).show()
                                 }
                                 showClipboardDialog = false
                             }
@@ -1111,13 +1117,13 @@ fun RemoteControlScreen(
                     ) {
                         Icon(Icons.Default.ContentPaste, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Set Remote", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        Text(stringResource(R.string.remote_clipboard_set), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClipboardDialog = false }) {
-                    Text("Close", color = TextSecondary)
+                    Text(stringResource(R.string.close), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark,
@@ -1280,13 +1286,13 @@ fun RemoteControlScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Screenshot Captured",
+                            text = stringResource(R.string.screenshot_captured_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = BananaGold
                         )
                         IconButton(onClick = { showScreenshotPreviewDialog = false }) {
-                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                         }
                     }
 
@@ -1315,7 +1321,7 @@ fun RemoteControlScreen(
                     ) {
                         OutlinedButton(
                             onClick = {
-                                Toast.makeText(context, "Retaking...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_retaking_screenshot), Toast.LENGTH_SHORT).show()
                                 viewModel.captureScreenshot { bmp ->
                                     capturedPreviewBitmap = bmp
                                 }
@@ -1326,14 +1332,14 @@ fun RemoteControlScreen(
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Retake", fontSize = 13.sp)
+                            Text(stringResource(R.string.remote_screenshot_retake), fontSize = 13.sp)
                         }
 
                         Button(
                             onClick = {
                                 capturedPreviewBitmap?.let { bmp ->
                                     viewModel.saveScreenshotToGallery(context, bmp) { path ->
-                                        Toast.makeText(context, "Saved to Gallery: $path", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_saved_to_gallery, path), Toast.LENGTH_LONG).show()
                                         showScreenshotPreviewDialog = false
                                     }
                                 }
@@ -1344,7 +1350,7 @@ fun RemoteControlScreen(
                         ) {
                             Icon(Icons.Default.SaveAlt, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Save", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text(stringResource(R.string.remote_screenshot_save), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
                     }
                 }
@@ -1354,13 +1360,14 @@ fun RemoteControlScreen(
 
     // Dialog: Disconnect Confirmation
     if (showDisconnectConfirmDialog) {
-        val connName = (connectionState as? ConnectionState.Connected)?.deviceName ?: "Remote Device"
+        val fallbackDevice = stringResource(R.string.remote_device_fallback)
+        val connName = (connectionState as? ConnectionState.Connected)?.deviceName ?: fallbackDevice
         AlertDialog(
             onDismissRequest = { showDisconnectConfirmDialog = false },
             icon = { Icon(Icons.Default.PowerSettingsNew, contentDescription = null, tint = StatusError, modifier = Modifier.size(32.dp)) },
             title = {
                 Text(
-                    text = "Disconnect from device?",
+                    text = stringResource(R.string.disconnect_dialog_title),
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
@@ -1368,7 +1375,7 @@ fun RemoteControlScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to disconnect from $connName and return to the home screen?",
+                    text = stringResource(R.string.disconnect_dialog_desc, connName),
                     color = TextSecondary,
                     fontSize = 14.sp
                 )
@@ -1383,12 +1390,12 @@ fun RemoteControlScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = StatusError),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Disconnect", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.disconnect), color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDisconnectConfirmDialog = false }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark,

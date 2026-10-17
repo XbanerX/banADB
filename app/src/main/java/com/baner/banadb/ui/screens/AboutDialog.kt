@@ -22,19 +22,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.baner.banadb.R
 import com.baner.banadb.data.repository.DevicePreferences
 import com.baner.banadb.ui.theme.*
@@ -47,22 +51,39 @@ fun AboutDialog(
 ) {
     val context = LocalContext.current
     var showFullLicense by remember { mutableStateOf(false) }
-    val themeMode by (viewModel?.themeMode?.collectAsState() ?: remember { mutableStateOf(DevicePreferences.THEME_SYSTEM) })
 
     if (showFullLicense) {
         FullLicenseDialog(onDismiss = { showFullLicense = false })
         return
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .border(1.dp, CyberCyan.copy(alpha = 0.35f), RoundedCornerShape(24.dp))
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismiss
+                ),
+            contentAlignment = Alignment.Center
         ) {
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { /* consume click to prevent dismissing when clicking card */ }
+                    )
+                    .border(1.dp, CyberCyan.copy(alpha = 0.35f), RoundedCornerShape(24.dp))
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,11 +91,21 @@ fun AboutDialog(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header with Close
+                // Header with JW on left & Close on right
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text(
+                        text = "JW",
+                        fontFamily = FontFamily(Font(R.font.dancing_script)),
+                        fontSize = 34.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = CyberCyan,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+
                     IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                     }
@@ -114,92 +145,49 @@ fun AboutDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Version Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(CyberCyan.copy(alpha = 0.15f))
-                        .border(1.dp, CyberCyan.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                // GitHub icon + Version Badge
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.about_version),
-                        color = CyberCyan,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    IconButton(
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/XbanerX/banADB"))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                // ignore
+                            }
+                        },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_github),
+                            contentDescription = stringResource(R.string.about_github),
+                            tint = CyberCyan,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(CyberCyan.copy(alpha = 0.15f))
+                            .border(1.dp, CyberCyan.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.about_version),
+                            color = CyberCyan,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
-
-                // Theme Selector Card
-                if (viewModel != null) {
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, SurfaceCardHover, RoundedCornerShape(16.dp))
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Outlined.Palette, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.theme_title), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                val themes: List<Triple<String, String, ImageVector>> = listOf(
-                                    Triple(DevicePreferences.THEME_SYSTEM, stringResource(R.string.theme_system), Icons.Default.BrightnessAuto),
-                                    Triple(DevicePreferences.THEME_LIGHT, stringResource(R.string.theme_light), Icons.Default.LightMode),
-                                    Triple(DevicePreferences.THEME_DARK, stringResource(R.string.theme_dark), Icons.Default.DarkMode)
-                                )
-                                themes.forEach { (mode, label, icon) ->
-                                    val selected = themeMode == mode
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(if (selected) CyberCyan.copy(alpha = 0.2f) else SurfaceDark)
-                                            .border(
-                                                1.dp,
-                                                if (selected) CyberCyan else SurfaceCardHover,
-                                                RoundedCornerShape(10.dp)
-                                            )
-                                            .clickable { viewModel?.setThemeMode(mode) }
-                                            .padding(vertical = 8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Icon(
-                                                imageVector = icon,
-                                                contentDescription = label,
-                                                tint = if (selected) CyberCyan else TextSecondary,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = label,
-                                                fontSize = 10.sp,
-                                                color = if (selected) CyberCyan else TextSecondary,
-                                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-                }
 
                 // Metadata Info Card
                 Card(
@@ -214,6 +202,26 @@ fun AboutDialog(
                             icon = Icons.Outlined.Person,
                             label = stringResource(R.string.about_author),
                             value = "baner"
+                        )
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            color = SurfaceCardHover
+                        )
+
+                        AboutInfoRow(
+                            painter = painterResource(R.drawable.ic_github),
+                            label = stringResource(R.string.about_github),
+                            value = "XbanerX/banADB",
+                            isClickable = true,
+                            onClick = {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/XbanerX/banADB"))
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    // ignore
+                                }
+                            }
                         )
 
                         HorizontalDivider(
@@ -254,22 +262,7 @@ fun AboutDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // License Button
-                OutlinedButton(
-                    onClick = { showFullLicense = true },
-                    shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, CyberCyan.copy(alpha = 0.6f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CyberCyan),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_view_license_btn), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 // Bottom Copyright
                 Text(
@@ -278,14 +271,18 @@ fun AboutDialog(
                     fontSize = 10.sp,
                     textAlign = TextAlign.Center
                 )
+
+                Spacer(modifier = Modifier.height(6.dp))
             }
         }
     }
 }
+}
 
 @Composable
 private fun AboutInfoRow(
-    icon: ImageVector,
+    icon: ImageVector? = null,
+    painter: Painter? = null,
     label: String,
     value: String,
     isClickable: Boolean = false,
@@ -305,12 +302,21 @@ private fun AboutInfoRow(
                 .background(CyberCyan.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = CyberCyan,
-                modifier = Modifier.size(16.dp)
-            )
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = CyberCyan,
+                    modifier = Modifier.size(16.dp)
+                )
+            } else if (painter != null) {
+                Icon(
+                    painter = painter,
+                    contentDescription = null,
+                    tint = CyberCyan,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.width(10.dp))
         Text(
@@ -351,15 +357,47 @@ private fun AboutInfoRow(
 private fun FullLicenseDialog(
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+    val context = LocalContext.current
+    val licenseText = remember {
+        try {
+            context.assets.open("LICENSE.txt").bufferedReader().use { it.readText() }
+        } catch (_: Exception) {
+            """
+                GNU AFFERO GENERAL PUBLIC LICENSE
+                Version 3, 19 November 2007
+                Copyright (C) 2026 baner <bandroid@banerxus.com>
+                https://www.gnu.org/licenses/agpl-3.0.html
+            """.trimIndent()
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .border(1.dp, CyberCyan.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.85f))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismiss
+                ),
+            contentAlignment = Alignment.Center
         ) {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { /* consume */ }
+                    )
+                    .border(1.dp, CyberCyan.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -387,30 +425,14 @@ private fun FullLicenseDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f, fill = false)
-                        .heightIn(max = 380.dp)
+                        .heightIn(max = 440.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(BackgroundDark)
                         .padding(12.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
-                        text = """
-                            GNU AFFERO GENERAL PUBLIC LICENSE
-                            Version 3, 19 November 2007
-                            
-                            Copyright (C) 2026 baner <bandroid@banerxus.com>
-                            
-                            This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-                            
-                            This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
-                            
-                            Key Freedoms & Requirements:
-                            • Freedom to run the program for any purpose.
-                            • Freedom to study how the program works and adapt it.
-                            • Freedom to redistribute copies to help others.
-                            • Freedom to improve the program and release improvements to the public.
-                            • Network copyleft: if modified versions run over a network, corresponding source code must be made available to all network users.
-                        """.trimIndent(),
+                        text = licenseText,
                         color = TextSecondary,
                         fontSize = 11.sp,
                         lineHeight = 16.sp,
@@ -431,4 +453,5 @@ private fun FullLicenseDialog(
             }
         }
     }
+}
 }

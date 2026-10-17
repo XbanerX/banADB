@@ -130,9 +130,9 @@ fun DashboardScreen(
 
                         // Battery Specs
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            MetricRow("Temp", if (data.batteryTemp > 0) "${data.batteryTemp} °C" else "N/A")
-                            MetricRow("Voltage", if (data.batteryVoltage > 0) "${data.batteryVoltage} mV" else "N/A")
-                            MetricRow("Health", data.batteryHealth)
+                            MetricRow(stringResource(R.string.dash_temp), if (data.batteryTemp > 0) stringResource(R.string.dash_temp_val, data.batteryTemp) else "N/A")
+                            MetricRow(stringResource(R.string.dash_voltage), if (data.batteryVoltage > 0) stringResource(R.string.dash_voltage_val, data.batteryVoltage) else "N/A")
+                            MetricRow(stringResource(R.string.dash_health), data.batteryHealth)
                         }
                     }
                 }
@@ -153,12 +153,12 @@ fun DashboardScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    DetailItem("Model", data.model)
-                    DetailItem("Manufacturer", data.manufacturer.ifEmpty { "Android" })
-                    DetailItem("Android Version", "Android ${data.androidVersion} (API ${data.sdkVersion})")
-                    DetailItem("Resolution", "${data.screenWidth} x ${data.screenHeight} px")
-                    DetailItem("Uptime", data.uptime.ifEmpty { "Active" })
-                    DetailItem("Connected Host", data.ipAddress)
+                    DetailItem(stringResource(R.string.dash_model), data.model)
+                    DetailItem(stringResource(R.string.dash_manufacturer), data.manufacturer.ifEmpty { "Android" })
+                    DetailItem(stringResource(R.string.dash_android_ver), stringResource(R.string.dash_android_ver_val, data.androidVersion, data.sdkVersion))
+                    DetailItem(stringResource(R.string.dash_resolution), stringResource(R.string.dash_res_val, data.screenWidth, data.screenHeight))
+                    DetailItem(stringResource(R.string.dash_uptime), data.uptime.ifEmpty { stringResource(R.string.dash_uptime_active) })
+                    DetailItem(stringResource(R.string.dash_connected_host), data.ipAddress)
                 }
             }
 
@@ -185,15 +185,15 @@ fun DashboardScreen(
                                 val phoneText = localClipboardManager.getText()?.text ?: ""
                                 if (phoneText.isNotEmpty()) {
                                     clipboardInput = phoneText
-                                    Toast.makeText(context, "Pasted phone clipboard", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_pasted_from_phone), Toast.LENGTH_SHORT).show()
                                 } else {
-                                    Toast.makeText(context, "Phone clipboard empty", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_phone_clipboard_empty), Toast.LENGTH_SHORT).show()
                                 }
                             }
                         ) {
                             Icon(Icons.Default.ContentPasteGo, contentDescription = null, tint = BananaGold, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Paste Phone", color = BananaGold, fontSize = 11.sp)
+                            Text(stringResource(R.string.remote_clipboard_paste), color = BananaGold, fontSize = 11.sp)
                         }
                     }
 
@@ -202,7 +202,7 @@ fun DashboardScreen(
                     OutlinedTextField(
                         value = clipboardInput,
                         onValueChange = { clipboardInput = it },
-                        placeholder = { Text("Paste or type text to sync...", fontSize = 12.sp) },
+                        placeholder = { Text(stringResource(R.string.dash_clip_placeholder), fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -221,7 +221,7 @@ fun DashboardScreen(
                             onClick = {
                                 viewModel.syncClipboardFromRemote { text ->
                                     clipboardInput = text
-                                    Toast.makeText(context, "Remote clipboard fetched", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_remote_clipboard_fetched), Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = SurfaceDark),
@@ -232,7 +232,7 @@ fun DashboardScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                                 Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp), tint = NeonEmerald)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("Get Remote", color = NeonEmerald, fontSize = 11.sp, maxLines = 1)
+                                Text(stringResource(R.string.dash_get_remote), color = NeonEmerald, fontSize = 11.sp, maxLines = 1)
                             }
                         }
 
@@ -240,7 +240,7 @@ fun DashboardScreen(
                             onClick = {
                                 if (clipboardInput.isNotEmpty()) {
                                     viewModel.syncClipboardToRemote(clipboardInput) { success ->
-                                        Toast.makeText(context, if (success) "Sent to clipboard" else "Failed", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, if (success) context.getString(R.string.toast_remote_clipboard_set) else context.getString(R.string.toast_failed), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
@@ -252,7 +252,7 @@ fun DashboardScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                                 Icon(Icons.Default.Upload, contentDescription = null, modifier = Modifier.size(18.dp), tint = BackgroundDark)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("Send Clip", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+                                Text(stringResource(R.string.dash_send_clip), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
                             }
                         }
 
@@ -260,7 +260,7 @@ fun DashboardScreen(
                             onClick = {
                                 if (clipboardInput.isNotEmpty()) {
                                     viewModel.sendText(clipboardInput)
-                                    Toast.makeText(context, "Injected into target focus", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_text_injected), Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = BananaGold),
@@ -271,7 +271,7 @@ fun DashboardScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                                 Icon(Icons.Default.KeyboardAlt, contentDescription = null, modifier = Modifier.size(18.dp), tint = BackgroundDark)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("Inject", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+                                Text(stringResource(R.string.dash_inject), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
                             }
                         }
                     }
@@ -338,7 +338,7 @@ fun DashboardScreen(
         AlertDialog(
             onDismissRequest = { showRebootConfirm = null },
             title = { Text(modeTitle) },
-            text = { Text("Are you sure you want to reboot the remote device? The ADB connection will be closed.") },
+            text = { Text(stringResource(R.string.remote_reboot_confirm_desc)) },
             confirmButton = {
                 Button(
                     onClick = {

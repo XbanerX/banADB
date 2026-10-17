@@ -168,14 +168,14 @@ fun NotificationMirrorScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Live Auto-Sync (5s)",
+                            text = stringResource(R.string.notif_auto_sync_title),
                             color = TextPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Real-time mirror from remote target phone",
+                            text = stringResource(R.string.notif_auto_sync_desc),
                             color = TextSecondary,
                             fontSize = 12.sp
                         )
@@ -203,7 +203,7 @@ fun NotificationMirrorScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Search notifications, apps, titles...",
+                        text = stringResource(R.string.notif_search_placeholder),
                         color = TextMuted,
                         fontSize = 14.sp
                     )
@@ -221,7 +221,7 @@ fun NotificationMirrorScreen(
                         IconButton(onClick = { searchQuery = "" }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Clear",
+                                contentDescription = stringResource(R.string.clear),
                                 tint = TextSecondary,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -243,16 +243,23 @@ fun NotificationMirrorScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             // Filter Chips Row
-            val categories = listOf("All", "Messages", "Social", "Email", "System")
+            val categories = listOf(
+                "All" to R.string.notif_cat_all,
+                "Messages" to R.string.notif_cat_messages,
+                "Social" to R.string.notif_cat_social,
+                "Email" to R.string.notif_cat_email,
+                "System" to R.string.notif_cat_system
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                categories.forEach { cat ->
-                    val isSelected = selectedCategory == cat
-                    val count = if (cat == "All") notifications.size else notifications.count { it.category.equals(cat, ignoreCase = true) }
+                categories.forEach { (catId, catLabelRes) ->
+                    val isSelected = selectedCategory == catId
+                    val count = if (catId == "All") notifications.size else notifications.count { it.category.equals(catId, ignoreCase = true) }
+                    val label = stringResource(catLabelRes)
 
                     Box(
                         modifier = Modifier
@@ -263,12 +270,12 @@ fun NotificationMirrorScreen(
                                 color = if (isSelected) CyberCyan else SurfaceCardHover,
                                 shape = RoundedCornerShape(20.dp)
                             )
-                            .clickable { selectedCategory = cat }
+                            .clickable { selectedCategory = catId }
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (count > 0) "$cat ($count)" else cat,
+                            text = if (count > 0) "$label ($count)" else label,
                             color = if (isSelected) BackgroundDark else TextSecondary,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             fontSize = 13.sp
@@ -300,9 +307,9 @@ fun NotificationMirrorScreen(
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
                             text = if (searchQuery.isNotEmpty() || selectedCategory != "All") {
-                                "No notifications match your filters."
+                                stringResource(R.string.notif_empty_filters)
                             } else {
-                                "No active notifications on remote phone."
+                                stringResource(R.string.notif_empty_active)
                             },
                             color = TextMuted,
                             fontSize = 14.sp
@@ -326,12 +333,12 @@ fun NotificationMirrorScreen(
                                     if (item.title.isNotEmpty()) appendLine(item.title)
                                     if (item.text.isNotEmpty()) append(item.text)
                                 }
-                                cm.setPrimaryClip(ClipData.newPlainText("Notification", fullText))
-                                Toast.makeText(context, "Copied notification text", Toast.LENGTH_SHORT).show()
+                                cm.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.notif_clip_label), fullText))
+                                Toast.makeText(context, context.getString(R.string.toast_copied_notification), Toast.LENGTH_SHORT).show()
                             },
                             onDismiss = {
                                 viewModel.dismissNotification(item)
-                                Toast.makeText(context, "Dismissing notification...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_dismissing_notification), Toast.LENGTH_SHORT).show()
                             }
                         )
                     }
@@ -467,13 +474,13 @@ private fun NotificationCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy",
+                        contentDescription = stringResource(R.string.notif_copy_btn),
                         tint = CyberCyan,
                         modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Copy",
+                        text = stringResource(R.string.notif_copy_btn),
                         color = CyberCyan,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
@@ -488,13 +495,13 @@ private fun NotificationCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Dismiss",
+                        contentDescription = stringResource(R.string.notif_dismiss_btn),
                         tint = TextMuted,
                         modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Dismiss",
+                        text = stringResource(R.string.notif_dismiss_btn),
                         color = TextMuted,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium

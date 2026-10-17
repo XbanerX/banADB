@@ -133,9 +133,9 @@ fun FileManagerScreen(
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            context.startActivity(Intent.createChooser(intent, "Open with"))
+            context.startActivity(Intent.createChooser(intent, context.getString(R.string.files_open_with)))
         } catch (e: Exception) {
-            Toast.makeText(context, "Could not open file: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.toast_could_not_open_file, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -148,7 +148,7 @@ fun FileManagerScreen(
         val category = getFileCategory(file.name)
         viewModel.pullFileToCache(file, context) { cached ->
             if (cached == null) {
-                Toast.makeText(context, "Failed to fetch file from remote device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.toast_fetch_file_failed), Toast.LENGTH_SHORT).show()
                 return@pullFileToCache
             }
 
@@ -260,7 +260,7 @@ fun FileManagerScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.FolderOpen, contentDescription = null, tint = TextMuted, modifier = Modifier.size(48.dp))
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Directory is empty", color = TextSecondary)
+                        Text(stringResource(R.string.files_dir_empty), color = TextSecondary)
                     }
                 }
             } else {
@@ -354,11 +354,11 @@ fun FileManagerScreen(
                                 Row {
                                     if (!file.isDirectory) {
                                         IconButton(onClick = { selectedFileForOptions = file }) {
-                                            Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = TextSecondary)
+                                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.options), tint = TextSecondary)
                                         }
                                     } else {
                                         IconButton(onClick = { fileToDelete = file }) {
-                                            Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = StatusError.copy(alpha = 0.7f))
+                                            Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.delete), tint = StatusError.copy(alpha = 0.7f))
                                         }
                                     }
                                 }
@@ -401,7 +401,7 @@ fun FileManagerScreen(
                 ) {
                     Icon(Icons.Default.Visibility, contentDescription = null, tint = BananaGold)
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text("View / Open File", color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.files_action_open), color = TextPrimary, fontWeight = FontWeight.SemiBold)
                 }
 
                 // Option: Download to Downloads
@@ -413,9 +413,9 @@ fun FileManagerScreen(
                             selectedFileForOptions = null
                             viewModel.saveFileToDownloads(f, context) { ok ->
                                 if (ok) {
-                                    Toast.makeText(context, "Saved to Downloads: ${f.name}", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_saved_to_downloads, f.name), Toast.LENGTH_LONG).show()
                                 } else {
-                                    Toast.makeText(context, "Download failed", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_download_failed), Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -424,7 +424,7 @@ fun FileManagerScreen(
                 ) {
                     Icon(Icons.Default.Download, contentDescription = null, tint = CyberCyan)
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text("Save to Downloads", color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.files_action_save_downloads), color = TextPrimary, fontWeight = FontWeight.SemiBold)
                 }
 
                 // Option: Delete
@@ -441,7 +441,7 @@ fun FileManagerScreen(
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null, tint = StatusError)
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text("Delete File", color = StatusError, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.files_action_delete), color = StatusError, fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -491,7 +491,7 @@ fun FileManagerScreen(
                             modifier = Modifier.weight(1f)
                         )
                         IconButton(onClick = { previewImageFile = null }) {
-                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                         }
                     }
 
@@ -512,7 +512,7 @@ fun FileManagerScreen(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            Text("Failed to decode image", color = TextMuted)
+                            Text(stringResource(R.string.files_image_decode_failed), color = TextMuted)
                         }
                     }
 
@@ -532,16 +532,16 @@ fun FileManagerScreen(
                         ) {
                             Icon(Icons.Default.OpenInNew, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Open With", color = TextPrimary, fontSize = 12.sp)
+                            Text(stringResource(R.string.files_open_with), color = TextPrimary, fontSize = 12.sp)
                         }
 
                         Button(
                             onClick = {
                                 viewModel.saveFileToDownloads(remoteFile, context) { ok ->
                                     if (ok) {
-                                        Toast.makeText(context, "Saved to Downloads: ${remoteFile.name}", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_saved_to_downloads, remoteFile.name), Toast.LENGTH_LONG).show()
                                     } else {
-                                        Toast.makeText(context, "Download failed", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_download_failed), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
@@ -551,7 +551,7 @@ fun FileManagerScreen(
                         ) {
                             Icon(Icons.Default.Download, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Save to Downloads", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(stringResource(R.string.files_action_save_downloads), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
@@ -589,7 +589,7 @@ fun FileManagerScreen(
                             Text(formatFileSize(remoteFile.size), color = TextMuted, fontSize = 11.sp)
                         }
                         IconButton(onClick = { previewTextFile = null }) {
-                            Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                         }
                     }
 
@@ -623,7 +623,7 @@ fun FileManagerScreen(
                         Button(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(textContent))
-                                Toast.makeText(context, "Copied content to clipboard", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_copied_content), Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
@@ -631,16 +631,16 @@ fun FileManagerScreen(
                         ) {
                             Icon(Icons.Default.ContentCopy, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Copy All", color = TextPrimary, fontSize = 12.sp)
+                            Text(stringResource(R.string.files_copy_all), color = TextPrimary, fontSize = 12.sp)
                         }
 
                         Button(
                             onClick = {
                                 viewModel.saveFileToDownloads(remoteFile, context) { ok ->
                                     if (ok) {
-                                        Toast.makeText(context, "Saved to Downloads: ${remoteFile.name}", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_saved_to_downloads, remoteFile.name), Toast.LENGTH_LONG).show()
                                     } else {
-                                        Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_download_failed), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
@@ -650,7 +650,7 @@ fun FileManagerScreen(
                         ) {
                             Icon(Icons.Default.Download, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Download", color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(stringResource(R.string.files_download), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }

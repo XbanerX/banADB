@@ -1,6 +1,7 @@
 package com.baner.banadb.ui.screens
 
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.baner.banadb.R
 import com.baner.banadb.data.model.ConnectionState
@@ -56,30 +58,38 @@ fun HomeScreen(
                 connectionState = connectionState,
                 onDisconnect = { viewModel.disconnect() },
                 actions = {
-                    val (themeIcon, themeTooltip) = when (themeMode) {
-                        DevicePreferences.THEME_LIGHT -> Icons.Default.LightMode to stringResource(R.string.theme_light)
-                        DevicePreferences.THEME_DARK -> Icons.Default.DarkMode to stringResource(R.string.theme_dark)
-                        else -> Icons.Default.BrightnessAuto to stringResource(R.string.theme_system)
+                    val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
+                    val isDark = when (themeMode) {
+                        DevicePreferences.THEME_LIGHT -> false
+                        DevicePreferences.THEME_DARK -> true
+                        else -> isSystemDark
                     }
-                    IconButton(onClick = {
-                        val nextMode = when (themeMode) {
-                            DevicePreferences.THEME_SYSTEM -> DevicePreferences.THEME_LIGHT
-                            DevicePreferences.THEME_LIGHT -> DevicePreferences.THEME_DARK
-                            else -> DevicePreferences.THEME_SYSTEM
-                        }
-                        viewModel.setThemeMode(nextMode)
-                    }) {
+                    val themeIcon = if (isDark) Icons.Default.DarkMode else Icons.Default.LightMode
+                    val themeTooltip = if (isDark) stringResource(R.string.theme_dark) else stringResource(R.string.theme_light)
+
+                    IconButton(
+                        onClick = {
+                            val nextMode = if (isDark) DevicePreferences.THEME_LIGHT else DevicePreferences.THEME_DARK
+                            viewModel.setThemeMode(nextMode)
+                        },
+                        modifier = Modifier.size(38.dp)
+                    ) {
                         Icon(
                             imageVector = themeIcon,
                             contentDescription = themeTooltip,
-                            tint = TextSecondary
+                            tint = TextSecondary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                    IconButton(onClick = { showAboutDialog = true }) {
+                    IconButton(
+                        onClick = { showAboutDialog = true },
+                        modifier = Modifier.size(38.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = stringResource(R.string.about_title),
-                            tint = TextSecondary
+                            tint = TextSecondary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }

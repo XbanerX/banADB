@@ -139,16 +139,24 @@ fun GalleryScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             // Categories Row
-            val categories = listOf("All", "Camera", "Screenshots", "Videos", "Downloads", "Pictures")
+            val categories = listOf(
+                "All" to R.string.gallery_cat_all,
+                "Camera" to R.string.gallery_cat_camera,
+                "Screenshots" to R.string.gallery_cat_screenshots,
+                "Videos" to R.string.gallery_cat_videos,
+                "Downloads" to R.string.gallery_cat_downloads,
+                "Pictures" to R.string.gallery_cat_pictures
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                categories.forEach { cat ->
-                    val isSelected = selectedCategory == cat
-                    val count = if (cat == "All") mediaItems.size else mediaItems.count { it.category.equals(cat, ignoreCase = true) }
+                categories.forEach { (catId, catLabelRes) ->
+                    val isSelected = selectedCategory == catId
+                    val count = if (catId == "All") mediaItems.size else mediaItems.count { it.category.equals(catId, ignoreCase = true) }
+                    val label = stringResource(catLabelRes)
 
                     Box(
                         modifier = Modifier
@@ -159,12 +167,12 @@ fun GalleryScreen(
                                 color = if (isSelected) CyberCyan else SurfaceCardHover,
                                 shape = RoundedCornerShape(20.dp)
                             )
-                            .clickable { selectedCategory = cat }
+                            .clickable { selectedCategory = catId }
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (count > 0) "$cat ($count)" else cat,
+                            text = if (count > 0) "$label ($count)" else label,
                             color = if (isSelected) BackgroundDark else TextSecondary,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             fontSize = 13.sp
@@ -181,10 +189,11 @@ fun GalleryScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(color = CyberCyan, modifier = Modifier.size(36.dp))
                         Spacer(modifier = Modifier.height(14.dp))
-                        Text("Scanning remote media files...", color = TextSecondary, fontSize = 14.sp)
+                        Text(stringResource(R.string.gallery_scanning), color = TextSecondary, fontSize = 14.sp)
                     }
                 }
             } else if (filteredList.isEmpty()) {
+                val currentCategoryLabel = categories.find { it.first == selectedCategory }?.let { stringResource(it.second) } ?: selectedCategory
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -203,7 +212,7 @@ fun GalleryScreen(
                         )
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
-                            text = if (selectedCategory != "All") "No $selectedCategory media found on remote phone." else "No media files found on remote phone.",
+                            text = if (selectedCategory != "All") stringResource(R.string.gallery_no_media_cat, currentCategoryLabel) else stringResource(R.string.gallery_no_media),
                             color = TextMuted,
                             fontSize = 14.sp
                         )
@@ -247,10 +256,10 @@ fun GalleryScreen(
         AlertDialog(
             onDismissRequest = { itemToDelete = null },
             icon = { Icon(Icons.Default.DeleteForever, contentDescription = null, tint = StatusError, modifier = Modifier.size(32.dp)) },
-            title = { Text("Delete Remote Media?", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+            title = { Text(stringResource(R.string.gallery_delete_title), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp) },
             text = {
                 Text(
-                    text = "Are you sure you want to permanently delete \"${item.name}\" from the remote phone?",
+                    text = stringResource(R.string.gallery_delete_desc, item.name),
                     color = TextSecondary,
                     fontSize = 14.sp
                 )
@@ -263,7 +272,7 @@ fun GalleryScreen(
                         viewModel.deleteRemoteMedia(toRemove) { ok ->
                             Toast.makeText(
                                 context,
-                                if (ok) "Deleted ${toRemove.name}" else "Failed to delete file",
+                                if (ok) context.getString(R.string.gallery_deleted_item, toRemove.name) else context.getString(R.string.gallery_delete_failed),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -271,12 +280,12 @@ fun GalleryScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = StatusError),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Delete", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.delete), color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { itemToDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = SurfaceDark,
@@ -372,7 +381,7 @@ private fun MediaGridCard(
                             .background(Color.Black.copy(alpha = 0.75f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Text("VIDEO", color = CyberCyan, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.gallery_video_badge), color = CyberCyan, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     }
                 } else {
                     // Photo Tag
@@ -476,13 +485,13 @@ private fun MediaPreviewDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (item.isVideo) "Video Preview" else "Photo Preview",
+                        text = if (item.isVideo) stringResource(R.string.gallery_video_preview) else stringResource(R.string.gallery_photo_preview),
                         color = TextPrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = TextSecondary)
                     }
                 }
 
@@ -521,7 +530,7 @@ private fun MediaPreviewDialog(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 CircularProgressIndicator(color = CyberCyan, modifier = Modifier.size(32.dp))
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text("Loading preview from remote...", color = TextSecondary, fontSize = 12.sp)
+                                Text(stringResource(R.string.gallery_loading_preview), color = TextSecondary, fontSize = 12.sp)
                             }
                         }
                     } else if (previewFile != null && previewFile!!.exists()) {
@@ -562,7 +571,7 @@ private fun MediaPreviewDialog(
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(12.dp))
-                                    Text("Tap to Play Video", color = CyberCyan, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Text(stringResource(R.string.gallery_tap_to_play), color = CyberCyan, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
                             }
                         } else {
@@ -588,7 +597,7 @@ private fun MediaPreviewDialog(
                                     contentScale = ContentScale.Fit
                                 )
                             } else {
-                                Text("Cannot render image preview", color = TextMuted, fontSize = 12.sp)
+                                Text(stringResource(R.string.gallery_cannot_render), color = TextMuted, fontSize = 12.sp)
                             }
                         }
                     } else {
@@ -600,7 +609,7 @@ private fun MediaPreviewDialog(
                                 contentScale = ContentScale.Fit
                             )
                         } else {
-                            Text("Preview unavailable", color = TextMuted, fontSize = 12.sp)
+                            Text(stringResource(R.string.gallery_preview_unavailable), color = TextMuted, fontSize = 12.sp)
                         }
                     }
                 }
@@ -625,7 +634,7 @@ private fun MediaPreviewDialog(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Path: ${item.path}",
+                        text = stringResource(R.string.gallery_path_label, item.path),
                         color = TextMuted,
                         fontSize = 11.sp,
                         maxLines = 1,
@@ -636,8 +645,8 @@ private fun MediaPreviewDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Size: ${formatFileSize(item.size)}", color = TextSecondary, fontSize = 11.sp)
-                        Text("Date: ${formatDate(item.timestamp)}", color = TextSecondary, fontSize = 11.sp)
+                        Text(stringResource(R.string.gallery_size_label, formatFileSize(item.size)), color = TextSecondary, fontSize = 11.sp)
+                        Text(stringResource(R.string.gallery_date_label, formatDate(item.timestamp)), color = TextSecondary, fontSize = 11.sp)
                     }
                 }
 
@@ -657,7 +666,7 @@ private fun MediaPreviewDialog(
                     Button(
                         onClick = {
                             isDownloading = true
-                            statusText = "Saving to your phone..."
+                            statusText = context.getString(R.string.gallery_saving_to_phone)
                             viewModel.downloadMediaToLocal(
                                 context = context,
                                 item = item,
@@ -666,9 +675,9 @@ private fun MediaPreviewDialog(
                                     isDownloading = false
                                     statusText = null
                                     if (ok) {
-                                        Toast.makeText(context, "Saved to Pictures/banADB!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_saved_to_pictures), Toast.LENGTH_LONG).show()
                                     } else {
-                                        Toast.makeText(context, "Failed: $pathOrMsg", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.toast_failed) + ": $pathOrMsg", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             )
@@ -680,13 +689,13 @@ private fun MediaPreviewDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Download,
-                            contentDescription = "Save",
+                            contentDescription = stringResource(R.string.save),
                             tint = BackgroundDark,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Save to Phone",
+                            text = stringResource(R.string.gallery_save_to_phone),
                             color = BackgroundDark,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
@@ -699,14 +708,14 @@ private fun MediaPreviewDialog(
                             previewFile?.let { f ->
                                 shareMediaFile(context, f, if (item.isVideo) "video/*" else "image/*")
                             } ?: run {
-                                Toast.makeText(context, "Loading file first...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_loading_file_first), Toast.LENGTH_SHORT).show()
                             }
                         },
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(SurfaceCard)
                     ) {
-                        Icon(Icons.Default.Share, contentDescription = "Share", tint = CyberCyan)
+                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share), tint = CyberCyan)
                     }
 
                     // Delete button
@@ -716,7 +725,7 @@ private fun MediaPreviewDialog(
                             .clip(RoundedCornerShape(10.dp))
                             .background(SurfaceCard)
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = StatusError)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = StatusError)
                     }
                 }
             }
@@ -734,7 +743,7 @@ private fun openMediaFile(context: Context, file: File, mimeType: String) {
         }
         context.startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(context, "No app available to play media", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.toast_no_app_play_media), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -746,9 +755,9 @@ private fun shareMediaFile(context: Context, file: File, mimeType: String) {
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "Share Media"))
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.gallery_share_media)))
     } catch (e: Exception) {
-        Toast.makeText(context, "Cannot share file: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.toast_cannot_share, e.localizedMessage ?: ""), Toast.LENGTH_SHORT).show()
     }
 }
 

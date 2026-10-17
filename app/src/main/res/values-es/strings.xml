@@ -83,7 +83,7 @@
 
     <!-- Remote Control Screen -->
     <string name="remote_title">Control Remoto</string>
-    <string name="remote_tab_live">Control en Vivo</string>
+    <string name="remote_tab_live">En Vivo</string>
     <string name="remote_tab_terminal">Terminal</string>
     <string name="remote_feature_tools">Herramientas Remotas</string>
     <string name="remote_feature_tools_sub">Apps, Archivos, Pantalla, Ajustes rápidos y más</string>
@@ -92,7 +92,7 @@
     <string name="remote_btn_recents">Recientes</string>
     <string name="remote_mode_dpad">D-Pad</string>
     <string name="remote_mode_touchpad">Panel Táctil</string>
-    <string name="remote_mode_numpad">Teclado Num</string>
+    <string name="remote_mode_numpad">Numérico</string>
     <string name="remote_vol_down">Vol -</string>
     <string name="remote_vol_mute">Silenciar</string>
     <string name="remote_vol_up">Vol +</string>
@@ -230,9 +230,10 @@
     <string name="about_title">Acerca de banADB</string>
     <string name="about_version">Versión 1.0.0 (Build 1)</string>
     <string name="about_author">Autor</string>
+    <string name="about_github">GitHub</string>
     <string name="about_contact">Contacto</string>
     <string name="about_license">Licencia</string>
-    <string name="about_view_license_btn">Ver Términos de Licencia AGPL-3.0</string>
+    <string name="about_view_license_btn">Ver Términos de Licencia</string>
     <string name="about_copyright">© 2026 baner. Todos los derechos reservados bajo AGPL-3.0.</string>
     <string name="dialog_exit_title">¿Salir de banADB?</string>
     <string name="dialog_exit_desc">¿Seguro que deseas cerrar banADB?</string>
@@ -298,7 +299,259 @@
     <string name="pair_stop_local_service">Detener Servicio</string>
     <string name="pair_manual_localhost">Emparejamiento Manual Localhost</string>
     <string name="pair_target_interface">Interfaz de red:</string>
-    <string name="pair_pairing_with_local">Emparejando con Dispositivo Local...</string>
-    <string name="pair_pair_and_connect_local">Emparejar y Conectar Dispositivo Local</string>
+    <string name="pair_pairing_with_local">Emparejando...</string>
+    <string name="pair_pair_and_connect_local">Emparejar y Conectar</string>
     <string name="pair_direct_adb_connect">Conexión Directa ADB</string>
+
+    <!-- General Actions -->
+    <string name="copy">Copiar</string>
+    <string name="dismiss">Descartar</string>
+    <string name="refresh">Actualizar</string>
+
+    <!-- Additional Feature Tools -->
+    <string name="tool_clipboard">Portapapeles</string>
+    <string name="tool_quick_set">Ajustes</string>
+    <string name="tool_battery">Batería</string>
+    <string name="tool_screenshot">Captura</string>
+
+    <!-- Pairing Screen & Local Discovery -->
+    <string name="pair_discovered_pairing_title">Dispositivos de emparejamiento descubiertos (Código de 6 dígitos):</string>
+    <string name="pair_tap_enter_code">Toca para ingresar código de 6 dígitos</string>
+    <string name="pair_pairing_with_target">Emparejando con %1$s:%2$d</string>
+    <string name="pair_enter_code_label">Ingresa el código Wi-Fi de 6 dígitos:</string>
+    <string name="pair_hide_manual_entry">Ocultar entrada manual</string>
+    <string name="pair_discovered_adb10_title">Dispositivos Android 10 descubiertos (Puerto 5555):</string>
+    <string name="pair_local_connected">Conectado: %1$s</string>
+    <string name="pair_local_disconnected">ADB local: Desconectado</string>
+    <string name="pair_scanning">Escaneando...</string>
+    <string name="pair_no_local_services">No se detectaron servicios locales. Toca \'Auto-Scan\' o activa Depuración inalámbrica.</string>
+    <string name="pair_service_active">Servicio activo: %1$s</string>
+    <string name="pair_discovered_port">Puerto de emparejamiento descubierto: %1$d</string>
+    <string name="pair_overlay_enabled">Regreso automático activado</string>
+    <string name="pair_allow_overlay">Permitir regreso automático (Superposición)</string>
+    <string name="pair_hide_manual_local">Ocultar emparejamiento local manual</string>
+    <string name="pair_show_manual_local">Emparejamiento local manual (Pantalla dividida)</string>
+    <string name="pair_6digits_placeholder">6 dígitos</string>
+    <string name="pair_conn_port_main_screen">Puerto de conexión (Ajustes)</string>
+    <string name="pair_error_prefix">Error: %1$s</string>
+
+    <!-- Toasts -->
+    <string name="toast_pairing_service_started">¡Servicio de emparejamiento iniciado! Revisa las notificaciones.</string>
+    <string name="toast_could_not_open_settings">No se pudo abrir Ajustes</string>
+    <string name="toast_pairing_service_stopped">Servicio de emparejamiento detenido</string>
+    <string name="toast_invalid_pairing_input">Ingresa un puerto válido y el código de 6 dígitos</string>
+    <string name="toast_paired_and_connected">¡Emparejado y conectado al dispositivo local!</string>
+    <string name="toast_capturing_screenshot">Capturando pantalla...</string>
+    <string name="toast_clipboard_updated">Portapapeles remoto actualizado</string>
+    <string name="toast_copied_to_phone">Copiado al portapapeles del teléfono</string>
+    <string name="toast_pasted_from_phone">Pegado desde el portapapeles</string>
+    <string name="toast_phone_clipboard_empty">El portapapeles del teléfono está vacío</string>
+    <string name="toast_text_injected">Texto inyectado en el campo activo</string>
+    <string name="toast_remote_clipboard_set">Portapapeles remoto actualizado</string>
+    <string name="toast_remote_clipboard_failed">Error al establecer el portapapeles remoto</string>
+    <string name="toast_retaking_screenshot">Repitiendo captura...</string>
+    <string name="toast_saved_to_gallery">Guardado en Galería: %1$s</string>
+    <string name="toast_remote_clipboard_fetched">Portapapeles remoto obtenido</string>
+    <string name="toast_failed">Error</string>
+    <string name="toast_could_not_open_file">No se pudo abrir el archivo: %1$s</string>
+    <string name="toast_fetch_file_failed">Error al obtener archivo del dispositivo remoto</string>
+    <string name="toast_saved_to_downloads">Guardado en Descargas: %1$s</string>
+    <string name="toast_download_failed">Error en la descarga</string>
+    <string name="toast_copied_content">Contenido copiado al portapapeles</string>
+    <string name="toast_saved_to_pictures">¡Guardado en Pictures/banADB!</string>
+    <string name="toast_loading_file_first">Descargando archivo primero...</string>
+    <string name="toast_no_app_play_media">No hay ninguna app disponible para reproducir el archivo</string>
+    <string name="toast_cannot_share">No se pudo compartir el archivo: %1$s</string>
+    <string name="toast_copied_notification">Texto de notificación copiado</string>
+    <string name="toast_dismissing_notification">Descartando notificación...</string>
+
+    <!-- Remote & Dashboard Extras -->
+    <string name="remote_tools_collapse">Toca para contraer cuadrícula</string>
+    <string name="remote_clipboard_empty_or_protected">(El portapapeles remoto está vacío o protegido)</string>
+    <string name="remote_clipboard_tip">Consejo: \'Inyectar directo\' escribe en el campo activo. \'Copiar a remoto\' guarda en el portapapeles.</string>
+    <string name="screenshot_captured_title">Captura de pantalla realizada</string>
+    <string name="disconnect_dialog_title">¿Desconectar del dispositivo?</string>
+    <string name="disconnect_dialog_desc">¿Estás seguro de que deseas desconectarte de %1$s y volver al inicio?</string>
+    <string name="dash_clip_placeholder">Pega o escribe texto para sincronizar...</string>
+    <string name="dash_get_remote">Obtener remoto</string>
+    <string name="dash_send_clip">Enviar clip</string>
+    <string name="dash_inject">Inyectar</string>
+    <string name="remote_reboot_confirm_desc">¿Estás seguro de reiniciar el dispositivo remoto? La conexión ADB se cerrará.</string>
+
+    <!-- File Manager -->
+    <string name="files_dir_empty">La carpeta está vacía</string>
+    <string name="files_action_open">Ver / Abrir archivo</string>
+    <string name="files_action_save_downloads">Guardar en Descargas</string>
+    <string name="files_action_delete">Eliminar archivo</string>
+    <string name="files_image_decode_failed">Error al decodificar imagen</string>
+    <string name="files_open_with">Abrir con</string>
+    <string name="files_copy_all">Copiar todo</string>
+
+    <!-- Gallery -->
+    <string name="gallery_scanning">Buscando archivos multimedia remotos...</string>
+    <string name="gallery_no_media_cat">No se encontraron archivos de %1$s en el teléfono remoto.</string>
+    <string name="gallery_no_media">No se encontraron archivos multimedia en el teléfono remoto.</string>
+    <string name="gallery_delete_title">¿Eliminar archivo multimedia remoto?</string>
+    <string name="gallery_delete_desc">¿Estás seguro de que deseas eliminar permanentemente \"%1$s\" del teléfono remoto?</string>
+    <string name="gallery_video_preview">Vista previa de video</string>
+    <string name="gallery_photo_preview">Vista previa de foto</string>
+    <string name="gallery_loading_preview">Cargando vista previa remota...</string>
+    <string name="gallery_tap_to_play">Toca para reproducir video</string>
+    <string name="gallery_cannot_render">No se puede renderizar la imagen</string>
+    <string name="gallery_preview_unavailable">Vista previa no disponible</string>
+    <string name="gallery_path_label">Ruta: %1$s</string>
+    <string name="gallery_size_label">Tamaño: %1$s</string>
+    <string name="gallery_date_label">Fecha: %1$s</string>
+    <string name="gallery_save_to_phone">Guardar en teléfono</string>
+
+    <!-- Notification Mirror -->
+    <string name="notif_auto_sync_title">Sincronización en vivo (5s)</string>
+    <string name="notif_auto_sync_desc">Reflejo en tiempo real del teléfono remoto</string>
+    <string name="notif_search_placeholder">Buscar notificaciones, apps, títulos...</string>
+    <string name="notif_empty_filters">Ninguna notificación coincide con los filtros.</string>
+    <string name="notif_empty_active">No hay notificaciones activas en el teléfono remoto.</string>
+
+    <!-- Process Manager -->
+    <string name="processes_running_count">%1$d procesos en ejecución</string>
+    <string name="processes_no_matching">No se encontraron procesos coincidentes</string>
+    <string name="processes_kill_action">Finalizar proceso</string>
+
+    <!-- Screen Mirror -->
+    <string name="mirror_capturing">Capturando pantalla remota...</string>
+    <string name="mirror_no_frame">Aún no hay captura disponible</string>
+    <string name="mirror_tap_to_start">Toca actualizar o en vivo para comenzar</string>
+
+    <!-- Script Runner -->
+    <string name="scripts_title_placeholder">ej. Forzar Modo Oscuro</string>
+    <string name="scripts_cmd_placeholder">ej. cmd uimode night yes</string>
+
+    <!-- Trackpad &amp; Gestures -->
+    <string name="trackpad_invert_on">Invertir: SÍ</string>
+    <string name="trackpad_invert_off">Invertir: NO</string>
+    <string name="trackpad_touch_surface">Superficie Táctil</string>
+    <string name="trackpad_gesture_hint">Toca para pulsar • Arrastra para deslizar</string>
+    <string name="trackpad_tap_btn">Tocar</string>
+
+    <!-- App Manager -->
+    <string name="apps_badge_system">SISTEMA</string>
+
+    <!-- System Notifications &amp; Services -->
+    <string name="notif_pairing_active_title">Emparejamiento local banADB activo</string>
+    <string name="notif_pairing_active_desc">Abre Opciones de desarrollador -&gt; Depuración inalámbrica -&gt; \'Vincular con código\'</string>
+    <string name="notif_pairing_detected_title">¡Servicio de emparejamiento detectado! (Puerto %1$d)</string>
+    <string name="notif_pairing_detected_desc">Toca \'Ingresar código\' abajo para ingresar el código de 6 dígitos</string>
+    <string name="notif_action_dev_options">Opciones des.</string>
+    <string name="notif_action_enter_code">Ingresar código</string>
+    <string name="notif_action_stop">Detener</string>
+    <string name="notif_action_open_app">Abrir App</string>
+    <string name="notif_paired_success_title">¡Emparejado con éxito!</string>
+    <string name="notif_paired_success_desc">Abre banADB para conectarte al puerto de depuración inalámbrica.</string>
+    <string name="notif_pairing_failed_title">Error de emparejamiento</string>
+    <string name="notif_pairing_failed_desc">%1$s. Toca \'Ingresar código\' para reintentar.</string>
+    <string name="notif_connected_local_title">Conectado a %1$s</string>
+    <string name="notif_connected_local_desc">ADB local activo. Toca \'Abrir App\' para regresar.</string>
+    <string name="notif_connected_local_big">ADB local conectado (%1$s). Toca \'Abrir App\' abajo para regresar a banADB.</string>
+    <string name="notif_connected_title">banADB Conectado: %1$s</string>
+    <string name="notif_active_session">Sesión activa con %1$s</string>
+
+    <!-- AdbViewModel Status Messages -->
+    <string name="status_apk_installing">Transfiriendo APK al dispositivo remoto...</string>
+    <string name="status_apk_executing">Ejecutando instalación remota...</string>
+    <string name="status_apk_success">¡APK instalado con éxito!</string>
+    <string name="status_apk_extracting">Extrayendo APK de %1$s...</string>
+    <string name="status_apk_extracted">APK extraído a Descargas: %1$s</string>
+    <string name="status_downloading_file">Descargando %1$s...</string>
+    <string name="status_auto_scan_no_port">Auto-Scan: No se detectó ningún puerto ADB abierto en 127.0.0.1. Asegúrate de activar la Depuración inalámbrica.</string>
+
+    <!-- Additional Dashboard Specs -->
+    <string name="dash_temp">Temp</string>
+    <string name="dash_voltage">Voltaje</string>
+    <string name="dash_health">Salud</string>
+    <string name="dash_model">Modelo</string>
+    <string name="dash_manufacturer">Fabricante</string>
+    <string name="dash_android_ver">Versión de Android</string>
+    <string name="dash_resolution">Resolución</string>
+    <string name="dash_uptime">Tiempo activo</string>
+    <string name="dash_connected_host">Host conectado</string>
+    <string name="dash_uptime_active">Activo</string>
+    <string name="dash_voltage_val">%1$d mV</string>
+    <string name="dash_temp_val">%1$d °C</string>
+    <string name="dash_res_val">%1$d x %2$d px</string>
+    <string name="dash_android_ver_val">Android %1$s (API %2$s)</string>
+
+    <!-- Additional Gallery Keys -->
+    <string name="gallery_cat_all">Todos</string>
+    <string name="gallery_cat_camera">Cámara</string>
+    <string name="gallery_cat_screenshots">Capturas</string>
+    <string name="gallery_cat_videos">Videos</string>
+    <string name="gallery_cat_downloads">Descargas</string>
+    <string name="gallery_cat_pictures">Imágenes</string>
+    <string name="gallery_video_badge">VIDEO</string>
+    <string name="gallery_saving_to_phone">Guardando en el teléfono...</string>
+    <string name="gallery_share_media">Compartir multimedia</string>
+    <string name="gallery_deleted_item">Eliminado %1$s</string>
+    <string name="gallery_delete_failed">Error al eliminar archivo</string>
+
+    <!-- Additional Notification Mirror Keys -->
+    <string name="notif_cat_all">Todos</string>
+    <string name="notif_cat_messages">Mensajes</string>
+    <string name="notif_cat_social">Redes</string>
+    <string name="notif_cat_email">Correo</string>
+    <string name="notif_cat_system">Sistema</string>
+    <string name="notif_copy_btn">Copiar</string>
+    <string name="notif_dismiss_btn">Descartar</string>
+    <string name="notif_clip_label">Notificación</string>
+
+    <!-- Additional Trackpad & Receiver Strings -->
+    <string name="trackpad_nav_hint">Toca o arrastra para navegar</string>
+    <string name="trackpad_tap_at">Toque en (%1$d, %2$d)</string>
+    <string name="trackpad_swipe_at">Deslice (%1$d, %2$d)</string>
+    <string name="trackpad_content_desc">Panel táctil</string>
+    <string name="trackpad_scroll_up">Desplazar arriba</string>
+    <string name="trackpad_scroll_down">Desplazar abajo</string>
+    <string name="notif_pair_code_empty_title">Código de vinculación vacío</string>
+    <string name="notif_pair_code_empty_desc">Toca \'Ingresar código\' y escribe el código de 6 dígitos.</string>
+    <string name="notif_pairing_in_progress_title">Vinculación en curso...</string>
+    <string name="notif_pairing_in_progress_desc">Contactando el daemon local de ADB en el puerto %1$d...</string>
+    <string name="notif_pair_remote_input_label">Ingresa código de 6 dígitos o PUERTO:CÓDIGO</string>
+    <string name="notif_pairing_error_title">Error de vinculación</string>
+    <string name="pair_placeholder_port">ej. 38491</string>
+    <string name="pair_placeholder_conn_port">ej. 41235</string>
+    <string name="remote_device_fallback">Dispositivo remoto</string>
+    <string name="local_device_fallback">Dispositivo local</string>
+    <!-- Additional Local Pairing, Status, D-Pad & Error Strings -->
+    <string name="pair_btn_pair_code">Vincular Código</string>
+    <string name="pair_err_invalid_ip">Por favor, ingresa una dirección IP válida</string>
+    <string name="pair_err_invalid_port">Por favor, ingresa un puerto de emparejamiento válido</string>
+    <string name="pair_err_invalid_code">Por favor, ingresa el código de emparejamiento de 6 dígitos</string>
+    <string name="dpad_up">Arriba</string>
+    <string name="dpad_down">Abajo</string>
+    <string name="dpad_left">Izquierda</string>
+    <string name="dpad_right">Derecha</string>
+    <string name="local_pairing_status_listening">Escuchando servicio de emparejamiento local...</string>
+    <string name="local_pairing_status_nsd_unavailable">NsdManager no disponible</string>
+    <string name="local_pairing_status_detected">Servicio de emparejamiento detectado en el puerto %1$d</string>
+    <string name="local_pairing_status_port_unknown">Puerto de emparejamiento desconocido. Responde con PUERTO:CÓDIGO</string>
+    <string name="local_pairing_status_in_progress">Emparejando con puerto %1$d usando código %2$s...</string>
+    <string name="local_pairing_status_succeeded_connecting">¡Emparejamiento exitoso! Conectando...</string>
+    <string name="local_pairing_status_connected">Conectado a %1$s</string>
+    <string name="local_pairing_status_paired_open_app">¡Emparejado! Abre la app para ingresar el puerto de conexión.</string>
+    <string name="local_pairing_status_failed">Error de emparejamiento: %1$s</string>
+    <string name="notif_pairing_succeeded_title">¡Emparejamiento Exitoso!</string>
+    <string name="notif_pairing_authenticating_desc">Autenticando con la sesión ADB local...</string>
+    <string name="notif_pairing_unexpected_error">Ocurrió un error inesperado.</string>
+    <string name="notif_unknown_error">Error desconocido</string>
+    <string name="notif_handshake_failed">Error en el protocolo de enlace</string>
+    <string name="status_auto_scan_scanning">Buscando demonio ADB local...</string>
+    <string name="status_auto_scan_found">ADB local encontrado en el puerto %1$d. Conectando...</string>
+    <string name="status_auto_scan_none">No se encontró ningún puerto ADB local.</string>
+    <string name="status_apk_install_failed">Instalación fallida: %1$s</string>
+    <string name="status_apk_extract_failed">Extracción fallida: %1$s</string>
+    <string name="status_pairing_local">Emparejando dispositivo local en el puerto %1$d...</string>
+    <string name="status_pairing_remote">Emparejando con %1$s...</string>
+    <string name="status_connecting_to">Conectando a %1$s...</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="share">Compartir</string>
+    <string name="options">Opciones</string>
+    <string name="call">Llamar</string>
 </resources>

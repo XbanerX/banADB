@@ -104,7 +104,7 @@ fun ProcessManagerScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "${filteredProcesses.size} processes running",
+                text = stringResource(R.string.processes_running_count, filteredProcesses.size),
                 color = TextSecondary,
                 fontSize = 13.sp
             )
@@ -117,7 +117,7 @@ fun ProcessManagerScreen(
                 }
             } else if (filteredProcesses.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No matching processes", color = TextSecondary)
+                    Text(stringResource(R.string.processes_no_matching), color = TextSecondary)
                 }
             } else {
                 LazyColumn(
@@ -164,7 +164,7 @@ fun ProcessManagerScreen(
                                 IconButton(onClick = { processToKill = proc }) {
                                     Icon(
                                         Icons.Default.Close,
-                                        contentDescription = "Kill Process",
+                                        contentDescription = stringResource(R.string.processes_kill_action),
                                         tint = StatusError.copy(alpha = 0.8f)
                                     )
                                 }

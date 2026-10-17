@@ -225,7 +225,7 @@ fun AppManagerScreen(
                                                         .background(SurfaceDark)
                                                         .padding(horizontal = 4.dp, vertical = 1.dp)
                                                 ) {
-                                                    Text("SYSTEM", color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                                    Text(stringResource(R.string.apps_badge_system), color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }

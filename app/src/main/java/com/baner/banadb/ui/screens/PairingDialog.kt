@@ -270,7 +270,7 @@ fun PairingDialog(
                         } else {
                             // Section Header Matching Screenshot: "Discovered Pairing Devices (6-Digit Code):"
                             Text(
-                                text = "Discovered Pairing Devices (6-Digit Code):",
+                                text = stringResource(R.string.pair_discovered_pairing_title),
                                 color = TextSecondary,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 13.sp
@@ -324,7 +324,7 @@ fun PairingDialog(
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                     Text("🔑 ", fontSize = 11.sp)
                                                     Text(
-                                                        "Tap to enter 6-Digit Pairing Code",
+                                                        stringResource(R.string.pair_tap_enter_code),
                                                         color = CyberCyan,
                                                         fontSize = 12.sp,
                                                         maxLines = 1,
@@ -355,7 +355,7 @@ fun PairingDialog(
                                             contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                                         ) {
                                             Text(
-                                                "Pair Code",
+                                                stringResource(R.string.pair_btn_pair_code),
                                                 color = BackgroundDark,
                                                 fontWeight = FontWeight.Bold,
                                                 maxLines = 1,
@@ -390,7 +390,7 @@ fun PairingDialog(
                                                 )
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Text(
-                                                    text = "Pairing with ${activeDev.ip}:${activeDev.port}",
+                                                    text = stringResource(R.string.pair_pairing_with_target, activeDev.ip, activeDev.port),
                                                     color = TextPrimary,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 15.sp
@@ -398,7 +398,7 @@ fun PairingDialog(
                                             }
 
                                             Text(
-                                                text = "Enter 6-Digit Wi-Fi Pairing Code:",
+                                                text = stringResource(R.string.pair_enter_code_label),
                                                 color = TextSecondary,
                                                 fontSize = 13.sp
                                             )
@@ -431,7 +431,8 @@ fun PairingDialog(
                                                 enabled = isReady,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .height(46.dp),
+                                                    .defaultMinSize(minHeight = 46.dp),
+                                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                                 shape = RoundedCornerShape(12.dp),
                                                 colors = ButtonDefaults.buttonColors(
                                                     containerColor = CyberCyan,
@@ -486,7 +487,7 @@ fun PairingDialog(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = if (showManualPairingEntry) "Hide Manual Entry" else "Manual IP & Port Entry",
+                                    text = if (showManualPairingEntry) stringResource(R.string.pair_hide_manual_entry) else stringResource(R.string.pair_manual_entry),
                                     color = BananaGold,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 14.sp
@@ -583,15 +584,15 @@ fun PairingDialog(
                                             val pPort = pairingPortInput.trim().toIntOrNull()
                                             val cPort = connectionPortInput.trim().toIntOrNull() ?: 5555
                                             if (ip.isBlank() || !ip.contains(".")) {
-                                                validationError = "Please enter a valid IP address"
+                                                validationError = context.getString(R.string.pair_err_invalid_ip)
                                                 return@Button
                                             }
                                             if (pPort == null || pPort <= 0) {
-                                                validationError = "Please enter a valid Pairing Port"
+                                                validationError = context.getString(R.string.pair_err_invalid_port)
                                                 return@Button
                                             }
                                             if (pairingCodeInput.length != 6) {
-                                                validationError = "Please enter 6-digit Pairing Code"
+                                                validationError = context.getString(R.string.pair_err_invalid_code)
                                                 return@Button
                                             }
                                             viewModel.pairAndConnect(ip, pPort, pairingCodeInput, cPort)
@@ -625,7 +626,7 @@ fun PairingDialog(
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         Text(
-                            text = "Discovered Android 10 Devices (Port 5555):",
+                            text = stringResource(R.string.pair_discovered_adb10_title),
                             color = TextSecondary,
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
@@ -669,7 +670,7 @@ fun PairingDialog(
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
-                                                Text("Direct ADB Connect", color = CyberCyan, fontSize = 12.sp, maxLines = 1)
+                                                Text(stringResource(R.string.pair_direct_adb_connect), color = CyberCyan, fontSize = 12.sp, maxLines = 1)
                                                 Text(
                                                     "(${dev.name.ifEmpty { "adb-device" }})",
                                                     color = TextMuted,
@@ -689,7 +690,7 @@ fun PairingDialog(
                                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                                         ) {
                                             Text(
-                                                "Connect",
+                                                stringResource(R.string.connect),
                                                 color = BackgroundDark,
                                                 fontWeight = FontWeight.Bold,
                                                 maxLines = 1,
@@ -856,7 +857,7 @@ fun PairingDialog(
                                 Spacer(modifier = Modifier.width(14.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = if (isConnected) "Connected: $connectedDevName" else "Local ADB: Disconnected",
+                                        text = if (isConnected) stringResource(R.string.pair_local_connected, connectedDevName) else stringResource(R.string.pair_local_disconnected),
                                         color = TextPrimary,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
@@ -865,7 +866,7 @@ fun PairingDialog(
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = if (isConnected) "$connectedHost:$connectedPort" else "Disconnected",
+                                        text = if (isConnected) "$connectedHost:$connectedPort" else stringResource(R.string.disconnected),
                                         color = if (isConnected) CyberCyan else TextSecondary,
                                         fontSize = 13.sp
                                     )
@@ -940,11 +941,12 @@ fun PairingDialog(
                                         },
                                         modifier = Modifier
                                             .weight(1f)
-                                            .height(46.dp),
+                                            .defaultMinSize(minHeight = 46.dp),
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = CyberCyan)
                                     ) {
-                                        Text(stringResource(R.string.connect), color = BackgroundDark, fontWeight = FontWeight.Bold)
+                                        Text(stringResource(R.string.connect), color = BackgroundDark, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
                                     }
 
                                     OutlinedButton(
@@ -956,7 +958,8 @@ fun PairingDialog(
                                         enabled = !isLocalScanning,
                                         modifier = Modifier
                                             .weight(1f)
-                                            .height(46.dp),
+                                            .defaultMinSize(minHeight = 46.dp),
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = CyberCyan),
                                         border = ButtonDefaults.outlinedButtonBorder.copy(
@@ -969,12 +972,12 @@ fun PairingDialog(
                                                 color = CyberCyan,
                                                 strokeWidth = 2.dp
                                             )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Scanning...", color = CyberCyan, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(stringResource(R.string.pair_scanning), color = CyberCyan, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
                                         } else {
                                             Icon(Icons.Default.Refresh, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(16.dp))
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(stringResource(R.string.pair_btn_auto_scan), color = CyberCyan, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(stringResource(R.string.pair_btn_auto_scan), color = CyberCyan, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
                                         }
                                     }
                                 }
@@ -993,7 +996,7 @@ fun PairingDialog(
 
                         if (localServices.isEmpty()) {
                             Text(
-                                text = "No local services detected yet. Tap 'Auto-Scan' or turn ON Wireless Debugging.",
+                                text = stringResource(R.string.pair_no_local_services),
                                 color = TextMuted,
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -1103,7 +1106,7 @@ fun PairingDialog(
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
-                                                    text = "Service Active: $localStatusMsg",
+                                                    text = stringResource(R.string.pair_service_active, localStatusMsg),
                                                     color = CyberCyan,
                                                     fontSize = 12.sp,
                                                     fontWeight = FontWeight.Medium
@@ -1112,7 +1115,7 @@ fun PairingDialog(
                                             if (discoveredPairingPort != null) {
                                                 Spacer(modifier = Modifier.height(4.dp))
                                                 Text(
-                                                    text = "Discovered Pairing Port: $discoveredPairingPort",
+                                                    text = stringResource(R.string.pair_discovered_port, discoveredPairingPort ?: 0),
                                                     color = BananaGold,
                                                     fontSize = 12.sp,
                                                     fontWeight = FontWeight.Bold
@@ -1129,11 +1132,12 @@ fun PairingDialog(
                                     Button(
                                         onClick = {
                                             viewModel.startLocalPairingService(context)
-                                            Toast.makeText(context, "Pairing service started! Check notifications.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.toast_pairing_service_started), Toast.LENGTH_SHORT).show()
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(48.dp),
+                                            .defaultMinSize(minHeight = 48.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = CyberCyan)
                                     ) {
@@ -1157,13 +1161,14 @@ fun PairingDialog(
                                                     }
                                                     context.startActivity(intent)
                                                 } catch (_: Exception) {
-                                                    Toast.makeText(context, "Could not open Settings", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, context.getString(R.string.toast_could_not_open_settings), Toast.LENGTH_SHORT).show()
                                                 }
                                             }
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(48.dp),
+                                            .defaultMinSize(minHeight = 48.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = CyberCyan)
                                     ) {
@@ -1176,11 +1181,12 @@ fun PairingDialog(
                                     OutlinedButton(
                                         onClick = {
                                             viewModel.stopLocalPairingService(context)
-                                            Toast.makeText(context, "Pairing service stopped", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.toast_pairing_service_stopped), Toast.LENGTH_SHORT).show()
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(42.dp),
+                                            .defaultMinSize(minHeight = 42.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError),
                                         border = ButtonDefaults.outlinedButtonBorder.copy(
@@ -1212,7 +1218,8 @@ fun PairingDialog(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(44.dp),
+                                        .defaultMinSize(minHeight = 44.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         contentColor = if (canOverlay) StatusConnected else CyberCyan
@@ -1231,7 +1238,7 @@ fun PairingDialog(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = if (canOverlay) "Auto-Return to App Enabled" else "Allow Auto-Return to App (Overlay)",
+                                        text = if (canOverlay) stringResource(R.string.pair_overlay_enabled) else stringResource(R.string.pair_allow_overlay),
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -1249,7 +1256,7 @@ fun PairingDialog(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = if (showManualLocalPairing) "Hide Manual Local Pairing" else "Manual Local Pairing (Split-Screen)",
+                                    text = if (showManualLocalPairing) stringResource(R.string.pair_hide_manual_local) else stringResource(R.string.pair_show_manual_local),
                                     color = BananaGold,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
@@ -1319,7 +1326,7 @@ fun PairingDialog(
                                             value = localPairingPortInput,
                                             onValueChange = { localPairingPortInput = it },
                                             label = { Text(stringResource(R.string.pair_pairing_port), fontSize = 11.sp) },
-                                            placeholder = { Text("e.g. 38491", fontSize = 11.sp) },
+                                            placeholder = { Text(stringResource(R.string.pair_placeholder_port), fontSize = 11.sp) },
                                             singleLine = true,
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             modifier = Modifier.weight(1f),
@@ -1333,7 +1340,7 @@ fun PairingDialog(
                                             value = localPairingCodeInput,
                                             onValueChange = { localPairingCodeInput = it },
                                             label = { Text(stringResource(R.string.pair_6digit_code), fontSize = 11.sp) },
-                                            placeholder = { Text("6 digits", fontSize = 11.sp) },
+                                            placeholder = { Text(stringResource(R.string.pair_6digits_placeholder), fontSize = 11.sp) },
                                             singleLine = true,
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             modifier = Modifier.weight(1f),
@@ -1348,8 +1355,8 @@ fun PairingDialog(
                                     OutlinedTextField(
                                         value = localConnectionPortInput,
                                         onValueChange = { localConnectionPortInput = it },
-                                        label = { Text("Connection Port (from main Wireless Debugging screen)") },
-                                        placeholder = { Text("e.g. 41235") },
+                                        label = { Text(stringResource(R.string.pair_conn_port_main_screen)) },
+                                        placeholder = { Text(stringResource(R.string.pair_placeholder_conn_port)) },
                                         singleLine = true,
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         modifier = Modifier.fillMaxWidth(),
@@ -1361,7 +1368,7 @@ fun PairingDialog(
 
                                     if (localPairingError != null) {
                                         Text(
-                                            text = "Error: $localPairingError",
+                                            text = stringResource(R.string.pair_error_prefix, localPairingError ?: ""),
                                             color = StatusError,
                                             fontSize = 12.sp
                                         )
@@ -1374,7 +1381,7 @@ fun PairingDialog(
                                             val code = localPairingCodeInput.trim()
 
                                             if (pPort == null || code.length < 6) {
-                                                Toast.makeText(context, "Enter a valid pairing port and 6-digit code", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, context.getString(R.string.toast_invalid_pairing_input), Toast.LENGTH_SHORT).show()
                                             } else {
                                                 viewModel.pairLocalDevice(
                                                     ip = selectedLocalIp,
@@ -1383,14 +1390,17 @@ fun PairingDialog(
                                                     connectionPort = cPort
                                                 ) { success ->
                                                     if (success) {
-                                                        Toast.makeText(context, "Paired and connected to local device!", Toast.LENGTH_SHORT).show()
+                                                        Toast.makeText(context, context.getString(R.string.toast_paired_and_connected), Toast.LENGTH_SHORT).show()
                                                         onDismiss()
                                                     }
                                                 }
                                             }
                                         },
                                         enabled = !isLocalPairingInProgress,
-                                        modifier = Modifier.fillMaxWidth().height(46.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .defaultMinSize(minHeight = 48.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                         shape = RoundedCornerShape(10.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = BananaGold)
                                     ) {

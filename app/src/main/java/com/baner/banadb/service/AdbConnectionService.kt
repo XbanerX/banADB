@@ -9,6 +9,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.baner.banadb.BanaAdbApplication
 import com.baner.banadb.MainActivity
+import com.baner.banadb.R
 
 class AdbConnectionService : Service() {
 
@@ -22,7 +23,7 @@ class AdbConnectionService : Service() {
             return START_NOT_STICKY
         }
 
-        val deviceName = intent?.getStringExtra(EXTRA_DEVICE_NAME) ?: "Android Device"
+        val deviceName = intent?.getStringExtra(EXTRA_DEVICE_NAME) ?: getString(R.string.remote_device_fallback)
         val ip = intent?.getStringExtra(EXTRA_DEVICE_IP) ?: "Wireless ADB"
 
         val notification = buildNotification(deviceName, ip)
@@ -53,11 +54,11 @@ class AdbConnectionService : Service() {
         )
 
         return NotificationCompat.Builder(this, BanaAdbApplication.CHANNEL_ID)
-            .setContentTitle("banADB Connected: $deviceName")
-            .setContentText("Active session with $ip")
+            .setContentTitle(getString(R.string.notif_connected_title, deviceName))
+            .setContentText(getString(R.string.notif_active_session, ip))
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentIntent(pendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Disconnect", stopPendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.disconnect), stopPendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()

@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import com.baner.banadb.BanaAdbApplication
 import com.baner.banadb.MainActivity
+import com.baner.banadb.R
 import com.baner.banadb.adb.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -23,7 +24,7 @@ object LocalPairingStateHolder {
     val discoveredPairingIp = MutableStateFlow<String?>(null)
     val discoveredPairingPort = MutableStateFlow<Int?>(null)
     val discoveredConnectPort = MutableStateFlow<Int?>(null)
-    val statusMessage = MutableStateFlow("Idle")
+    val statusMessage = MutableStateFlow("")
     val isPairingInProgress = MutableStateFlow(false)
     val lastError = MutableStateFlow<String?>(null)
 
@@ -31,7 +32,7 @@ object LocalPairingStateHolder {
         discoveredPairingIp.value = null
         discoveredPairingPort.value = null
         discoveredConnectPort.value = null
-        statusMessage.value = "Idle"
+        statusMessage.value = ""
         isPairingInProgress.value = false
         lastError.value = null
     }
@@ -63,11 +64,11 @@ class LocalPairingService : Service() {
 
         LocalPairingStateHolder.reset()
         LocalPairingStateHolder.isRunning.value = true
-        LocalPairingStateHolder.statusMessage.value = "Listening for local pairing service..."
+        LocalPairingStateHolder.statusMessage.value = getString(R.string.local_pairing_status_listening)
 
         val notification = buildNotification(
-            title = "banADB Local Pairing Active",
-            content = "Open Dev Options -> Wireless Debugging -> 'Pair device with pairing code'"
+            title = getString(R.string.notif_pairing_active_title),
+            content = getString(R.string.notif_pairing_active_desc)
         )
         startForeground(NOTIFICATION_ID, notification)
 
@@ -81,7 +82,7 @@ class LocalPairingService : Service() {
 
         if (nsdManager == null) {
             Log.e(TAG, "NsdManager is null on this device")
-            LocalPairingStateHolder.statusMessage.value = "NsdManager unavailable"
+            LocalPairingStateHolder.statusMessage.value = getString(R.string.local_pairing_status_nsd_unavailable)
             return
         }
 
@@ -106,11 +107,11 @@ class LocalPairingService : Service() {
 
                             LocalPairingStateHolder.discoveredPairingIp.value = host
                             LocalPairingStateHolder.discoveredPairingPort.value = port
-                            LocalPairingStateHolder.statusMessage.value = "Pairing service detected on port $port"
+                            LocalPairingStateHolder.statusMessage.value = getString(R.string.local_pairing_status_detected, port)
 
                             updateNotification(
-                                title = "Pairing Service Detected! (Port $port)",
-                                content = "Tap 'Enter Code' below to submit the 6-digit pairing code"
+                                title = getString(R.string.notif_pairing_detected_title, port),
+                                content = getString(R.string.notif_pairing_detected_desc)
                             )
                         }
                     })
@@ -206,7 +207,7 @@ class LocalPairingService : Service() {
 
         // Action: RemoteInput for direct pairing code entry
         val remoteInput = RemoteInput.Builder(LocalPairingReceiver.KEY_PAIRING_CODE)
-            .setLabel("Enter 6-digit code")
+            .setLabel(getString(R.string.notif_pair_remote_input_label))
             .build()
 
         val replyIntent = Intent(this, LocalPairingReceiver::class.java).apply {
@@ -221,7 +222,7 @@ class LocalPairingService : Service() {
 
         val replyAction = NotificationCompat.Action.Builder(
             android.R.drawable.ic_input_add,
-            "Enter Code",
+            getString(R.string.notif_action_enter_code),
             replyPendingIntent
         ).addRemoteInput(remoteInput).build()
 
@@ -242,9 +243,9 @@ class LocalPairingService : Service() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentIntent(appPendingIntent)
-            .addAction(android.R.drawable.ic_menu_preferences, "Dev Options", devOptionsPendingIntent)
+            .addAction(android.R.drawable.ic_menu_preferences, getString(R.string.notif_action_dev_options), devOptionsPendingIntent)
             .addAction(replyAction)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopPendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.notif_action_stop), stopPendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()

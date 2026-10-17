@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import com.baner.banadb.BanaAdbApplication
 import com.baner.banadb.MainActivity
+import com.baner.banadb.R
 import com.baner.banadb.adb.AdbManager
 import com.baner.banadb.adb.NetworkUtils
 import com.baner.banadb.data.model.SavedDevice
@@ -31,7 +32,7 @@ class LocalPairingReceiver : BroadcastReceiver() {
         val rawInput = remoteInput?.getCharSequence(KEY_PAIRING_CODE)?.toString()?.trim() ?: ""
 
         if (rawInput.isBlank()) {
-            notifyUser(context, "Pairing Code Empty", "Please tap 'Enter Code' and provide a 6-digit code.")
+            notifyUser(context, context.getString(R.string.notif_pair_code_empty_title), context.getString(R.string.notif_pair_code_empty_desc))
             return
         }
 
@@ -51,11 +52,11 @@ class LocalPairingReceiver : BroadcastReceiver() {
         }
 
         if (port <= 0) {
-            LocalPairingStateHolder.statusMessage.value = "Pairing port unknown. Reply with PORT:CODE"
+            LocalPairingStateHolder.statusMessage.value = context.getString(R.string.local_pairing_status_port_unknown)
             notifyUser(
                 context,
-                "Pairing Port Not Detected",
-                "mDNS didn't detect port automatically. Reply with: PORT:CODE (e.g. 38491:123456)"
+                context.getString(R.string.notif_pair_code_empty_title),
+                context.getString(R.string.notif_pair_code_empty_desc)
             )
             return
         }
@@ -64,8 +65,8 @@ class LocalPairingReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 LocalPairingStateHolder.isPairingInProgress.value = true
-                LocalPairingStateHolder.statusMessage.value = "Pairing with port $port using code $code..."
-                notifyUser(context, "Pairing in Progress...", "Contacting local ADB daemon on port $port...")
+                LocalPairingStateHolder.statusMessage.value = context.getString(R.string.local_pairing_status_in_progress, port, code)
+                notifyUser(context, context.getString(R.string.notif_pairing_in_progress_title), context.getString(R.string.notif_pairing_in_progress_desc, port))
 
                 val candidateIps = mutableListOf<String>()
                 val prefIp = NetworkUtils.getPreferredLocalIp()
@@ -74,7 +75,7 @@ class LocalPairingReceiver : BroadcastReceiver() {
 
                 var pairSuccess = false
                 var successfulIp = prefIp
-                var lastErrMsg = "Unknown error"
+                var lastErrMsg = context.getString(R.string.notif_unknown_error)
 
                 for (ip in candidateIps) {
                     Log.d(TAG, "Attempting local pair on $ip:$port...")
@@ -84,14 +85,18 @@ class LocalPairingReceiver : BroadcastReceiver() {
                         successfulIp = ip
                         break
                     } else {
-                        lastErrMsg = result.exceptionOrNull()?.message ?: "Handshake failed"
+                        lastErrMsg = result.exceptionOrNull()?.message ?: context.getString(R.string.notif_handshake_failed)
                         Log.w(TAG, "Pair failed on $ip:$port: $lastErrMsg")
                     }
                 }
 
                 if (pairSuccess) {
-                    LocalPairingStateHolder.statusMessage.value = "Pairing succeeded! Connecting..."
-                    notifyUser(context, "Pairing Successful!", "Authenticating with local ADB session...")
+                    LocalPairingStateHolder.statusMessage.value = context.getString(R.string.local_pairing_status_succeeded_connecting)
+                    notifyUser(
+                        context,
+                        context.getString(R.string.notif_pairing_succeeded_title),
+                        context.getString(R.string.notif_pairing_authenticating_desc)
+                    )
 
                     delay(800)
 
@@ -118,8 +123,8 @@ class LocalPairingReceiver : BroadcastReceiver() {
                     }
 
                     if (connectResult.isSuccess) {
-                        val devName = try { AdbManager.fetchDashboard().model } catch (_: Exception) { "Local Device" }
-                        LocalPairingStateHolder.statusMessage.value = "Connected to $devName"
+                        val devName = try { AdbManager.fetchDashboard().model } catch (_: Exception) { context.getString(R.string.local_device_fallback) }
+                        LocalPairingStateHolder.statusMessage.value = context.getString(R.string.local_pairing_status_connected, devName)
 
                         // 1. Save device in DevicePreferences so it displays in Saved Devices on Home
                         val prefs = DevicePreferences(context)
@@ -156,26 +161,26 @@ class LocalPairingReceiver : BroadcastReceiver() {
                         delay(1000)
                         LocalPairingService.stop(context)
                     } else {
-                        LocalPairingStateHolder.statusMessage.value = "Paired! Open app to enter connection port."
+                        LocalPairingStateHolder.statusMessage.value = context.getString(R.string.local_pairing_status_paired_open_app)
                         notifyUser(
                             context,
-                            "Paired Successfully!",
-                            "Open banADB to connect to your Wireless Debugging connection port."
+                            context.getString(R.string.notif_paired_success_title),
+                            context.getString(R.string.notif_paired_success_desc)
                         )
                     }
                 } else {
                     LocalPairingStateHolder.lastError.value = lastErrMsg
-                    LocalPairingStateHolder.statusMessage.value = "Pairing failed: $lastErrMsg"
+                    LocalPairingStateHolder.statusMessage.value = context.getString(R.string.local_pairing_status_failed, lastErrMsg)
                     notifyUser(
                         context,
-                        "Pairing Failed",
-                        "$lastErrMsg. Tap 'Enter Code' to retry."
+                        context.getString(R.string.notif_pairing_failed_title),
+                        context.getString(R.string.notif_pairing_failed_desc, lastErrMsg)
                     )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Unexpected error in pairing receiver", e)
                 LocalPairingStateHolder.lastError.value = e.message
-                notifyUser(context, "Pairing Error", e.message ?: "An unexpected error occurred.")
+                notifyUser(context, context.getString(R.string.notif_pairing_error_title), e.message ?: context.getString(R.string.notif_pairing_unexpected_error))
             } finally {
                 LocalPairingStateHolder.isPairingInProgress.value = false
                 pendingResult.finish()
@@ -197,12 +202,12 @@ class LocalPairingReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, BanaAdbApplication.CHANNEL_PAIRING_ID)
-            .setContentTitle("Connected to $devName")
-            .setContentText("Local ADB active. Tap 'Open App' to return.")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("Local ADB connected ($sessionInfo). Tap 'Open App' below to return to banADB."))
+            .setContentTitle(context.getString(R.string.notif_connected_local_title, devName))
+            .setContentText(context.getString(R.string.notif_connected_local_desc))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notif_connected_local_big, sessionInfo)))
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentIntent(openAppPendingIntent)
-            .addAction(android.R.drawable.ic_menu_directions, "Open App", openAppPendingIntent)
+            .addAction(android.R.drawable.ic_menu_directions, context.getString(R.string.notif_action_open_app), openAppPendingIntent)
             .setAutoCancel(true)
             .setOngoing(false)
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -227,7 +232,7 @@ class LocalPairingReceiver : BroadcastReceiver() {
         )
 
         val remoteInput = RemoteInput.Builder(KEY_PAIRING_CODE)
-            .setLabel("Enter 6-digit code or PORT:CODE")
+            .setLabel(context.getString(R.string.notif_pair_remote_input_label))
             .build()
 
         val replyIntent = Intent(context, LocalPairingReceiver::class.java).apply {
@@ -242,7 +247,7 @@ class LocalPairingReceiver : BroadcastReceiver() {
 
         val replyAction = NotificationCompat.Action.Builder(
             android.R.drawable.ic_input_add,
-            "Enter Code",
+            context.getString(R.string.notif_action_enter_code),
             replyPendingIntent
         ).addRemoteInput(remoteInput).build()
 

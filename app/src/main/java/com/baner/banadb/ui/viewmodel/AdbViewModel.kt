@@ -11,6 +11,7 @@ import android.util.Log
 import android.util.LruCache
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.baner.banadb.R
 import com.baner.banadb.adb.AdbManager
 import com.baner.banadb.adb.MdnsDiscoveryManager
 import com.baner.banadb.adb.NetworkUtils
@@ -160,7 +161,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     fun scanAndConnectLocal(onPortFound: ((Int) -> Unit)? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             _isLocalScanning.value = true
-            _statusMessage.value = "Scanning for local ADB daemon..."
+            _statusMessage.value = getApplication<Application>().getString(R.string.status_auto_scan_scanning)
             appendConsole("Starting Auto-Scan for local ADB daemon on 127.0.0.1...")
             discoveryManager.startDiscovery()
 
@@ -227,11 +228,11 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
             withContext(Dispatchers.Main) {
                 if (foundPort != null) {
                     onPortFound?.invoke(foundPort)
-                    _statusMessage.value = "Found local ADB on port $foundPort. Connecting..."
+                    _statusMessage.value = getApplication<Application>().getString(R.string.status_auto_scan_found, foundPort)
                     appendConsole("Auto-Scan found port $foundPort! Connecting to 127.0.0.1:$foundPort...")
                     connect("127.0.0.1", foundPort)
                 } else {
-                    _statusMessage.value = "No local ADB port found."
+                    _statusMessage.value = getApplication<Application>().getString(R.string.status_auto_scan_none)
                     appendConsole("Auto-Scan: No open ADB port detected on 127.0.0.1. Ensure Wireless Debugging is enabled.")
                 }
             }
@@ -269,7 +270,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
         onComplete: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
-            _connectionState.value = ConnectionState.Pairing("Pairing local device on port $pairingPort...")
+            _connectionState.value = ConnectionState.Pairing(getApplication<Application>().getString(R.string.status_pairing_local, pairingPort))
             appendConsole("Local pairing on port $pairingPort (Code: $pairingCode)...")
 
             val targetIps = if (ip.isNotBlank()) listOf(ip) else listOf(
@@ -311,7 +312,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
 
     fun doPairing(ip: String, pairingPort: Int, pairingCode: String, connectionPort: Int, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
-            _connectionState.value = ConnectionState.Pairing("Pairing with $ip:$pairingPort...")
+            _connectionState.value = ConnectionState.Pairing(getApplication<Application>().getString(R.string.status_pairing_remote, "$ip:$pairingPort"))
             appendConsole("Pairing with $ip:$pairingPort (Code: $pairingCode)...")
             
             val pairResult = AdbManager.pair(ip, pairingPort, pairingCode)
@@ -348,7 +349,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
 
     fun doConnect(ip: String, port: Int) {
         viewModelScope.launch {
-            _connectionState.value = ConnectionState.Connecting("Connecting to $ip:$port...")
+            _connectionState.value = ConnectionState.Connecting(getApplication<Application>().getString(R.string.status_connecting_to, "$ip:$port"))
             appendConsole("Connecting to $ip:$port...")
 
             val result = AdbManager.connect(ip, port)
@@ -488,7 +489,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     fun installApkFromUri(uri: Uri, context: Context) {
         viewModelScope.launch {
             _isOperationLoading.value = true
-            _operationStatus.value = "Transferring APK to remote device..."
+            _operationStatus.value = context.getString(R.string.status_apk_installing)
             try {
                 val tempFile = File(context.cacheDir, "install_${System.currentTimeMillis()}.apk")
                 context.contentResolver.openInputStream(uri)?.use { input ->
@@ -496,17 +497,17 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
                         input.copyTo(output)
                     }
                 }
-                _operationStatus.value = "Executing remote install..."
+                _operationStatus.value = context.getString(R.string.status_apk_executing)
                 val result = AdbManager.installApk(tempFile)
                 tempFile.delete()
                 result.onSuccess {
-                    _operationStatus.value = "APK installed successfully!"
+                    _operationStatus.value = context.getString(R.string.status_apk_success)
                     refreshApps()
                 }.onFailure { err ->
-                    _operationStatus.value = "Install failed: ${err.message}"
+                    _operationStatus.value = context.getString(R.string.status_apk_install_failed, err.message ?: "")
                 }
             } catch (e: Exception) {
-                _operationStatus.value = "Failed: ${e.message}"
+                _operationStatus.value = context.getString(R.string.status_apk_install_failed, e.message ?: "")
             } finally {
                 _isOperationLoading.value = false
             }
@@ -516,18 +517,18 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     fun extractApk(pkg: String, label: String, context: Context) {
         viewModelScope.launch {
             _isOperationLoading.value = true
-            _operationStatus.value = "Extracting $label APK..."
+            _operationStatus.value = context.getString(R.string.status_apk_extracting, label)
             try {
                 val destDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
                     ?: File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "banADB")
                 val result = AdbManager.extractApk(pkg, label, destDir)
                 result.onSuccess { file ->
-                    _operationStatus.value = "APK extracted to Downloads: ${file.name}"
+                    _operationStatus.value = context.getString(R.string.status_apk_extracted, file.name)
                 }.onFailure { err ->
-                    _operationStatus.value = "Extract failed: ${err.message}"
+                    _operationStatus.value = context.getString(R.string.status_apk_extract_failed, err.message ?: "")
                 }
             } catch (e: Exception) {
-                _operationStatus.value = "Failed: ${e.message}"
+                _operationStatus.value = context.getString(R.string.status_apk_extract_failed, e.message ?: "")
             } finally {
                 _isOperationLoading.value = false
             }
@@ -627,7 +628,7 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         viewModelScope.launch {
             try {
-                onProgress("Downloading ${item.name}...")
+                onProgress(context.getString(R.string.status_downloading_file, item.name))
                 val subDir = if (item.isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
                 val publicDir = File(Environment.getExternalStoragePublicDirectory(subDir), "banADB")
                 if (!publicDir.exists()) publicDir.mkdirs()
@@ -643,11 +644,11 @@ class AdbViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     onComplete(true, targetFile.absolutePath)
                 } else {
-                    onComplete(false, "Download failed or file empty")
+                    onComplete(false, context.getString(R.string.toast_download_failed))
                 }
             } catch (e: Exception) {
                 Log.e("AdbViewModel", "downloadMediaToLocal error", e)
-                onComplete(false, e.localizedMessage ?: "Download failed")
+                onComplete(false, e.localizedMessage ?: context.getString(R.string.toast_download_failed))
             }
         }
     }
