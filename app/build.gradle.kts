@@ -74,6 +74,11 @@ android {
             excludes += "META-INF/NOTICE*"
         }
     }
+    sourceSets {
+        getByName("main") {
+            assets.srcDirs(layout.buildDirectory.dir("generated/assets/clip"))
+        }
+    }
 }
 
 dependencies {
@@ -105,5 +110,53 @@ dependencies {
 
 tasks.matching { it.name.contains("AarMetadata") }.configureEach {
     enabled = false
+}
+
+val compileClipRunner = tasks.register<JavaCompile>("compileClipRunner") {
+    source = fileTree("src/main/clip")
+    destinationDirectory.set(layout.buildDirectory.dir("intermediates/clip_classes"))
+    classpath = files(android.bootClasspath)
+    options.release.set(8)
+}
+
+val buildClipJar = tasks.register("buildClipJar") {
+    dependsOn(compileClipRunner)
+    val inputClassDir = compileClipRunner.flatMap { it.destinationDirectory }
+    val outputDir = layout.buildDirectory.dir("generated/assets/clip")
+    val outputJar = outputDir.map { it.file("banaclip.jar") }
+
+    inputs.dir(inputClassDir)
+    outputs.file(outputJar)
+
+    doLast {
+        val outJarFile = outputJar.get().asFile
+        outJarFile.parentFile.mkdirs()
+
+        val sdkDir = android.sdkDirectory
+        val buildToolsVersion = android.buildToolsVersion
+        val d8Candidates = listOf(
+            File(sdkDir, "build-tools/$buildToolsVersion/d8"),
+            File(sdkDir, "build-tools").listFiles()?.sortedDescending()?.map { File(it, "d8") }?.firstOrNull { it.exists() }
+        ).filterNotNull().filter { it.exists() }
+
+        val d8Path = d8Candidates.firstOrNull()?.absolutePath ?: "d8"
+        val classFiles = fileTree(inputClassDir.get().asFile).matching { include("**/*.class") }.files
+
+        project.exec {
+            commandLine(d8Path, "--output", outJarFile.absolutePath, *classFiles.map { it.absolutePath }.toTypedArray())
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn(buildClipJar)
+}
+
+tasks.matching { it.name.contains("Lint") }.configureEach {
+    dependsOn(buildClipJar)
+}
+
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }.configureEach {
+    dependsOn(buildClipJar)
 }
 

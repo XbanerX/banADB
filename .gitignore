@@ -15,3 +15,6 @@ __pycache__/
 *.jks
 *.keystore
 releases/
+*.apk
+*.class
+app/src/main/assets/banaclip.jar
