@@ -21,16 +21,20 @@ android {
     }
 
     signingConfigs {
+        // Release signing is optional and only enabled when the keystore and
+        // credentials are provided via environment variables (never committed).
+        // F-Droid builds without a keystore produce an unsigned APK that F-Droid
+        // signs with its own key.
         val keyFile = file("banadb-release.jks")
-        if (keyFile.exists()) {
+        val storePass = providers.environmentVariable("BANADB_STORE_PASSWORD").orNull
+        val keyAliasValue = providers.environmentVariable("BANADB_KEY_ALIAS").orNull ?: "banadb"
+        val keyPass = providers.environmentVariable("BANADB_KEY_PASSWORD").orNull
+        if (keyFile.exists() && !storePass.isNullOrBlank() && !keyPass.isNullOrBlank()) {
             create("release") {
                 storeFile = keyFile
-                storePassword = providers.environmentVariable("BANADB_STORE_PASSWORD").orNull
-                    ?: "banadb2026"
-                keyAlias = providers.environmentVariable("BANADB_KEY_ALIAS").orNull
-                    ?: "banadb"
-                keyPassword = providers.environmentVariable("BANADB_KEY_PASSWORD").orNull
-                    ?: "banadb2026"
+                storePassword = storePass
+                keyAlias = keyAliasValue
+                keyPassword = keyPass
             }
         }
     }
