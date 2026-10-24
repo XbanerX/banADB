@@ -21,13 +21,16 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            val keyFile = file("banadb-release.jks")
-            if (keyFile.exists()) {
+        val keyFile = file("banadb-release.jks")
+        if (keyFile.exists()) {
+            create("release") {
                 storeFile = keyFile
-                storePassword = "banadb2026"
-                keyAlias = "banadb"
-                keyPassword = "banadb2026"
+                storePassword = providers.environmentVariable("BANADB_STORE_PASSWORD").orNull
+                    ?: "banadb2026"
+                keyAlias = providers.environmentVariable("BANADB_KEY_ALIAS").orNull
+                    ?: "banadb"
+                keyPassword = providers.environmentVariable("BANADB_KEY_PASSWORD").orNull
+                    ?: "banadb2026"
             }
         }
     }
@@ -44,7 +47,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
