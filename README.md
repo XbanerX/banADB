@@ -140,6 +140,22 @@ If you want to build banADB yourself or contribute to the project:
    adb install -r app/build/outputs/apk/debug/app-debug.apk
    ```
 
+### Building a signed release APK (optional)
+
+Release signing is optional and driven by environment variables (the keystore
+password is never stored in the repository). Place your keystore as
+`app/banadb-release.jks`, then run:
+
+```bash
+export BANADB_STORE_PASSWORD=your_store_password
+export BANADB_KEY_ALIAS=banadb          # optional, defaults to "banadb"
+export BANADB_KEY_PASSWORD=your_key_password
+./gradlew assembleRelease
+```
+
+If the keystore or credentials are missing, Gradle produces an unsigned APK
+(which is what F-Droid does; F-Droid signs the APK with its own key).
+
 ---
 
 ## License
