@@ -1,1 +1,1 @@
-Wireless ADB remote cockpit & device manager. No PC or root required.
+Wireless ADB remote control, no PC needed

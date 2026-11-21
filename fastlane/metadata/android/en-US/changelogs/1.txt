@@ -1,0 +1,3 @@
+Initial release of banADB.
+- Pair over Wi-Fi using wireless ADB (Android 11+) or connect with legacy ADB (Android 10 and below).
+- Use remote controls, file and app management, notifications, clipboard, terminal, and device diagnostics.
